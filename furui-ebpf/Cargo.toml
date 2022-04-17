@@ -7,9 +7,35 @@ edition = "2018"
 aya-bpf = { git = "https://github.com/aya-rs/aya", branch = "main" }
 furui-common = { path = "../furui-common" }
 
+
 [[bin]]
-name = "furui"
-path = "src/main.rs"
+name = "bind"
+path = "src/bind.rs"
+
+[[bin]]
+name = "connect"
+path = "src/connect.rs"
+
+[[bin]]
+name = "close"
+path = "src/close.rs"
+
+[[bin]]
+name = "ingress"
+path = "src/ingress.rs"
+
+[[bin]]
+name = "ingress_icmp"
+path = "src/ingress_icmp.rs"
+
+[[bin]]
+name = "egress"
+path = "src/egress.rs"
+
+[[bin]]
+name = "egress_icmp"
+path = "src/egress_icmp.rs"
+
 
 [profile.release]
 panic = "abort"

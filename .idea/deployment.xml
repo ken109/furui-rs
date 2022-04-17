@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="windows-ubuntu">
+  <component name="PublishConfigData" autoUpload="Always" serverName="furui-root">
     <serverData>
-      <paths name="local-ubuntu">
+      <paths name="furui-root">
         <serverdata>
           <mappings>
-            <mapping deploy="/Univ/furui" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/furui-rust" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
