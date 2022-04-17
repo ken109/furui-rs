@@ -6,15 +6,15 @@ use aya_bpf::{
     programs::SkBuffContext,
 };
 
-#[classifier(name="furui")]
-pub fn furui(ctx: SkBuffContext) -> i32 {
-    match unsafe { try_furui(ctx) } {
+#[classifier(name = "egress")]
+pub fn egress(ctx: SkBuffContext) -> i32 {
+    match unsafe { try_egress(ctx) } {
         Ok(ret) => ret,
         Err(ret) => ret,
     }
 }
 
-unsafe fn try_furui(_ctx: SkBuffContext) -> Result<i32, i32> {
+unsafe fn try_egress(_ctx: SkBuffContext) -> Result<i32, i32> {
     Ok(0)
 }
 
