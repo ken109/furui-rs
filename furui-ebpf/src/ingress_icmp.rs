@@ -1,6 +1,8 @@
 #![no_std]
 #![no_main]
 
+mod vmlinux;
+
 use aya_bpf::{
     macros::classifier,
     programs::SkBuffContext,

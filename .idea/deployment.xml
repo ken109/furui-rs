@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="furui-root">
+  <component name="PublishConfigData" autoUpload="Always" serverName="local-ubuntu">
     <serverData>
       <paths name="furui-root">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/furui-rust" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="local-ubuntu">
         <serverdata>
           <mappings>
             <mapping deploy="/furui-rust" local="$PROJECT_DIR$" web="/" />
