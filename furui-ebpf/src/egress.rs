@@ -1,12 +1,14 @@
 #![no_std]
 #![no_main]
 
-mod vmlinux;
-
 use aya_bpf::{
     macros::classifier,
     programs::SkBuffContext,
 };
+
+#[allow(warnings)]
+mod vmlinux;
+
 
 #[classifier(name = "egress")]
 pub fn egress(ctx: SkBuffContext) -> i32 {

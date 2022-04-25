@@ -1,9 +1,10 @@
-mod build_ebpf;
-mod run;
-
 use std::process::exit;
 
 use structopt::StructOpt;
+
+mod build_ebpf;
+mod run;
+
 #[derive(StructOpt)]
 pub struct Options {
     #[structopt(subcommand)]
