@@ -1,14 +1,16 @@
 #![no_std]
 #![no_main]
 
-mod vmlinux;
-
 use aya_bpf::{
     macros::tracepoint,
     programs::TracePointContext,
 };
 
-#[tracepoint(name = "close")]
+#[allow(warnings)]
+mod vmlinux;
+
+
+#[tracepoint]
 pub fn close(ctx: TracePointContext) -> u32 {
     match unsafe { try_close(ctx) } {
         Ok(ret) => ret,

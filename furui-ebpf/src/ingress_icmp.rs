@@ -1,14 +1,16 @@
 #![no_std]
 #![no_main]
 
-mod vmlinux;
-
 use aya_bpf::{
     macros::classifier,
     programs::SkBuffContext,
 };
 
-#[classifier(name="ingress_icmp")]
+#[allow(warnings)]
+mod vmlinux;
+
+
+#[classifier(name = "ingress_icmp")]
 pub fn ingress_icmp(ctx: SkBuffContext) -> i32 {
     match unsafe { try_ingress_icmp(ctx) } {
         Ok(ret) => ret,

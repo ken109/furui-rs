@@ -3,7 +3,7 @@ use std::{os::unix::process::CommandExt, process::Command};
 use anyhow::Context as _;
 use structopt::StructOpt;
 
-use crate::build_ebpf::{build_ebpf, Architecture, Options as BuildOptions};
+use crate::build_ebpf::{Architecture, build_ebpf, Options as BuildOptions};
 
 #[derive(StructOpt)]
 pub struct Options {
