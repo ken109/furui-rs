@@ -4,6 +4,7 @@ use std::sync::Arc;
 use aya::Bpf;
 use aya::maps::perf::AsyncPerfEventArray;
 use aya::util::online_cpus;
+use aya_bpf::cty::c_char;
 use bytes::BytesMut;
 use tokio::task;
 
@@ -46,4 +47,8 @@ fn handle_perf_array<E: 'static>(bpf: &mut Bpf, map_name: &str, callback: Box<Ca
     }
 
     Ok(())
+}
+
+fn to_str<const N: usize>(array: [c_char; N]) -> String {
+    array.iter().map(|&s| (s as u8) as char).collect::<String>()
 }
