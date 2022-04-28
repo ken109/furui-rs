@@ -12,7 +12,7 @@
       <paths name="local-ubuntu">
         <serverdata>
           <mappings>
-            <mapping deploy="/furui-rust" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/Univ/furui-rust" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

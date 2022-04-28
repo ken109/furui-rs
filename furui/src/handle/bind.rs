@@ -4,13 +4,13 @@ use log::info;
 
 use furui_common::BindEvent;
 
-use crate::handle::handle_perf_array;
+use crate::handle::{handle_perf_array, to_str};
 
 pub fn bind(bpf: &mut Bpf) -> Result<(), anyhow::Error> {
     handle_perf_array(bpf, "BIND_EVENTS", Box::new(|event: BindEvent| {
         let time = Local::now().format("%H:%M:%S").to_string();
 
-        info!("{} PID {} {:?}", time, event.pid, event.comm);
+        info!("{} {} PID {} {}", time, to_str(event.container_id), event.pid, to_str(event.comm));
     }))?;
 
     Ok(())
