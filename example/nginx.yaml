@@ -1,0 +1,10 @@
+policies:
+  - container:
+      name: "nginx_test"
+    communications:
+      - executable: "nginx"
+        sockets:
+          - protocol: "tcp"
+            local_port: 80
+          - protocol: "tcp"
+            local_port: 443
