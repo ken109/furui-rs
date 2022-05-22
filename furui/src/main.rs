@@ -1,20 +1,33 @@
+use std::path::PathBuf;
+use std::process;
+
 use aya::{Bpf, include_bytes_aligned};
 use log::info;
 use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TerminalMode, TermLogger};
 use structopt::StructOpt;
 use tokio::signal;
 
+use crate::policy::Policies;
+
 mod load;
 mod handle;
+mod policy;
 
 #[derive(Debug, StructOpt)]
 struct Opt {
     #[structopt(short, long, default_value = "eth0")]
     iface: String,
+
+    policy_path: PathBuf,
 }
 
 #[tokio::main]
-async fn main() -> Result<(), anyhow::Error> {
+async fn main() -> anyhow::Result<()> {
+    if unsafe { libc::geteuid() } != 0 {
+        println!("You must be root.");
+        process::exit(1);
+    }
+
     let opt = Opt::from_args();
 
     #[cfg(debug_assertions)]
@@ -31,6 +44,13 @@ async fn main() -> Result<(), anyhow::Error> {
         ColorChoice::Auto,
     )?;
 
+    let policies = match Policies::new(opt.policy_path) {
+        Ok(policies) => policies,
+        Err(err) => {
+            println!("{}", err);
+            process::exit(1);
+        }
+    };
 
     #[cfg(debug_assertions)]
         let mut bpf = Bpf::load(include_bytes_aligned!("../../target/bpfel-unknown-none/debug/bind"))?;
@@ -73,7 +93,6 @@ async fn main() -> Result<(), anyhow::Error> {
     #[cfg(not(debug_assertions))]
         let mut bpf = Bpf::load(include_bytes_aligned!("../../target/bpfel-unknown-none/release/egress_icmp"))?;
     load::egress_icmp(&mut bpf, &opt.iface)?;
-
 
     info!("Waiting for Ctrl-C...");
     signal::ctrl_c().await?;
