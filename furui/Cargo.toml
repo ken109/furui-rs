@@ -21,6 +21,7 @@ serde_yaml = "0.8"
 libc = "0.2"
 bytes = "1.1"
 chrono = "0.4"
+dns-lookup = "1.0.8"
 
 [[bin]]
 name = "furui"

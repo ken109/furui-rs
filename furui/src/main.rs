@@ -7,11 +7,12 @@ use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TerminalMode, TermLogge
 use structopt::StructOpt;
 use tokio::signal;
 
-use crate::policy::Policies;
+use crate::parse_policy::ParsePolicies;
 
 mod load;
 mod handle;
-mod policy;
+mod parse_policy;
+mod domain;
 
 #[derive(Debug, StructOpt)]
 struct Opt {
@@ -22,7 +23,16 @@ struct Opt {
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() {
+    match try_main().await {
+        Ok(_) => (),
+        Err(err) => {
+            println!("{}", err)
+        }
+    }
+}
+
+async fn try_main() -> anyhow::Result<()> {
     if unsafe { libc::geteuid() } != 0 {
         println!("You must be root.");
         process::exit(1);
@@ -44,13 +54,17 @@ async fn main() -> anyhow::Result<()> {
         ColorChoice::Auto,
     )?;
 
-    let policies = match Policies::new(opt.policy_path) {
-        Ok(policies) => policies,
+    let policies = match ParsePolicies::new(opt.policy_path) {
+        Ok(parsed_policies) => parsed_policies.to_domain()?,
         Err(err) => {
             println!("{}", err);
             process::exit(1);
         }
     };
+
+    println!("{:#?}", policies);
+
+    process::exit(0);
 
     #[cfg(debug_assertions)]
         let mut bpf = Bpf::load(include_bytes_aligned!("../../target/bpfel-unknown-none/debug/bind"))?;
