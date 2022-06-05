@@ -7,12 +7,16 @@ use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TerminalMode, TermLogge
 use structopt::StructOpt;
 use tokio::signal;
 
+use crate::docker::Docker;
+use crate::domain::Containers;
 use crate::parse_policy::ParsePolicies;
 
 mod load;
 mod handle;
 mod parse_policy;
 mod domain;
+mod docker;
+mod constant;
 
 #[derive(Debug, StructOpt)]
 struct Opt {
@@ -54,17 +58,19 @@ async fn try_main() -> anyhow::Result<()> {
         ColorChoice::Auto,
     )?;
 
+    let docker = Docker::new()?;
+
+    let mut containers = Containers::new();
+
+    docker.add_running_containers_inspect(&mut containers).await?;
+
     let policies = match ParsePolicies::new(opt.policy_path) {
-        Ok(parsed_policies) => parsed_policies.to_domain()?,
+        Ok(parsed_policies) => parsed_policies.to_domain(containers)?,
         Err(err) => {
             println!("{}", err);
             process::exit(1);
         }
     };
-
-    println!("{:#?}", policies);
-
-    process::exit(0);
 
     #[cfg(debug_assertions)]
         let mut bpf = Bpf::load(include_bytes_aligned!("../../target/bpfel-unknown-none/debug/bind"))?;

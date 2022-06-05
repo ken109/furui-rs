@@ -69,17 +69,24 @@ impl ParsePolicies {
         Ok(serde_yaml::from_str::<ParsePolicies>(&contents)?)
     }
 
-    fn lookup_host(remote_host: &str) -> Vec<IpAddr> {
+    fn lookup_host(containers: &domain::Containers, remote_host: &str) -> Vec<IpAddr> {
         match lookup_host(remote_host) {
             Ok(ips) => ips,
             Err(err) => {
-                warn!("{}: Host name: {}", err, remote_host);
-                vec![]
+                match containers.get_container_by_name(remote_host) {
+                    Some(container) => {
+                        container.ip_addresses.unwrap()
+                    }
+                    None => {
+                        warn!("failed to look up host: {} err: {}",  remote_host, err);
+                        vec![]
+                    }
+                }
             }
         }
     }
 
-    pub fn to_domain(&self) -> anyhow::Result<Policies> {
+    pub fn to_domain(&self, containers: domain::Containers) -> anyhow::Result<Policies> {
         let mut policies = Policies { policies: vec![] };
 
         for parsed_policy in &self.policies {
@@ -105,7 +112,7 @@ impl ParsePolicies {
 
                     match &parsed_socket.remote_host {
                         Some(remote_host) => {
-                            for addr in ParsePolicies::lookup_host(remote_host) {
+                            for addr in ParsePolicies::lookup_host(&containers, remote_host) {
                                 communication.sockets.push(domain::Socket {
                                     protocol: socket.protocol.clone(),
                                     local_port: socket.local_port,
@@ -131,7 +138,7 @@ impl ParsePolicies {
 
                     match &parsed_icmp.remote_host {
                         Some(remote_host) => {
-                            for addr in ParsePolicies::lookup_host(remote_host) {
+                            for addr in ParsePolicies::lookup_host(&containers, remote_host) {
                                 communication.icmp.push(domain::ICMP {
                                     version: parsed_icmp.version,
                                     icmp_type: parsed_icmp.icmp_type,
@@ -154,6 +161,7 @@ impl ParsePolicies {
                     id: None,
                     ip_addresses: None,
                     name: parsed_policy.container.name.clone(),
+                    pid: 0,
                 },
                 communications,
             })
