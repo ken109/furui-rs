@@ -8,7 +8,7 @@ default = []
 user = ["aya"]
 
 [dependencies]
-aya = { git = "https://github.com/aya-rs/aya", branch = "main", optional = true }
+aya = { version = ">=0.11", optional = true }
 aya-bpf = { git = "https://github.com/aya-rs/aya", branch = "main" }
 
 [lib]

@@ -5,7 +5,7 @@ edition = "2018"
 publish = false
 
 [dependencies]
-aya = { version = "0.10.7", features = ["async_tokio"] }
+aya = { version = ">=0.11", features = ["async_tokio"] }
 aya-bpf = { git = "https://github.com/aya-rs/aya", branch = "main" }
 aya-log = { git = "https://github.com/aya-rs/aya-log", branch = "main" }
 furui-common = { path = "../furui-common", features = ["user"] }
