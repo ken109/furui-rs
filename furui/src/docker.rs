@@ -4,7 +4,9 @@ use std::net::IpAddr;
 use anyhow::anyhow;
 use bollard;
 use bollard::container::ListContainersOptions;
-use bollard::models::{ContainerInspectResponse, ContainerSummary};
+use bollard::models::{ContainerInspectResponse, ContainerSummary, EventMessage};
+use bollard::system::EventsOptions;
+use futures::Stream;
 use log::warn;
 
 use crate::constant::CONTAINER_ID_LENGTH;
@@ -68,5 +70,16 @@ impl Docker {
         }
 
         Ok(())
+    }
+
+    pub fn container_events(&self) -> impl Stream<Item = Result<EventMessage, bollard::errors::Error>> {
+        let mut filters = HashMap::new();
+        filters.insert("type", vec!["container"]);
+        filters.insert("event", vec!["start", "unpause", "pause", "die"]);
+
+        self.docker.events(Some(EventsOptions {
+            filters,
+            ..Default::default()
+        }))
     }
 }

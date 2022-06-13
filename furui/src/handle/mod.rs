@@ -10,9 +10,11 @@ use tokio::task;
 
 pub use bind::*;
 pub use connect::*;
+pub use docker::*;
 
 mod bind;
 mod connect;
+mod docker;
 
 type Callback<E> = dyn Fn(E) + Send + Sync + 'static;
 
