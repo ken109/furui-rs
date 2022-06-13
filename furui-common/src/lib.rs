@@ -1,9 +1,6 @@
 #![no_std]
 
-use aya_bpf::{
-    cty::c_char,
-    TASK_COMM_LEN,
-};
+use aya_bpf::{cty::c_char, TASK_COMM_LEN};
 
 #[repr(C)]
 pub struct BindEvent {

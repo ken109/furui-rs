@@ -72,17 +72,13 @@ impl ParsePolicies {
     fn lookup_host(containers: &domain::Containers, remote_host: &str) -> Vec<IpAddr> {
         match lookup_host(remote_host) {
             Ok(ips) => ips,
-            Err(err) => {
-                match containers.get_container_by_name(remote_host) {
-                    Some(container) => {
-                        container.ip_addresses.unwrap()
-                    }
-                    None => {
-                        warn!("failed to look up host: {} err: {}",  remote_host, err);
-                        vec![]
-                    }
+            Err(err) => match containers.get_container_by_name(remote_host) {
+                Some(container) => container.ip_addresses.unwrap(),
+                None => {
+                    warn!("failed to look up host: {} err: {}", remote_host, err);
+                    vec![]
                 }
-            }
+            },
         }
     }
 
@@ -121,9 +117,7 @@ impl ParsePolicies {
                                 })
                             }
                         }
-                        None => {
-                            communication.sockets.push(socket)
-                        }
+                        None => communication.sockets.push(socket),
                     }
                 }
 
@@ -147,9 +141,7 @@ impl ParsePolicies {
                                 })
                             }
                         }
-                        None => {
-                            communication.icmp.push(icmp)
-                        }
+                        None => communication.icmp.push(icmp),
                     }
                 }
 
