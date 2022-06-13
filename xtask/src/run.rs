@@ -3,7 +3,7 @@ use std::{os::unix::process::CommandExt, process::Command};
 use anyhow::Context as _;
 use structopt::StructOpt;
 
-use crate::build_ebpf::{Architecture, build_ebpf, Options as BuildOptions};
+use crate::build_ebpf::{build_ebpf, Architecture, Options as BuildOptions};
 
 #[derive(StructOpt)]
 pub struct Options {
@@ -42,7 +42,7 @@ pub fn run(opts: Options) -> Result<(), anyhow::Error> {
         target: opts.bpf_target,
         release: opts.release,
     })
-        .context("Error while building eBPF program")?;
+    .context("Error while building eBPF program")?;
     build(&opts).context("Error while building userspace application")?;
 
     // profile we are building (release or debug)

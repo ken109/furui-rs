@@ -1,14 +1,10 @@
 #![no_std]
 #![no_main]
 
-use aya_bpf::{
-    macros::tracepoint,
-    programs::TracePointContext,
-};
+use aya_bpf::{macros::tracepoint, programs::TracePointContext};
 
 #[allow(warnings)]
 mod vmlinux;
-
 
 #[tracepoint]
 pub fn close(ctx: TracePointContext) -> u32 {

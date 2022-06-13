@@ -18,14 +18,17 @@ pub struct Docker {
 
 impl Docker {
     pub fn new() -> anyhow::Result<Docker> {
-        Ok(Docker { docker: bollard::Docker::connect_with_local_defaults()? })
+        Ok(Docker {
+            docker: bollard::Docker::connect_with_local_defaults()?,
+        })
     }
 
     async fn containers(&self) -> anyhow::Result<Vec<ContainerSummary>> {
         let mut list_container_filters = HashMap::new();
         list_container_filters.insert("status", vec!["running"]);
 
-        Ok(self.docker
+        Ok(self
+            .docker
             .list_containers(Some(ListContainersOptions {
                 all: true,
                 filters: list_container_filters,
@@ -35,7 +38,10 @@ impl Docker {
     }
 
     pub async fn set_container_inspect(&self, container: &mut Container) -> anyhow::Result<()> {
-        let inspect = self.docker.inspect_container(&container.id.as_ref().unwrap(), None).await?;
+        let inspect = self
+            .docker
+            .inspect_container(&container.id.as_ref().unwrap(), None)
+            .await?;
 
         let mut addrs: Vec<IpAddr> = vec![];
         for (_, network) in inspect.network_settings.unwrap().networks.unwrap() {
@@ -50,7 +56,15 @@ impl Docker {
             };
         }
 
-        container.id = Some(container.id.as_ref().unwrap().chars().take(CONTAINER_ID_LENGTH).collect::<String>());
+        container.id = Some(
+            container
+                .id
+                .as_ref()
+                .unwrap()
+                .chars()
+                .take(CONTAINER_ID_LENGTH)
+                .collect::<String>(),
+        );
         container.ip_addresses = Some(addrs);
         container.name = inspect.name.unwrap();
         container.pid = inspect.state.unwrap().pid.unwrap();
@@ -58,7 +72,10 @@ impl Docker {
         Ok(())
     }
 
-    pub async fn add_running_containers_inspect(&self, containers: &mut Containers) -> anyhow::Result<()> {
+    pub async fn add_running_containers_inspect(
+        &self,
+        containers: &mut Containers,
+    ) -> anyhow::Result<()> {
         let docker_containers = self.containers().await?;
 
         for docker_container in docker_containers {
@@ -72,7 +89,9 @@ impl Docker {
         Ok(())
     }
 
-    pub fn container_events(&self) -> impl Stream<Item = Result<EventMessage, bollard::errors::Error>> {
+    pub fn container_events(
+        &self,
+    ) -> impl Stream<Item = Result<EventMessage, bollard::errors::Error>> {
         let mut filters = HashMap::new();
         filters.insert("type", vec!["container"]);
         filters.insert("event", vec!["start", "unpause", "pause", "die"]);

@@ -1,7 +1,7 @@
 use std::convert::TryInto;
 
+use aya::programs::{tc, KProbe, SchedClassifier, TcAttachType, TracePoint};
 use aya::Bpf;
-use aya::programs::{KProbe, SchedClassifier, tc, TcAttachType, TracePoint};
 // use aya_log::BpfLogger;
 use log::info;
 
@@ -84,7 +84,6 @@ pub fn ingress_icmp(bpf: &mut Bpf, iface: &str) -> Result<(), anyhow::Error> {
 
     Ok(())
 }
-
 
 pub fn egress(bpf: &mut Bpf, iface: &str) -> Result<(), anyhow::Error> {
     // BpfLogger::init(bpf).unwrap();

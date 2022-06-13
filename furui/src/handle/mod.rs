@@ -1,9 +1,9 @@
 use std::convert::TryFrom;
 use std::sync::Arc;
 
-use aya::Bpf;
 use aya::maps::perf::AsyncPerfEventArray;
 use aya::util::online_cpus;
+use aya::Bpf;
 use aya_bpf::cty::c_char;
 use bytes::BytesMut;
 use tokio::task;
@@ -18,7 +18,11 @@ mod docker;
 
 type Callback<E> = dyn Fn(E) + Send + Sync + 'static;
 
-fn handle_perf_array<E: 'static>(bpf: &mut Bpf, map_name: &str, callback: Box<Callback<E>>) -> Result<(), anyhow::Error> {
+fn handle_perf_array<E: 'static>(
+    bpf: &mut Bpf,
+    map_name: &str,
+    callback: Box<Callback<E>>,
+) -> Result<(), anyhow::Error> {
     let shared_callback: Arc<Callback<E>> = Arc::from(callback);
 
     let mut perf_array = AsyncPerfEventArray::try_from(bpf.map_mut(map_name)?)?;
