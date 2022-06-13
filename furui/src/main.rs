@@ -1,6 +1,6 @@
 use std::path::PathBuf;
-use std::process;
 
+use anyhow::anyhow;
 use aya::{include_bytes_aligned, Bpf};
 use log::info;
 use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TermLogger, TerminalMode};
@@ -38,8 +38,7 @@ async fn main() {
 
 async fn try_main() -> anyhow::Result<()> {
     if unsafe { libc::geteuid() } != 0 {
-        println!("You must be root.");
-        process::exit(1);
+        return Err(anyhow!("You must be root."));
     }
 
     let opt = Opt::from_args();
@@ -69,8 +68,7 @@ async fn try_main() -> anyhow::Result<()> {
     let policies = match ParsePolicies::new(opt.policy_path) {
         Ok(parsed_policies) => parsed_policies.to_domain(containers)?,
         Err(err) => {
-            println!("{}", err);
-            process::exit(1);
+            return Err(err);
         }
     };
 
