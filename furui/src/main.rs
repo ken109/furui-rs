@@ -5,7 +5,7 @@ use aya::{Bpf, include_bytes_aligned};
 use log::info;
 use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TerminalMode, TermLogger};
 use structopt::StructOpt;
-use tokio::signal;
+use tokio::{signal, task};
 
 use crate::docker::Docker;
 use crate::domain::Containers;
@@ -113,6 +113,8 @@ async fn try_main() -> anyhow::Result<()> {
     #[cfg(not(debug_assertions))]
         let mut bpf = Bpf::load(include_bytes_aligned!("../../target/bpfel-unknown-none/release/egress_icmp"))?;
     load::egress_icmp(&mut bpf, &opt.iface)?;
+
+    task::spawn(async move { handle::docker(&docker).await });
 
     info!("Waiting for Ctrl-C...");
     signal::ctrl_c().await?;
