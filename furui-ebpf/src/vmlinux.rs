@@ -18,8 +18,8 @@ impl<Storage> __BindgenBitfieldUnit<Storage> {
 }
 
 impl<Storage> __BindgenBitfieldUnit<Storage>
-where
-    Storage: AsRef<[u8]> + AsMut<[u8]>,
+    where
+        Storage: AsRef<[u8]> + AsMut<[u8]>,
 {
     #[inline]
     pub fn get_bit(&self, index: usize) -> bool {
@@ -579,7 +579,7 @@ pub struct file_operations {
         ) -> ::aya_bpf::cty::c_long,
     >,
     pub show_fdinfo:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut seq_file, arg2: *mut file)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut seq_file, arg2: *mut file)>,
     pub copy_file_range: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut file,
@@ -679,7 +679,7 @@ pub union __call_single_node__bindgen_ty_1 {
 }
 
 pub type smp_call_func_t =
-    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>;
+::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>;
 
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -932,7 +932,7 @@ pub struct hrtimer {
     pub node: timerqueue_node,
     pub _softexpires: ktime_t,
     pub function:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut hrtimer) -> hrtimer_restart::Type>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut hrtimer) -> hrtimer_restart::Type>,
     pub base: *mut hrtimer_clock_base,
     pub state: u8_,
     pub is_rel: u8_,
@@ -4196,9 +4196,9 @@ pub struct sched_class {
         unsafe extern "C" fn(arg1: *mut rq, arg2: *mut task_struct, arg3: ::aya_bpf::cty::c_int),
     >,
     pub pick_next_task:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq) -> *mut task_struct>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq) -> *mut task_struct>,
     pub put_prev_task:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq, arg2: *mut task_struct)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq, arg2: *mut task_struct)>,
     pub set_next_task: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut rq, arg2: *mut task_struct, arg3: bool_),
     >,
@@ -4220,7 +4220,7 @@ pub struct sched_class {
         unsafe extern "C" fn(arg1: *mut task_struct, arg2: ::aya_bpf::cty::c_int),
     >,
     pub task_woken:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq, arg2: *mut task_struct)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq, arg2: *mut task_struct)>,
     pub set_cpus_allowed: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut task_struct, arg2: *const cpumask, arg3: u32_),
     >,
@@ -4235,9 +4235,9 @@ pub struct sched_class {
     pub task_fork: ::core::option::Option<unsafe extern "C" fn(arg1: *mut task_struct)>,
     pub task_dead: ::core::option::Option<unsafe extern "C" fn(arg1: *mut task_struct)>,
     pub switched_from:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq, arg2: *mut task_struct)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq, arg2: *mut task_struct)>,
     pub switched_to:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq, arg2: *mut task_struct)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq, arg2: *mut task_struct)>,
     pub prio_changed: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut rq, arg2: *mut task_struct, arg3: ::aya_bpf::cty::c_int),
     >,
@@ -5531,9 +5531,9 @@ pub struct vm_operations_struct {
         unsafe extern "C" fn(arg1: *mut vm_area_struct) -> ::aya_bpf::cty::c_ulong,
     >,
     pub page_mkwrite:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut vm_fault) -> vm_fault_t>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut vm_fault) -> vm_fault_t>,
     pub pfn_mkwrite:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut vm_fault) -> vm_fault_t>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut vm_fault) -> vm_fault_t>,
     pub access: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut vm_area_struct,
@@ -5587,7 +5587,7 @@ pub struct linux_binfmt {
         unsafe extern "C" fn(arg1: *mut linux_binprm) -> ::aya_bpf::cty::c_int,
     >,
     pub load_shlib:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut file) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut file) -> ::aya_bpf::cty::c_int>,
     pub core_dump: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut coredump_params) -> ::aya_bpf::cty::c_int,
     >,
@@ -6174,9 +6174,9 @@ pub struct dentry_operations {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub d_delete:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *const dentry) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *const dentry) -> ::aya_bpf::cty::c_int>,
     pub d_init:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut dentry) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut dentry) -> ::aya_bpf::cty::c_int>,
     pub d_release: ::core::option::Option<unsafe extern "C" fn(arg1: *mut dentry)>,
     pub d_prune: ::core::option::Option<unsafe extern "C" fn(arg1: *mut dentry)>,
     pub d_iput: ::core::option::Option<unsafe extern "C" fn(arg1: *mut dentry, arg2: *mut inode)>,
@@ -6586,7 +6586,7 @@ pub struct key_type {
         unsafe extern "C" fn(arg1: *mut key_preparsed_payload) -> ::aya_bpf::cty::c_int,
     >,
     pub free_preparse:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut key_preparsed_payload)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut key_preparsed_payload)>,
     pub instantiate: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut key,
@@ -6606,7 +6606,7 @@ pub struct key_type {
     pub revoke: ::core::option::Option<unsafe extern "C" fn(arg1: *mut key)>,
     pub destroy: ::core::option::Option<unsafe extern "C" fn(arg1: *mut key)>,
     pub describe:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *const key, arg2: *mut seq_file)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *const key, arg2: *mut seq_file)>,
     pub read: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *const key,
@@ -6908,11 +6908,11 @@ pub struct quota_format_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub read_dqblk:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot) -> ::aya_bpf::cty::c_int>,
     pub commit_dqblk:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot) -> ::aya_bpf::cty::c_int>,
     pub release_dqblk:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot) -> ::aya_bpf::cty::c_int>,
     pub get_next_id: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut super_block, arg2: *mut kqid) -> ::aya_bpf::cty::c_int,
     >,
@@ -6922,17 +6922,17 @@ pub struct quota_format_ops {
 #[derive(Debug, Copy, Clone)]
 pub struct dquot_operations {
     pub write_dquot:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot) -> ::aya_bpf::cty::c_int>,
     pub alloc_dquot: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut super_block, arg2: ::aya_bpf::cty::c_int) -> *mut dquot,
     >,
     pub destroy_dquot: ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot)>,
     pub acquire_dquot:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot) -> ::aya_bpf::cty::c_int>,
     pub release_dquot:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot) -> ::aya_bpf::cty::c_int>,
     pub mark_dirty:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut dquot) -> ::aya_bpf::cty::c_int>,
     pub write_info: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut super_block,
@@ -6940,7 +6940,7 @@ pub struct dquot_operations {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub get_reserved_space:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut inode) -> *mut qsize_t>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut inode) -> *mut qsize_t>,
     pub get_projid: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut inode, arg2: *mut kprojid_t) -> ::aya_bpf::cty::c_int,
     >,
@@ -7109,7 +7109,7 @@ pub struct address_space_operations {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub set_page_dirty:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut page) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut page) -> ::aya_bpf::cty::c_int>,
     pub readpages: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut file,
@@ -7171,7 +7171,7 @@ pub struct address_space_operations {
     >,
     pub putback_page: ::core::option::Option<unsafe extern "C" fn(arg1: *mut page)>,
     pub launder_page:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut page) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut page) -> ::aya_bpf::cty::c_int>,
     pub is_partially_uptodate: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut page,
@@ -7692,7 +7692,7 @@ pub struct file_lock_context {
 #[derive(Debug, Copy, Clone)]
 pub struct file_lock_operations {
     pub fl_copy_lock:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut file_lock, arg2: *mut file_lock)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut file_lock, arg2: *mut file_lock)>,
     pub fl_release_private: ::core::option::Option<unsafe extern "C" fn(arg1: *mut file_lock)>,
 }
 
@@ -7781,7 +7781,7 @@ pub struct lock_manager_operations {
         unsafe extern "C" fn(arg1: *mut file_lock, arg2: *mut *mut ::aya_bpf::cty::c_void),
     >,
     pub lm_breaker_owns_lease:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut file_lock) -> bool_>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut file_lock) -> bool_>,
 }
 
 #[repr(C)]
@@ -7799,11 +7799,11 @@ pub struct fasync_struct {
 #[derive(Debug, Copy, Clone)]
 pub struct super_operations {
     pub alloc_inode:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut super_block) -> *mut inode>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut super_block) -> *mut inode>,
     pub destroy_inode: ::core::option::Option<unsafe extern "C" fn(arg1: *mut inode)>,
     pub free_inode: ::core::option::Option<unsafe extern "C" fn(arg1: *mut inode)>,
     pub dirty_inode:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut inode, arg2: ::aya_bpf::cty::c_int)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut inode, arg2: ::aya_bpf::cty::c_int)>,
     pub write_inode: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut inode,
@@ -7811,7 +7811,7 @@ pub struct super_operations {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub drop_inode:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut inode) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut inode) -> ::aya_bpf::cty::c_int>,
     pub evict_inode: ::core::option::Option<unsafe extern "C" fn(arg1: *mut inode)>,
     pub put_super: ::core::option::Option<unsafe extern "C" fn(arg1: *mut super_block)>,
     pub sync_fs: ::core::option::Option<
@@ -7874,7 +7874,7 @@ pub struct super_operations {
         ) -> ssize_t,
     >,
     pub get_dquots:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut inode) -> *mut *mut dquot>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut inode) -> *mut *mut dquot>,
     pub bdev_try_to_free_page: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut super_block,
@@ -7938,7 +7938,7 @@ pub struct export_operations {
     >,
     pub get_parent: ::core::option::Option<unsafe extern "C" fn(arg1: *mut dentry) -> *mut dentry>,
     pub commit_metadata:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut inode) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut inode) -> ::aya_bpf::cty::c_int>,
     pub get_uuid: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut super_block,
@@ -8026,7 +8026,7 @@ pub struct fscrypt_operations {
     pub empty_dir: ::core::option::Option<unsafe extern "C" fn(arg1: *mut inode) -> bool_>,
     pub max_namelen: ::aya_bpf::cty::c_uint,
     pub has_stable_inodes:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut super_block) -> bool_>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut super_block) -> bool_>,
     pub get_ino_and_lblk_bits: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut super_block,
@@ -8046,7 +8046,7 @@ pub struct fscrypt_operations {
 #[derive(Debug, Copy, Clone)]
 pub struct fsverity_operations {
     pub begin_enable_verity:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut file) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut file) -> ::aya_bpf::cty::c_int>,
     pub end_enable_verity: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut file,
@@ -8148,7 +8148,7 @@ pub struct dev_pm_info {
     pub accounting_timestamp: u64_,
     pub subsys_data: *mut pm_subsys_data,
     pub set_latency_tolerance:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device, arg2: s32)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device, arg2: s32)>,
     pub qos: *mut dev_pm_qos,
 }
 
@@ -9290,7 +9290,7 @@ pub struct kobj_ns_type_operations {
     pub type_: kobj_ns_type::Type,
     pub current_may_mount: ::core::option::Option<unsafe extern "C" fn() -> bool_>,
     pub grab_current_ns:
-        ::core::option::Option<unsafe extern "C" fn() -> *mut ::aya_bpf::cty::c_void>,
+    ::core::option::Option<unsafe extern "C" fn() -> *mut ::aya_bpf::cty::c_void>,
     pub netlink_ns: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut sock) -> *const ::aya_bpf::cty::c_void,
     >,
@@ -9573,7 +9573,7 @@ pub struct module_attribute {
         unsafe extern "C" fn(arg1: *mut module, arg2: *const ::aya_bpf::cty::c_char),
     >,
     pub test:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut module) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut module) -> ::aya_bpf::cty::c_int>,
     pub free: ::core::option::Option<unsafe extern "C" fn(arg1: *mut module)>,
 }
 
@@ -9760,50 +9760,50 @@ pub struct em_perf_domain {
 #[derive(Debug, Copy, Clone)]
 pub struct dev_pm_ops {
     pub prepare:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub complete: ::core::option::Option<unsafe extern "C" fn(arg1: *mut device)>,
     pub suspend:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub resume:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub freeze:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub thaw:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub poweroff:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub restore:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub suspend_late:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub resume_early:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub freeze_late:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub thaw_early:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub poweroff_late:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub restore_early:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub suspend_noirq:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub resume_noirq:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub freeze_noirq:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub thaw_noirq:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub poweroff_noirq:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub restore_noirq:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub runtime_suspend:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub runtime_resume:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub runtime_idle:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
 }
 
 #[repr(C)]
@@ -9889,10 +9889,10 @@ impl wakeup_source {
 pub struct dev_pm_domain {
     pub ops: dev_pm_ops,
     pub start:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub detach: ::core::option::Option<unsafe extern "C" fn(arg1: *mut device, arg2: bool_)>,
     pub activate:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub sync: ::core::option::Option<unsafe extern "C" fn(arg1: *mut device)>,
     pub dismiss: ::core::option::Option<unsafe extern "C" fn(arg1: *mut device)>,
 }
@@ -9916,24 +9916,24 @@ pub struct bus_type {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub probe:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub sync_state: ::core::option::Option<unsafe extern "C" fn(arg1: *mut device)>,
     pub remove:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub shutdown: ::core::option::Option<unsafe extern "C" fn(arg1: *mut device)>,
     pub online:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub offline:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub suspend: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut device, arg2: pm_message_t) -> ::aya_bpf::cty::c_int,
     >,
     pub resume:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub num_vf:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub dma_configure:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub pm: *const dev_pm_ops,
     pub iommu_ops: *const iommu_ops,
     pub p: *mut subsys_private,
@@ -9961,16 +9961,16 @@ pub struct device_driver {
     pub of_match_table: *const of_device_id,
     pub acpi_match_table: *const acpi_device_id,
     pub probe:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub sync_state: ::core::option::Option<unsafe extern "C" fn(arg1: *mut device)>,
     pub remove:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub shutdown: ::core::option::Option<unsafe extern "C" fn(arg1: *mut device)>,
     pub suspend: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut device, arg2: pm_message_t) -> ::aya_bpf::cty::c_int,
     >,
     pub resume:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub groups: *mut *const attribute_group,
     pub dev_groups: *mut *const attribute_group,
     pub pm: *const dev_pm_ops,
@@ -10008,7 +10008,7 @@ pub struct iommu_ops {
         unsafe extern "C" fn(arg1: *mut iommu_domain, arg2: *mut device) -> ::aya_bpf::cty::c_int,
     >,
     pub detach_dev:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut iommu_domain, arg2: *mut device)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut iommu_domain, arg2: *mut device)>,
     pub map: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut iommu_domain,
@@ -10038,11 +10038,11 @@ pub struct iommu_ops {
         unsafe extern "C" fn(arg1: *mut iommu_domain, arg2: dma_addr_t) -> phys_addr_t,
     >,
     pub probe_device:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> *mut iommu_device>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> *mut iommu_device>,
     pub release_device: ::core::option::Option<unsafe extern "C" fn(arg1: *mut device)>,
     pub probe_finalize: ::core::option::Option<unsafe extern "C" fn(arg1: *mut device)>,
     pub device_group:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> *mut iommu_group>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> *mut iommu_group>,
     pub enable_nesting: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut iommu_domain) -> ::aya_bpf::cty::c_int,
     >,
@@ -10053,9 +10053,9 @@ pub struct iommu_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub get_resv_regions:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device, arg2: *mut list_head)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device, arg2: *mut list_head)>,
     pub put_resv_regions:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device, arg2: *mut list_head)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device, arg2: *mut list_head)>,
     pub apply_resv_region: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut device,
@@ -10094,7 +10094,7 @@ pub struct iommu_ops {
         unsafe extern "C" fn(arg1: *mut iommu_domain, arg2: *mut device) -> ::aya_bpf::cty::c_int,
     >,
     pub aux_detach_dev:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut iommu_domain, arg2: *mut device)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut iommu_domain, arg2: *mut device)>,
     pub aux_get_pasid: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut iommu_domain, arg2: *mut device) -> ::aya_bpf::cty::c_int,
     >,
@@ -10132,7 +10132,7 @@ pub struct iommu_ops {
         unsafe extern "C" fn(arg1: *mut device, arg2: u32_) -> ::aya_bpf::cty::c_int,
     >,
     pub def_domain_type:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub pgsize_bitmap: ::aya_bpf::cty::c_ulong,
     pub owner: *mut module,
 }
@@ -10180,7 +10180,7 @@ pub struct class {
     pub class_release: ::core::option::Option<unsafe extern "C" fn(arg1: *mut class)>,
     pub dev_release: ::core::option::Option<unsafe extern "C" fn(arg1: *mut device)>,
     pub shutdown_pre:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_int>,
     pub ns_type: *const kobj_ns_type_operations,
     pub namespace: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut device) -> *const ::aya_bpf::cty::c_void,
@@ -10442,7 +10442,7 @@ pub struct dma_map_ops {
     pub get_required_mask: ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> u64_>,
     pub max_mapping_size: ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> size_t>,
     pub get_merge_boundary:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_ulong>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut device) -> ::aya_bpf::cty::c_ulong>,
 }
 
 #[repr(C)]
@@ -10546,7 +10546,7 @@ pub struct dev_pagemap_ops {
     pub kill: ::core::option::Option<unsafe extern "C" fn(arg1: *mut dev_pagemap)>,
     pub cleanup: ::core::option::Option<unsafe extern "C" fn(arg1: *mut dev_pagemap)>,
     pub migrate_to_ram:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut vm_fault) -> vm_fault_t>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut vm_fault) -> vm_fault_t>,
 }
 
 #[repr(C)]
@@ -10720,7 +10720,7 @@ pub struct fwnode_operations {
     >,
     pub put: ::core::option::Option<unsafe extern "C" fn(arg1: *mut fwnode_handle)>,
     pub device_is_available:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *const fwnode_handle) -> bool_>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *const fwnode_handle) -> bool_>,
     pub device_get_match_data: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *const fwnode_handle,
@@ -10835,7 +10835,7 @@ pub struct irq_chip {
     pub parent_device: *mut device,
     pub name: *const ::aya_bpf::cty::c_char,
     pub irq_startup:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data) -> ::aya_bpf::cty::c_uint>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data) -> ::aya_bpf::cty::c_uint>,
     pub irq_shutdown: ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data)>,
     pub irq_enable: ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data)>,
     pub irq_disable: ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data)>,
@@ -10852,7 +10852,7 @@ pub struct irq_chip {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub irq_retrigger:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data) -> ::aya_bpf::cty::c_int>,
     pub irq_set_type: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut irq_data,
@@ -10874,14 +10874,14 @@ pub struct irq_chip {
     pub irq_pm_shutdown: ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data)>,
     pub irq_calc_mask: ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data)>,
     pub irq_print_chip:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data, arg2: *mut seq_file)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data, arg2: *mut seq_file)>,
     pub irq_request_resources:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data) -> ::aya_bpf::cty::c_int>,
     pub irq_release_resources: ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data)>,
     pub irq_compose_msi_msg:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data, arg2: *mut msi_msg)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data, arg2: *mut msi_msg)>,
     pub irq_write_msi_msg:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data, arg2: *mut msi_msg)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data, arg2: *mut msi_msg)>,
     pub irq_get_irqchip_state: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut irq_data,
@@ -10906,9 +10906,9 @@ pub struct irq_chip {
         unsafe extern "C" fn(arg1: *mut irq_data, arg2: ::aya_bpf::cty::c_uint),
     >,
     pub ipi_send_mask:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data, arg2: *const cpumask)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data, arg2: *const cpumask)>,
     pub irq_nmi_setup:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data) -> ::aya_bpf::cty::c_int>,
     pub irq_nmi_teardown: ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_data)>,
     pub flags: ::aya_bpf::cty::c_ulong,
 }
@@ -10988,9 +10988,9 @@ pub struct irq_chip_generic {
     pub lock: raw_spinlock_t,
     pub reg_base: *mut ::aya_bpf::cty::c_void,
     pub reg_readl:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void) -> u32_>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void) -> u32_>,
     pub reg_writel:
-        ::core::option::Option<unsafe extern "C" fn(arg1: u32_, arg2: *mut ::aya_bpf::cty::c_void)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: u32_, arg2: *mut ::aya_bpf::cty::c_void)>,
     pub suspend: ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_chip_generic)>,
     pub resume: ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_chip_generic)>,
     pub irq_base: ::aya_bpf::cty::c_uint,
@@ -11409,9 +11409,9 @@ pub struct proc_ns_operations {
         unsafe extern "C" fn(arg1: *mut nsset, arg2: *mut ns_common) -> ::aya_bpf::cty::c_int,
     >,
     pub owner:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut ns_common) -> *mut user_namespace>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ns_common) -> *mut user_namespace>,
     pub get_parent:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut ns_common) -> *mut ns_common>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ns_common) -> *mut ns_common>,
 }
 
 #[repr(C)]
@@ -11545,7 +11545,7 @@ pub struct cgroup_subsys {
         unsafe extern "C" fn(arg1: *mut task_struct, arg2: *mut css_set) -> ::aya_bpf::cty::c_int,
     >,
     pub cancel_fork:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut task_struct, arg2: *mut css_set)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut task_struct, arg2: *mut css_set)>,
     pub fork: ::core::option::Option<unsafe extern "C" fn(arg1: *mut task_struct)>,
     pub exit: ::core::option::Option<unsafe extern "C" fn(arg1: *mut task_struct)>,
     pub release: ::core::option::Option<unsafe extern "C" fn(arg1: *mut task_struct)>,
@@ -11781,9 +11781,9 @@ pub struct pmu {
         unsafe extern "C" fn(arg1: *mut perf_event) -> ::aya_bpf::cty::c_int,
     >,
     pub event_mapped:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut perf_event, arg2: *mut mm_struct)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut perf_event, arg2: *mut mm_struct)>,
     pub event_unmapped:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut perf_event, arg2: *mut mm_struct)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut perf_event, arg2: *mut mm_struct)>,
     pub add: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut perf_event,
@@ -11801,15 +11801,15 @@ pub struct pmu {
     >,
     pub read: ::core::option::Option<unsafe extern "C" fn(arg1: *mut perf_event)>,
     pub start_txn:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut pmu, arg2: ::aya_bpf::cty::c_uint)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut pmu, arg2: ::aya_bpf::cty::c_uint)>,
     pub commit_txn:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut pmu) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut pmu) -> ::aya_bpf::cty::c_int>,
     pub cancel_txn: ::core::option::Option<unsafe extern "C" fn(arg1: *mut pmu)>,
     pub event_idx: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut perf_event) -> ::aya_bpf::cty::c_int,
     >,
     pub sched_task:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut perf_event_context, arg2: bool_)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut perf_event_context, arg2: bool_)>,
     pub task_ctx_cache: *mut kmem_cache,
     pub swap_task_ctx: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut perf_event_context, arg2: *mut perf_event_context),
@@ -11831,7 +11831,7 @@ pub struct pmu {
         ) -> ::aya_bpf::cty::c_long,
     >,
     pub addr_filters_validate:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut list_head) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut list_head) -> ::aya_bpf::cty::c_int>,
     pub addr_filters_sync: ::core::option::Option<unsafe extern "C" fn(arg1: *mut perf_event)>,
     pub aux_output_match: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut perf_event) -> ::aya_bpf::cty::c_int,
@@ -12069,7 +12069,7 @@ pub struct trace_event_class {
     >,
     pub fields_array: *mut trace_event_fields,
     pub get_fields:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut trace_event_call) -> *mut list_head>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut trace_event_call) -> *mut list_head>,
     pub fields: list_head,
     pub raw_init: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut trace_event_call) -> ::aya_bpf::cty::c_int,
@@ -12176,7 +12176,7 @@ pub struct irq_domain_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub deactivate:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_domain, arg2: *mut irq_data)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut irq_domain, arg2: *mut irq_data)>,
     pub translate: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut irq_domain,
@@ -12276,10 +12276,10 @@ pub struct blkcg_gq {
 
 pub type blk_qc_t = ::aya_bpf::cty::c_uint;
 pub type integrity_processing_fn =
-    ::core::option::Option<unsafe extern "C" fn(arg1: *mut blk_integrity_iter) -> blk_status_t>;
+::core::option::Option<unsafe extern "C" fn(arg1: *mut blk_integrity_iter) -> blk_status_t>;
 pub type integrity_prepare_fn = ::core::option::Option<unsafe extern "C" fn(arg1: *mut request)>;
 pub type integrity_complete_fn =
-    ::core::option::Option<unsafe extern "C" fn(arg1: *mut request, arg2: ::aya_bpf::cty::c_uint)>;
+::core::option::Option<unsafe extern "C" fn(arg1: *mut request, arg2: ::aya_bpf::cty::c_uint)>;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -12408,7 +12408,7 @@ pub struct sg_io_v4 {
 #[derive(Debug, Copy, Clone)]
 pub struct bsg_ops {
     pub check_proto:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut sg_io_v4) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut sg_io_v4) -> ::aya_bpf::cty::c_int>,
     pub fill_hdr: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut request,
@@ -12424,7 +12424,7 @@ pub struct bsg_ops {
 
 pub type req_flags_t = __u32;
 pub type rq_end_io_fn =
-    ::core::option::Option<unsafe extern "C" fn(arg1: *mut request, arg2: blk_status_t)>;
+::core::option::Option<unsafe extern "C" fn(arg1: *mut request, arg2: blk_status_t)>;
 
 pub mod mq_rq_state {
     pub type Type = ::aya_bpf::cty::c_uint;
@@ -12595,10 +12595,10 @@ pub struct elevator_mq_ops {
         unsafe extern "C" fn(arg1: *mut blk_mq_hw_ctx, arg2: *mut list_head, arg3: bool_),
     >,
     pub dispatch_request:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut blk_mq_hw_ctx) -> *mut request>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut blk_mq_hw_ctx) -> *mut request>,
     pub has_work: ::core::option::Option<unsafe extern "C" fn(arg1: *mut blk_mq_hw_ctx) -> bool_>,
     pub completed_request:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut request, arg2: u64_)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut request, arg2: u64_)>,
     pub requeue_request: ::core::option::Option<unsafe extern "C" fn(arg1: *mut request)>,
     pub former_request: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut request_queue, arg2: *mut request) -> *mut request,
@@ -12733,7 +12733,7 @@ pub struct blk_mq_ops {
         unsafe extern "C" fn(arg1: *mut request, arg2: ::aya_bpf::cty::c_int),
     >,
     pub get_rq_budget_token:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut request) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut request) -> ::aya_bpf::cty::c_int>,
     pub timeout: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut request, arg2: bool_) -> blk_eh_timer_return::Type,
     >,
@@ -12773,7 +12773,7 @@ pub struct blk_mq_ops {
         unsafe extern "C" fn(arg1: *mut blk_mq_tag_set) -> ::aya_bpf::cty::c_int,
     >,
     pub show_rq:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut seq_file, arg2: *mut request)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut seq_file, arg2: *mut request)>,
 }
 
 #[repr(C)]
@@ -14204,7 +14204,7 @@ pub struct tty_operations {
         unsafe extern "C" fn(arg1: *mut tty_driver, arg2: *mut tty_struct) -> ::aya_bpf::cty::c_int,
     >,
     pub remove:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut tty_driver, arg2: *mut tty_struct)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut tty_driver, arg2: *mut tty_struct)>,
     pub open: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut tty_struct, arg2: *mut file) -> ::aya_bpf::cty::c_int,
     >,
@@ -14246,7 +14246,7 @@ pub struct tty_operations {
         ) -> ::aya_bpf::cty::c_long,
     >,
     pub set_termios:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut tty_struct, arg2: *mut ktermios)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut tty_struct, arg2: *mut ktermios)>,
     pub throttle: ::core::option::Option<unsafe extern "C" fn(arg1: *mut tty_struct)>,
     pub unthrottle: ::core::option::Option<unsafe extern "C" fn(arg1: *mut tty_struct)>,
     pub stop: ::core::option::Option<unsafe extern "C" fn(arg1: *mut tty_struct)>,
@@ -14298,7 +14298,7 @@ pub struct tty_operations {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub show_fdinfo:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut tty_struct, arg2: *mut seq_file)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut tty_struct, arg2: *mut seq_file)>,
     pub poll_init: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut tty_driver,
@@ -14480,7 +14480,7 @@ pub struct tty_ldisc_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub set_termios:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut tty_struct, arg2: *mut ktermios)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut tty_struct, arg2: *mut ktermios)>,
     pub poll: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut tty_struct,
@@ -14526,7 +14526,7 @@ pub struct tty_ldisc {
 #[derive(Debug, Copy, Clone)]
 pub struct tty_port_operations {
     pub carrier_raised:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut tty_port) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut tty_port) -> ::aya_bpf::cty::c_int>,
     pub dtr_rts: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut tty_port, arg2: ::aya_bpf::cty::c_int),
     >,
@@ -14783,7 +14783,7 @@ pub struct dst_ops {
     pub family: ::aya_bpf::cty::c_ushort,
     pub gc_thresh: ::aya_bpf::cty::c_uint,
     pub gc:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut dst_ops) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut dst_ops) -> ::aya_bpf::cty::c_int>,
     pub check: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut dst_entry, arg2: __u32) -> *mut dst_entry,
     >,
@@ -14805,7 +14805,7 @@ pub struct dst_ops {
         ),
     >,
     pub negative_advice:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut dst_entry) -> *mut dst_entry>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut dst_entry) -> *mut dst_entry>,
     pub link_failure: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sk_buff)>,
     pub update_pmtu: ::core::option::Option<
         unsafe extern "C" fn(
@@ -15845,7 +15845,7 @@ pub struct bpf_iter_aux_info {
 }
 
 pub type bpf_iter_fini_seq_priv_t =
-    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>;
+::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -15860,11 +15860,11 @@ pub struct bpf_iter_seq_info {
 #[derive(Debug, Copy, Clone)]
 pub struct bpf_map_ops {
     pub map_alloc_check:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_attr) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_attr) -> ::aya_bpf::cty::c_int>,
     pub map_alloc:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_attr) -> *mut bpf_map>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_attr) -> *mut bpf_map>,
     pub map_release:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_map, arg2: *mut file)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_map, arg2: *mut file)>,
     pub map_free: ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_map)>,
     pub map_get_next_key: ::core::option::Option<
         unsafe extern "C" fn(
@@ -15955,12 +15955,12 @@ pub struct bpf_map_ops {
         ) -> *mut ::aya_bpf::cty::c_void,
     >,
     pub map_fd_put_ptr:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
     pub map_gen_lookup: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut bpf_map, arg2: *mut bpf_insn) -> ::aya_bpf::cty::c_int,
     >,
     pub map_fd_sys_lookup_elem:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void) -> u32_>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void) -> u32_>,
     pub map_seq_show_elem: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut bpf_map,
@@ -15980,7 +15980,7 @@ pub struct bpf_map_ops {
         unsafe extern "C" fn(arg1: *mut bpf_map, arg2: *mut bpf_prog_aux) -> ::aya_bpf::cty::c_int,
     >,
     pub map_poke_untrack:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_map, arg2: *mut bpf_prog_aux)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_map, arg2: *mut bpf_prog_aux)>,
     pub map_poke_run: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut bpf_map,
@@ -16568,7 +16568,7 @@ pub mod rx_handler_result {
 }
 
 pub type rx_handler_func_t =
-    ::core::option::Option<unsafe extern "C" fn(arg1: *mut *mut sk_buff) -> rx_handler_result_t>;
+::core::option::Option<unsafe extern "C" fn(arg1: *mut *mut sk_buff) -> rx_handler_result_t>;
 
 pub mod netdev_ml_priv_type {
     pub type Type = ::aya_bpf::cty::c_uint;
@@ -18113,7 +18113,7 @@ pub struct fib_rules_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub delete:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut fib_rule) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut fib_rule) -> ::aya_bpf::cty::c_int>,
     pub compare: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut fib_rule,
@@ -18154,16 +18154,16 @@ pub mod tcp_ca_event {
 pub struct tcp_congestion_ops {
     pub ssthresh: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock) -> u32_>,
     pub cong_avoid:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: u32_, arg3: u32_)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: u32_, arg3: u32_)>,
     pub set_state: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: u8_)>,
     pub cwnd_event:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: tcp_ca_event::Type)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: tcp_ca_event::Type)>,
     pub in_ack_event: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: u32_)>,
     pub pkts_acked:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: *const ack_sample)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: *const ack_sample)>,
     pub min_tso_segs: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock) -> u32_>,
     pub cong_control:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: *const rate_sample)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: *const rate_sample)>,
     pub undo_cwnd: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock) -> u32_>,
     pub sndbuf_expand: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock) -> u32_>,
     pub get_info: ::core::option::Option<
@@ -18191,7 +18191,7 @@ pub struct fib_notifier_ops {
     pub family: ::aya_bpf::cty::c_int,
     pub list: list_head,
     pub fib_seq_read:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut net) -> ::aya_bpf::cty::c_uint>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut net) -> ::aya_bpf::cty::c_uint>,
     pub fib_dump: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut net,
@@ -18212,7 +18212,7 @@ pub struct dst_entry {
     pub expires: ::aya_bpf::cty::c_ulong,
     pub xfrm: *mut xfrm_state,
     pub input:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut sk_buff) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut sk_buff) -> ::aya_bpf::cty::c_int>,
     pub output: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut net,
@@ -18527,7 +18527,7 @@ pub struct proto_ops {
     pub family: ::aya_bpf::cty::c_int,
     pub owner: *mut module,
     pub release:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut socket) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut socket) -> ::aya_bpf::cty::c_int>,
     pub bind: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut socket,
@@ -18621,7 +18621,7 @@ pub struct proto_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub show_fdinfo:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut seq_file, arg2: *mut socket)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut seq_file, arg2: *mut socket)>,
     pub sendmsg: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut socket,
@@ -18666,7 +18666,7 @@ pub struct proto_ops {
         unsafe extern "C" fn(arg1: *mut sock, arg2: ::aya_bpf::cty::c_int) -> ::aya_bpf::cty::c_int,
     >,
     pub peek_len:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut socket) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut socket) -> ::aya_bpf::cty::c_int>,
     pub read_sock: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut sock,
@@ -18931,9 +18931,9 @@ pub struct dcbnl_rtnl_ops {
     >,
     pub getstate: ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device) -> u8_>,
     pub setstate:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device, arg2: u8_) -> u8_>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device, arg2: u8_) -> u8_>,
     pub getpermhwaddr:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device, arg2: *mut u8_)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device, arg2: *mut u8_)>,
     pub setpgtccfgtx: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut net_device,
@@ -19051,7 +19051,7 @@ pub struct dcbnl_rtnl_ops {
     >,
     pub getdcbx: ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device) -> u8_>,
     pub setdcbx:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device, arg2: u8_) -> u8_>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device, arg2: u8_) -> u8_>,
     pub peer_getappinfo: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut net_device,
@@ -19405,7 +19405,7 @@ pub struct header_ops {
         ) -> bool_,
     >,
     pub parse_protocol:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *const sk_buff) -> __be16>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *const sk_buff) -> __be16>,
 }
 
 #[repr(C)]
@@ -19743,7 +19743,7 @@ pub struct xfrmdev_ops {
         unsafe extern "C" fn(arg1: *mut sk_buff, arg2: *mut xfrm_state) -> bool_,
     >,
     pub xdo_dev_state_advance_esn:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut xfrm_state)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut xfrm_state)>,
 }
 
 #[repr(C)]
@@ -20050,7 +20050,7 @@ pub struct net_device_ops {
         unsafe extern "C" fn(arg1: *mut net_device, arg2: *mut neighbour) -> ::aya_bpf::cty::c_int,
     >,
     pub ndo_neigh_destroy:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device, arg2: *mut neighbour)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device, arg2: *mut neighbour)>,
     pub ndo_fdb_add: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut ndmsg,
@@ -20186,7 +20186,7 @@ pub struct net_device_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub ndo_get_devlink_port:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device) -> *mut devlink_port>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device) -> *mut devlink_port>,
     pub ndo_tunnel_ctl: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut net_device,
@@ -20195,7 +20195,7 @@ pub struct net_device_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub ndo_get_peer_dev:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device) -> *mut net_device>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device) -> *mut net_device>,
     pub ndo_fill_forward_path: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut net_device_path_ctx,
@@ -20211,7 +20211,7 @@ pub struct neigh_parms {
     pub dev: *mut net_device,
     pub list: list_head,
     pub neigh_setup:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut neighbour) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut neighbour) -> ::aya_bpf::cty::c_int>,
     pub tbl: *mut neigh_table,
     pub sysctl_table: *mut ::aya_bpf::cty::c_void,
     pub dead: ::aya_bpf::cty::c_int,
@@ -20259,7 +20259,7 @@ pub struct iw_handler_def {
     pub private: *const iw_handler,
     pub private_args: *const iw_priv_args,
     pub get_wireless_stats:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device) -> *mut iw_statistics>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device) -> *mut iw_statistics>,
 }
 
 pub mod ethtool_phys_id_state {
@@ -20301,7 +20301,7 @@ pub struct ethtool_ops {
     >,
     pub get_msglevel: ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device) -> u32_>,
     pub set_msglevel:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device, arg2: u32_)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device, arg2: u32_)>,
     pub nway_reset: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut net_device) -> ::aya_bpf::cty::c_int,
     >,
@@ -20414,9 +20414,9 @@ pub struct ethtool_ops {
         unsafe extern "C" fn(arg1: *mut net_device, arg2: *mut u32_) -> ::aya_bpf::cty::c_int,
     >,
     pub get_rxfh_key_size:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device) -> u32_>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device) -> u32_>,
     pub get_rxfh_indir_size:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device) -> u32_>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device) -> u32_>,
     pub get_rxfh: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut net_device,
@@ -20636,7 +20636,7 @@ impl ethtool_ops {
 #[derive(Debug, Copy, Clone)]
 pub struct l3mdev_ops {
     pub l3mdev_fib_table:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *const net_device) -> u32_>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *const net_device) -> u32_>,
     pub l3mdev_l3_rcv: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut net_device, arg2: *mut sk_buff, arg3: u16_) -> *mut sk_buff,
     >,
@@ -20657,7 +20657,7 @@ pub struct l3mdev_ops {
 #[derive(Debug, Copy, Clone)]
 pub struct ndisc_ops {
     pub is_useropt:
-        ::core::option::Option<unsafe extern "C" fn(arg1: u8_) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: u8_) -> ::aya_bpf::cty::c_int>,
     pub parse_options: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *const net_device,
@@ -20843,13 +20843,13 @@ pub struct rtnl_link_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub dellink:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device, arg2: *mut list_head)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device, arg2: *mut list_head)>,
     pub get_size: ::core::option::Option<unsafe extern "C" fn(arg1: *const net_device) -> size_t>,
     pub fill_info: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut sk_buff, arg2: *const net_device) -> ::aya_bpf::cty::c_int,
     >,
     pub get_xstats_size:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *const net_device) -> size_t>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *const net_device) -> size_t>,
     pub fill_xstats: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut sk_buff, arg2: *const net_device) -> ::aya_bpf::cty::c_int,
     >,
@@ -20877,7 +20877,7 @@ pub struct rtnl_link_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub get_link_net:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *const net_device) -> *mut net>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *const net_device) -> *mut net>,
     pub get_linkxstats_size: ::core::option::Option<
         unsafe extern "C" fn(arg1: *const net_device, arg2: ::aya_bpf::cty::c_int) -> size_t,
     >,
@@ -21049,9 +21049,9 @@ pub struct Qdisc_ops {
         unsafe extern "C" fn(arg1: *mut Qdisc, arg2: *mut gnet_dump) -> ::aya_bpf::cty::c_int,
     >,
     pub ingress_block_set:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut Qdisc, arg2: u32_)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut Qdisc, arg2: u32_)>,
     pub egress_block_set:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut Qdisc, arg2: u32_)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut Qdisc, arg2: u32_)>,
     pub ingress_block_get: ::core::option::Option<unsafe extern "C" fn(arg1: *mut Qdisc) -> u32_>,
     pub egress_block_get: ::core::option::Option<unsafe extern "C" fn(arg1: *mut Qdisc) -> u32_>,
     pub owner: *mut module,
@@ -21100,7 +21100,7 @@ pub struct Qdisc_class_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub walk:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut Qdisc, arg2: *mut qdisc_walker)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut Qdisc, arg2: *mut qdisc_walker)>,
     pub tcf_block: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut Qdisc,
@@ -21230,7 +21230,7 @@ pub struct tcf_proto_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub init:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut tcf_proto) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut tcf_proto) -> ::aya_bpf::cty::c_int>,
     pub destroy: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut tcf_proto, arg2: bool_, arg3: *mut netlink_ext_ack),
     >,
@@ -21300,7 +21300,7 @@ pub struct tcf_proto_ops {
         ) -> *mut ::aya_bpf::cty::c_void,
     >,
     pub tmplt_destroy:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
     pub dump: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut net,
@@ -21401,7 +21401,7 @@ pub struct neigh_table {
         unsafe extern "C" fn(arg1: *const neighbour, arg2: *const ::aya_bpf::cty::c_void) -> bool_,
     >,
     pub constructor:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut neighbour) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut neighbour) -> ::aya_bpf::cty::c_int>,
     pub pconstructor: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut pneigh_entry) -> ::aya_bpf::cty::c_int,
     >,
@@ -21456,9 +21456,9 @@ pub struct neigh_statistics {
 pub struct neigh_ops {
     pub family: ::aya_bpf::cty::c_int,
     pub solicit:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut neighbour, arg2: *mut sk_buff)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut neighbour, arg2: *mut sk_buff)>,
     pub error_report:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut neighbour, arg2: *mut sk_buff)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut neighbour, arg2: *mut sk_buff)>,
     pub output: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut neighbour, arg2: *mut sk_buff) -> ::aya_bpf::cty::c_int,
     >,
@@ -21566,7 +21566,7 @@ pub struct smc_hashinfo {
 #[derive(Copy, Clone)]
 pub struct proto {
     pub close:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: ::aya_bpf::cty::c_long)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: ::aya_bpf::cty::c_long)>,
     pub pre_connect: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut sock,
@@ -21600,10 +21600,10 @@ pub struct proto {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub init:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock) -> ::aya_bpf::cty::c_int>,
     pub destroy: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock)>,
     pub shutdown:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: ::aya_bpf::cty::c_int)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: ::aya_bpf::cty::c_int)>,
     pub setsockopt: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut sock,
@@ -21623,7 +21623,7 @@ pub struct proto {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub keepalive:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: ::aya_bpf::cty::c_int)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: ::aya_bpf::cty::c_int)>,
     pub compat_ioctl: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut sock,
@@ -21679,7 +21679,7 @@ pub struct proto {
     >,
     pub release_cb: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock)>,
     pub hash:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock) -> ::aya_bpf::cty::c_int>,
     pub unhash: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock)>,
     pub rehash: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock)>,
     pub get_port: ::core::option::Option<
@@ -21700,7 +21700,7 @@ pub struct proto {
         unsafe extern "C" fn(arg1: *const sock, arg2: ::aya_bpf::cty::c_int) -> bool_,
     >,
     pub stream_memory_read:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *const sock) -> bool_>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *const sock) -> bool_>,
     pub enter_memory_pressure: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock)>,
     pub leave_memory_pressure: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock)>,
     pub memory_allocated: *mut atomic_long_t,
@@ -21753,7 +21753,7 @@ pub struct request_sock_ops {
         unsafe extern "C" fn(arg1: *const sock, arg2: *mut sk_buff, arg3: *mut request_sock),
     >,
     pub send_reset:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *const sock, arg2: *mut sk_buff)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *const sock, arg2: *mut sk_buff)>,
     pub destructor: ::core::option::Option<unsafe extern "C" fn(arg1: *mut request_sock)>,
     pub syn_ack_timeout: ::core::option::Option<unsafe extern "C" fn(arg1: *const request_sock)>,
 }
@@ -22075,7 +22075,7 @@ pub union dev_pm_qos_request__bindgen_ty_1 {
 }
 
 pub type pstate_check_t =
-    ::core::option::Option<unsafe extern "C" fn(arg1: ::aya_bpf::cty::c_ulong) -> bool_>;
+::core::option::Option<unsafe extern "C" fn(arg1: ::aya_bpf::cty::c_ulong) -> bool_>;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -24317,7 +24317,7 @@ pub struct crypto_type {
         unsafe extern "C" fn(arg1: *mut crypto_tfm) -> ::aya_bpf::cty::c_int,
     >,
     pub show:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut seq_file, arg2: *mut crypto_alg)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut seq_file, arg2: *mut crypto_alg)>,
     pub report: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut sk_buff, arg2: *mut crypto_alg) -> ::aya_bpf::cty::c_int,
     >,
@@ -24433,7 +24433,7 @@ pub struct bpf_link_ops {
     pub release: ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_link)>,
     pub dealloc: ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_link)>,
     pub detach:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_link) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_link) -> ::aya_bpf::cty::c_int>,
     pub update_prog: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut bpf_link,
@@ -24442,7 +24442,7 @@ pub struct bpf_link_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub show_fdinfo:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *const bpf_link, arg2: *mut seq_file)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *const bpf_link, arg2: *mut seq_file)>,
     pub fill_link_info: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *const bpf_link,
@@ -24948,7 +24948,7 @@ pub struct rchan_callbacks {
         ) -> *mut dentry,
     >,
     pub remove_buf_file:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut dentry) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut dentry) -> ::aya_bpf::cty::c_int>,
 }
 
 #[repr(C)]
@@ -25464,7 +25464,7 @@ pub struct blk_stat_callback {
     pub timer: timer_list,
     pub cpu_stat: *mut blk_rq_stat,
     pub bucket_fn:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *const request) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *const request) -> ::aya_bpf::cty::c_int>,
     pub buckets: ::aya_bpf::cty::c_uint,
     pub stat: *mut blk_rq_stat,
     pub timer_fn: ::core::option::Option<unsafe extern "C" fn(arg1: *mut blk_stat_callback)>,
@@ -26600,7 +26600,7 @@ pub struct lwtunnel_state {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub orig_input:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut sk_buff) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut sk_buff) -> ::aya_bpf::cty::c_int>,
     pub rcu: callback_head,
     pub data: __IncompleteArrayField<__u8>,
 }
@@ -26688,7 +26688,7 @@ pub struct strp_callbacks {
         unsafe extern "C" fn(arg1: *mut strparser, arg2: *mut sk_buff) -> ::aya_bpf::cty::c_int,
     >,
     pub rcv_msg:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut strparser, arg2: *mut sk_buff)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut strparser, arg2: *mut sk_buff)>,
     pub read_sock_done: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut strparser,
@@ -26834,7 +26834,7 @@ pub struct sk_psock {
     pub refcnt: refcount_t,
     pub saved_unhash: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock)>,
     pub saved_close:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: ::aya_bpf::cty::c_long)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock, arg2: ::aya_bpf::cty::c_long)>,
     pub saved_write_space: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock)>,
     pub saved_data_ready: ::core::option::Option<unsafe extern "C" fn(arg1: *mut sock)>,
     pub psock_update_sk_prot: ::core::option::Option<
@@ -26962,9 +26962,9 @@ pub struct bpf_prog_offload_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub prepare:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_prog) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_prog) -> ::aya_bpf::cty::c_int>,
     pub translate:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_prog) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_prog) -> ::aya_bpf::cty::c_int>,
     pub destroy: ::core::option::Option<unsafe extern "C" fn(arg1: *mut bpf_prog)>,
 }
 
@@ -28007,7 +28007,7 @@ pub struct io_rsrc_node {
 }
 
 pub type rsrc_put_fn =
-    ::core::option::Option<unsafe extern "C" fn(arg1: *mut io_ring_ctx, arg2: *mut io_rsrc_put)>;
+::core::option::Option<unsafe extern "C" fn(arg1: *mut io_ring_ctx, arg2: *mut io_rsrc_put)>;
 
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -29137,7 +29137,7 @@ pub struct rpc_call_ops {
         unsafe extern "C" fn(arg1: *mut rpc_task, arg2: *mut ::aya_bpf::cty::c_void),
     >,
     pub rpc_release:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
 }
 
 #[repr(C)]
@@ -29518,7 +29518,7 @@ pub struct rpc_credops {
         unsafe extern "C" fn(arg1: *mut rpc_task, arg2: *mut xdr_stream) -> ::aya_bpf::cty::c_int,
     >,
     pub crrefresh:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_task) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_task) -> ::aya_bpf::cty::c_int>,
     pub crvalidate: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut rpc_task, arg2: *mut xdr_stream) -> ::aya_bpf::cty::c_int,
     >,
@@ -29529,7 +29529,7 @@ pub struct rpc_credops {
         unsafe extern "C" fn(arg1: *mut rpc_task, arg2: *mut xdr_stream) -> ::aya_bpf::cty::c_int,
     >,
     pub crkey_timeout:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_cred) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_cred) -> ::aya_bpf::cty::c_int>,
     pub crstringify_acceptor: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut rpc_cred) -> *mut ::aya_bpf::cty::c_char,
     >,
@@ -29616,26 +29616,26 @@ pub struct rpc_xprt_ops {
         unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: *mut rpc_task) -> ::aya_bpf::cty::c_int,
     >,
     pub release_xprt:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: *mut rpc_task)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: *mut rpc_task)>,
     pub alloc_slot:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: *mut rpc_task)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: *mut rpc_task)>,
     pub free_slot:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: *mut rpc_rqst)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: *mut rpc_rqst)>,
     pub rpcbind: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_task)>,
     pub set_port: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: ::aya_bpf::cty::c_ushort),
     >,
     pub connect:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: *mut rpc_task)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: *mut rpc_task)>,
     pub buf_alloc:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_task) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_task) -> ::aya_bpf::cty::c_int>,
     pub buf_free: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_task)>,
     pub prepare_request: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_rqst)>,
     pub send_request:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_rqst) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_rqst) -> ::aya_bpf::cty::c_int>,
     pub wait_for_reply_request: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_task)>,
     pub timer:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: *mut rpc_task)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: *mut rpc_task)>,
     pub release_request: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_task)>,
     pub close: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt)>,
     pub destroy: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt)>,
@@ -29647,9 +29647,9 @@ pub struct rpc_xprt_ops {
         ),
     >,
     pub print_stats:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: *mut seq_file)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: *mut seq_file)>,
     pub enable_swap:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt) -> ::aya_bpf::cty::c_int>,
     pub disable_swap: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt)>,
     pub inject_disconnect: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt)>,
     pub bc_setup: ::core::option::Option<
@@ -29660,7 +29660,7 @@ pub struct rpc_xprt_ops {
     >,
     pub bc_maxpayload: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt) -> size_t>,
     pub bc_num_slots:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt) -> ::aya_bpf::cty::c_uint>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt) -> ::aya_bpf::cty::c_uint>,
     pub bc_free_rqst: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_rqst)>,
     pub bc_destroy: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut rpc_xprt, arg2: ::aya_bpf::cty::c_uint),
@@ -29712,9 +29712,9 @@ pub struct rpc_program {
 pub struct rpc_xprt_iter_ops {
     pub xpi_rewind: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt_iter)>,
     pub xpi_xprt:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt_iter) -> *mut rpc_xprt>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt_iter) -> *mut rpc_xprt>,
     pub xpi_next:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt_iter) -> *mut rpc_xprt>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rpc_xprt_iter) -> *mut rpc_xprt>,
 }
 
 #[repr(C)]
@@ -30858,7 +30858,7 @@ pub struct nfs_rpc_ops {
     >,
     pub free_client: ::core::option::Option<unsafe extern "C" fn(arg1: *mut nfs_client)>,
     pub create_server:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut fs_context) -> *mut nfs_server>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut fs_context) -> *mut nfs_server>,
     pub clone_server: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: *mut nfs_server,
@@ -30987,7 +30987,7 @@ pub struct nfs4_state_maintenance_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub get_state_renewal_cred:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut nfs_client) -> *const cred>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut nfs_client) -> *const cred>,
     pub renew_lease: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut nfs_client, arg2: *const cred) -> ::aya_bpf::cty::c_int,
     >,
@@ -32452,7 +32452,7 @@ pub struct xfrm_type_offload {
     pub owner: *mut module,
     pub proto: u8_,
     pub encap:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut xfrm_state, arg2: *mut sk_buff)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut xfrm_state, arg2: *mut sk_buff)>,
     pub input_tail: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut xfrm_state, arg2: *mut sk_buff) -> ::aya_bpf::cty::c_int,
     >,
@@ -32510,7 +32510,7 @@ pub struct rq_qos_ops {
     >,
     pub issue: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq_qos, arg2: *mut request)>,
     pub requeue:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq_qos, arg2: *mut request)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq_qos, arg2: *mut request)>,
     pub done: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq_qos, arg2: *mut request)>,
     pub done_bio: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq_qos, arg2: *mut bio)>,
     pub cleanup: ::core::option::Option<unsafe extern "C" fn(arg1: *mut rq_qos, arg2: *mut bio)>,
@@ -32967,7 +32967,7 @@ pub struct uevent_sock {
 }
 
 pub type irq_write_msi_msg_t =
-    ::core::option::Option<unsafe extern "C" fn(arg1: *mut msi_desc, arg2: *mut msi_msg)>;
+::core::option::Option<unsafe extern "C" fn(arg1: *mut msi_desc, arg2: *mut msi_msg)>;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -33033,7 +33033,7 @@ pub struct mii_bus {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub reset:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut mii_bus) -> ::aya_bpf::cty::c_int>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut mii_bus) -> ::aya_bpf::cty::c_int>,
     pub stats: [mdio_bus_stats; 32usize],
     pub mdio_lock: mutex,
     pub parent: *mut device,
@@ -33274,7 +33274,7 @@ pub struct iommu_group {
     pub notifier: blocking_notifier_head,
     pub iommu_data: *mut ::aya_bpf::cty::c_void,
     pub iommu_data_release:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
     pub name: *mut ::aya_bpf::cty::c_char,
     pub id: ::aya_bpf::cty::c_int,
     pub default_domain: *mut iommu_domain,
@@ -33506,7 +33506,7 @@ pub struct phy_device {
     pub mdix: u8_,
     pub mdix_ctrl: u8_,
     pub phy_link_change:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut phy_device, arg2: bool_)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut phy_device, arg2: bool_)>,
     pub adjust_link: ::core::option::Option<unsafe extern "C" fn(arg1: *mut net_device)>,
     pub macsec_ops: *const macsec_ops,
 }
@@ -33859,7 +33859,7 @@ pub struct phy_driver {
         unsafe extern "C" fn(arg1: *mut phy_device) -> ::aya_bpf::cty::c_int,
     >,
     pub handle_interrupt:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut phy_device) -> irqreturn_t>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut phy_device) -> irqreturn_t>,
     pub remove: ::core::option::Option<unsafe extern "C" fn(arg1: *mut phy_device)>,
     pub match_phy_device: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut phy_device) -> ::aya_bpf::cty::c_int,
@@ -33927,7 +33927,7 @@ pub struct phy_driver {
         unsafe extern "C" fn(arg1: *mut phy_device) -> ::aya_bpf::cty::c_int,
     >,
     pub get_strings:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut phy_device, arg2: *mut u8_)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut phy_device, arg2: *mut u8_)>,
     pub get_stats: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut phy_device, arg2: *mut ethtool_stats, arg3: *mut u64_),
     >,
@@ -35279,12 +35279,12 @@ pub struct sfp_upstream_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub module_remove:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
     pub module_start: ::core::option::Option<
         unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void) -> ::aya_bpf::cty::c_int,
     >,
     pub module_stop:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
     pub link_down: ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
     pub link_up: ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
     pub connect_phy: ::core::option::Option<
@@ -35294,7 +35294,7 @@ pub struct sfp_upstream_ops {
         ) -> ::aya_bpf::cty::c_int,
     >,
     pub disconnect_phy:
-        ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>,
 }
 
 #[repr(C)]
@@ -36129,7 +36129,7 @@ pub mod flow_action_hw_stats {
 }
 
 pub type action_destr =
-    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>;
+::core::option::Option<unsafe extern "C" fn(arg1: *mut ::aya_bpf::cty::c_void)>;
 
 pub mod flow_action_mangle_base {
     pub type Type = ::aya_bpf::cty::c_uint;

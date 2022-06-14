@@ -2,13 +2,13 @@ use std::convert::TryInto;
 
 use aya::programs::{tc, KProbe, SchedClassifier, TcAttachType, TracePoint};
 use aya::Bpf;
-// use aya_log::BpfLogger;
+use aya_log::BpfLogger;
 use log::info;
 
 use crate::handle;
 
 pub fn bind(bpf: &mut Bpf) -> Result<(), anyhow::Error> {
-    // BpfLogger::init(bpf).unwrap();
+    BpfLogger::init(bpf).unwrap();
 
     let program_v4: &mut KProbe = bpf.program_mut("bind_v4").unwrap().try_into()?;
     program_v4.load()?;

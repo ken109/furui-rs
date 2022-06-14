@@ -1,3 +1,5 @@
+extern crate core;
+
 use std::path::PathBuf;
 
 use anyhow::anyhow;
@@ -81,68 +83,68 @@ async fn try_main() -> anyhow::Result<()> {
         "../../target/bpfel-unknown-none/release/bind"
     ))?;
     load::bind(&mut bpf)?;
+    //
+    // #[cfg(debug_assertions)]
+    // let mut bpf = Bpf::load(include_bytes_aligned!(
+    //     "../../target/bpfel-unknown-none/debug/connect"
+    // ))?;
+    // #[cfg(not(debug_assertions))]
+    // let mut bpf = Bpf::load(include_bytes_aligned!(
+    //     "../../target/bpfel-unknown-none/release/connect"
+    // ))?;
+    // load::connect(&mut bpf)?;
+    //
+    // #[cfg(debug_assertions)]
+    // let mut bpf = Bpf::load(include_bytes_aligned!(
+    //     "../../target/bpfel-unknown-none/debug/close"
+    // ))?;
+    // #[cfg(not(debug_assertions))]
+    // let mut bpf = Bpf::load(include_bytes_aligned!(
+    //     "../../target/bpfel-unknown-none/release/close"
+    // ))?;
+    // load::close(&mut bpf)?;
+    //
+    // #[cfg(debug_assertions)]
+    // let mut bpf = Bpf::load(include_bytes_aligned!(
+    //     "../../target/bpfel-unknown-none/debug/ingress"
+    // ))?;
+    // #[cfg(not(debug_assertions))]
+    // let mut bpf = Bpf::load(include_bytes_aligned!(
+    //     "../../target/bpfel-unknown-none/release/ingress"
+    // ))?;
+    // load::ingress(&mut bpf, &opt.iface)?;
+    //
+    // #[cfg(debug_assertions)]
+    // let mut bpf = Bpf::load(include_bytes_aligned!(
+    //     "../../target/bpfel-unknown-none/debug/ingress_icmp"
+    // ))?;
+    // #[cfg(not(debug_assertions))]
+    // let mut bpf = Bpf::load(include_bytes_aligned!(
+    //     "../../target/bpfel-unknown-none/release/ingress_icmp"
+    // ))?;
+    // load::ingress_icmp(&mut bpf, &opt.iface)?;
+    //
+    // #[cfg(debug_assertions)]
+    // let mut bpf = Bpf::load(include_bytes_aligned!(
+    //     "../../target/bpfel-unknown-none/debug/egress"
+    // ))?;
+    // #[cfg(not(debug_assertions))]
+    // let mut bpf = Bpf::load(include_bytes_aligned!(
+    //     "../../target/bpfel-unknown-none/release/egress"
+    // ))?;
+    // load::egress(&mut bpf, &opt.iface)?;
+    //
+    // #[cfg(debug_assertions)]
+    // let mut bpf = Bpf::load(include_bytes_aligned!(
+    //     "../../target/bpfel-unknown-none/debug/egress_icmp"
+    // ))?;
+    // #[cfg(not(debug_assertions))]
+    // let mut bpf = Bpf::load(include_bytes_aligned!(
+    //     "../../target/bpfel-unknown-none/release/egress_icmp"
+    // ))?;
+    // load::egress_icmp(&mut bpf, &opt.iface)?;
 
-    #[cfg(debug_assertions)]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/debug/connect"
-    ))?;
-    #[cfg(not(debug_assertions))]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/release/connect"
-    ))?;
-    load::connect(&mut bpf)?;
-
-    #[cfg(debug_assertions)]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/debug/close"
-    ))?;
-    #[cfg(not(debug_assertions))]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/release/close"
-    ))?;
-    load::close(&mut bpf)?;
-
-    #[cfg(debug_assertions)]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/debug/ingress"
-    ))?;
-    #[cfg(not(debug_assertions))]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/release/ingress"
-    ))?;
-    load::ingress(&mut bpf, &opt.iface)?;
-
-    #[cfg(debug_assertions)]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/debug/ingress_icmp"
-    ))?;
-    #[cfg(not(debug_assertions))]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/release/ingress_icmp"
-    ))?;
-    load::ingress_icmp(&mut bpf, &opt.iface)?;
-
-    #[cfg(debug_assertions)]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/debug/egress"
-    ))?;
-    #[cfg(not(debug_assertions))]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/release/egress"
-    ))?;
-    load::egress(&mut bpf, &opt.iface)?;
-
-    #[cfg(debug_assertions)]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/debug/egress_icmp"
-    ))?;
-    #[cfg(not(debug_assertions))]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/release/egress_icmp"
-    ))?;
-    load::egress_icmp(&mut bpf, &opt.iface)?;
-
-    task::spawn(async move { handle::docker(&docker).await });
+    // task::spawn(async move { handle::docker(&docker).await });
 
     info!("Waiting for Ctrl-C...");
     signal::ctrl_c().await?;
