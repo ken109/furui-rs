@@ -16,7 +16,7 @@ use furui_common::{BindEvent, PortKey, PortVal};
 use crate::vmlinux::{socket, task_struct};
 
 #[map]
-static mut HASH: HashMap<PortKey, PortVal> = HashMap::with_max_entries(1024, 0);
+static mut PROC_PORTS: HashMap<PortKey, PortVal> = HashMap::with_max_entries(1024, 0);
 
 #[map]
 static mut BIND_EVENTS: PerfEventArray<BindEvent> =
