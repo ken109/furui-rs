@@ -22,7 +22,7 @@ pub struct Options {
 }
 
 /// Build the project
-fn build(opts: &Options) -> Result<(), anyhow::Error> {
+fn build(opts: &Options) -> anyhow::Result<()> {
     let mut args = vec!["build"];
     if opts.release {
         args.push("--release")
@@ -36,7 +36,7 @@ fn build(opts: &Options) -> Result<(), anyhow::Error> {
 }
 
 /// Build and run the project
-pub fn run(opts: Options) -> Result<(), anyhow::Error> {
+pub fn run(opts: Options) -> anyhow::Result<()> {
     // build our ebpf program followed by our application
     build_ebpf(BuildOptions {
         target: opts.bpf_target,

@@ -1,6 +1,3 @@
-#![no_std]
-#![no_main]
-
 use core::mem;
 use core::mem::MaybeUninit;
 
@@ -17,9 +14,6 @@ use aya_log_ebpf::info;
 use furui_common::{BindEvent, PortKey, PortVal};
 
 use crate::vmlinux::{socket, task_struct};
-
-#[allow(warnings)]
-mod vmlinux;
 
 #[map]
 static mut HASH: HashMap<PortKey, PortVal> = HashMap::with_max_entries(1024, 0);
@@ -76,9 +70,4 @@ pub fn bind_v6(ctx: ProbeContext) -> u32 {
 
 unsafe fn try_bind_v6(_ctx: ProbeContext) -> Result<u32, u32> {
     Ok(0)
-}
-
-#[panic_handler]
-fn panic(_info: &core::panic::PanicInfo) -> ! {
-    unsafe { core::hint::unreachable_unchecked() }
 }

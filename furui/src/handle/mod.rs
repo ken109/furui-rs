@@ -22,7 +22,7 @@ fn handle_perf_array<E: 'static>(
     bpf: &mut Bpf,
     map_name: &str,
     callback: Box<Callback<E>>,
-) -> Result<(), anyhow::Error> {
+) -> anyhow::Result<()> {
     let shared_callback: Arc<Callback<E>> = Arc::from(callback);
 
     let mut perf_array = AsyncPerfEventArray::try_from(bpf.map_mut(map_name)?)?;
