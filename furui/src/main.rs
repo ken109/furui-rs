@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 use anyhow::anyhow;
 use aya::{include_bytes_aligned, Bpf};
+use aya_log::BpfLogger;
 use log::info;
 use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TermLogger, TerminalMode};
 use structopt::StructOpt;
@@ -76,73 +77,13 @@ async fn try_main() -> anyhow::Result<()> {
 
     #[cfg(debug_assertions)]
     let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/debug/bind"
+        "../../target/bpfel-unknown-none/debug/furui"
     ))?;
     #[cfg(not(debug_assertions))]
     let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/release/bind"
+        "../../target/bpfel-unknown-none/release/furui"
     ))?;
-    load::bind(&mut bpf)?;
-    //
-    // #[cfg(debug_assertions)]
-    // let mut bpf = Bpf::load(include_bytes_aligned!(
-    //     "../../target/bpfel-unknown-none/debug/connect"
-    // ))?;
-    // #[cfg(not(debug_assertions))]
-    // let mut bpf = Bpf::load(include_bytes_aligned!(
-    //     "../../target/bpfel-unknown-none/release/connect"
-    // ))?;
-    // load::connect(&mut bpf)?;
-    //
-    // #[cfg(debug_assertions)]
-    // let mut bpf = Bpf::load(include_bytes_aligned!(
-    //     "../../target/bpfel-unknown-none/debug/close"
-    // ))?;
-    // #[cfg(not(debug_assertions))]
-    // let mut bpf = Bpf::load(include_bytes_aligned!(
-    //     "../../target/bpfel-unknown-none/release/close"
-    // ))?;
-    // load::close(&mut bpf)?;
-    //
-    // #[cfg(debug_assertions)]
-    // let mut bpf = Bpf::load(include_bytes_aligned!(
-    //     "../../target/bpfel-unknown-none/debug/ingress"
-    // ))?;
-    // #[cfg(not(debug_assertions))]
-    // let mut bpf = Bpf::load(include_bytes_aligned!(
-    //     "../../target/bpfel-unknown-none/release/ingress"
-    // ))?;
-    // load::ingress(&mut bpf, &opt.iface)?;
-    //
-    // #[cfg(debug_assertions)]
-    // let mut bpf = Bpf::load(include_bytes_aligned!(
-    //     "../../target/bpfel-unknown-none/debug/ingress_icmp"
-    // ))?;
-    // #[cfg(not(debug_assertions))]
-    // let mut bpf = Bpf::load(include_bytes_aligned!(
-    //     "../../target/bpfel-unknown-none/release/ingress_icmp"
-    // ))?;
-    // load::ingress_icmp(&mut bpf, &opt.iface)?;
-    //
-    // #[cfg(debug_assertions)]
-    // let mut bpf = Bpf::load(include_bytes_aligned!(
-    //     "../../target/bpfel-unknown-none/debug/egress"
-    // ))?;
-    // #[cfg(not(debug_assertions))]
-    // let mut bpf = Bpf::load(include_bytes_aligned!(
-    //     "../../target/bpfel-unknown-none/release/egress"
-    // ))?;
-    // load::egress(&mut bpf, &opt.iface)?;
-    //
-    // #[cfg(debug_assertions)]
-    // let mut bpf = Bpf::load(include_bytes_aligned!(
-    //     "../../target/bpfel-unknown-none/debug/egress_icmp"
-    // ))?;
-    // #[cfg(not(debug_assertions))]
-    // let mut bpf = Bpf::load(include_bytes_aligned!(
-    //     "../../target/bpfel-unknown-none/release/egress_icmp"
-    // ))?;
-    // load::egress_icmp(&mut bpf, &opt.iface)?;
+    load::all(&mut bpf, &opt.iface)?;
 
     // task::spawn(async move { handle::docker(&docker).await });
 

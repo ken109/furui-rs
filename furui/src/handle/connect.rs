@@ -6,7 +6,7 @@ use furui_common::ConnectEvent;
 
 use crate::handle::{handle_perf_array, to_str};
 
-pub fn connect(bpf: &mut Bpf) -> Result<(), anyhow::Error> {
+pub fn connect(bpf: &mut Bpf) -> anyhow::Result<()> {
     handle_perf_array(
         bpf,
         "CONNECT_EVENTS",
