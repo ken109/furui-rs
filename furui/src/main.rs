@@ -4,7 +4,6 @@ use std::path::PathBuf;
 
 use anyhow::anyhow;
 use aya::{include_bytes_aligned, Bpf};
-use aya_log::BpfLogger;
 use log::info;
 use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TermLogger, TerminalMode};
 use structopt::StructOpt;
@@ -83,9 +82,9 @@ async fn try_main() -> anyhow::Result<()> {
     let mut bpf = Bpf::load(include_bytes_aligned!(
         "../../target/bpfel-unknown-none/release/furui"
     ))?;
-    load::all(&mut bpf, &opt.iface)?;
+    load::all_programs(&mut bpf, &opt.iface)?;
 
-    // task::spawn(async move { handle::docker(&docker).await });
+    task::spawn(async move { handle::docker(&docker).await });
 
     info!("Waiting for Ctrl-C...");
     signal::ctrl_c().await?;

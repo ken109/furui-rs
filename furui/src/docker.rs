@@ -1,13 +1,11 @@
 use std::collections::HashMap;
 use std::net::IpAddr;
 
-use anyhow::anyhow;
 use bollard;
 use bollard::container::ListContainersOptions;
-use bollard::models::{ContainerInspectResponse, ContainerSummary, EventMessage};
+use bollard::models::{ContainerSummary, EventMessage};
 use bollard::system::EventsOptions;
 use futures::Stream;
-use log::warn;
 
 use crate::constant::CONTAINER_ID_LENGTH;
 use crate::domain::{Container, Containers};
