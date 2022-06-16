@@ -1,19 +1,18 @@
-use core::mem;
 use core::mem::MaybeUninit;
 
+use aya_bpf::helpers::bpf_probe_read_kernel;
 use aya_bpf::{
-    cty::{c_char, c_void},
-    helpers::{bpf_get_current_task, bpf_probe_read, gen},
+    cty::{c_long, c_ushort},
     macros::{kprobe, map},
     maps::{HashMap, PerfEventArray},
     programs::ProbeContext,
     BpfContext,
 };
-use aya_log_ebpf::info;
 
 use furui_common::{BindEvent, PortKey, PortVal};
 
-use crate::vmlinux::{socket, task_struct};
+use crate::helpers::{get_container_id, is_container_process, AF_INET};
+use crate::vmlinux::socket;
 
 #[map]
 static mut PROC_PORTS: HashMap<PortKey, PortVal> = HashMap::with_max_entries(1024, 0);
@@ -26,36 +25,32 @@ static mut BIND_EVENTS: PerfEventArray<BindEvent> =
 pub fn bind_v4(ctx: ProbeContext) -> u32 {
     match unsafe { try_bind_v4(ctx) } {
         Ok(ret) => ret,
-        Err(ret) => ret,
+        Err(ret) => ret as u32,
     }
 }
 
-unsafe fn try_bind_v4(ctx: ProbeContext) -> Result<u32, u32> {
-    let mut event = MaybeUninit::<BindEvent>::uninit();
-
-    (*event.as_mut_ptr()).pid = ctx.pid();
-    (*event.as_mut_ptr()).comm = ctx.command().unwrap();
-
-    let task = &*(bpf_get_current_task() as *const task_struct);
-
-    let nsproxy = &*bpf_probe_read(&task.nsproxy).unwrap();
-    let pidns = &*bpf_probe_read(&nsproxy.pid_ns_for_children).unwrap();
-
-    if bpf_probe_read(&pidns.level).unwrap() == 0 {
+unsafe fn try_bind_v4(ctx: ProbeContext) -> Result<u32, c_long> {
+    if !is_container_process()? {
         return Ok(0);
     }
 
-    let uts = &*bpf_probe_read(&nsproxy.uts_ns).unwrap();
+    let mut event_uninit = MaybeUninit::<BindEvent>::zeroed();
+    let mut event_ptr = event_uninit.as_mut_ptr();
 
-    gen::bpf_probe_read(
-        (*event.as_mut_ptr()).container_id.as_mut_ptr() as *mut c_void,
-        mem::size_of::<[c_char; 16]>() as u32,
-        uts.name.nodename.as_ptr() as *const c_void,
-    );
+    (*event_ptr).container_id = get_container_id()?;
+    (*event_ptr).pid = ctx.pid();
+    (*event_ptr).comm = ctx.command()?;
 
-    let _ = (ctx.arg::<*const socket>(0).unwrap()).as_ref().unwrap();
+    let sock = &*bpf_probe_read_kernel(&ctx.arg::<*const socket>(0).ok_or(1)?)?;
+    let sk = &*bpf_probe_read_kernel(&sock.sk)?;
+    (*event_ptr).family = bpf_probe_read_kernel(&sk.__sk_common.skc_family)?;
 
-    BIND_EVENTS.output(&ctx, event.assume_init_ref(), 0);
+    if (*event_ptr).family == AF_INET {
+        // (*event_ptr).lport = 0;
+        // (*event_ptr).proto = 0;
+
+        BIND_EVENTS.output(&ctx, event_uninit.assume_init_ref(), 0);
+    }
 
     Ok(0)
 }
@@ -64,10 +59,10 @@ unsafe fn try_bind_v4(ctx: ProbeContext) -> Result<u32, u32> {
 pub fn bind_v6(ctx: ProbeContext) -> u32 {
     match unsafe { try_bind_v6(ctx) } {
         Ok(ret) => ret,
-        Err(ret) => ret,
+        Err(ret) => ret as u32,
     }
 }
 
-unsafe fn try_bind_v6(_ctx: ProbeContext) -> Result<u32, u32> {
+unsafe fn try_bind_v6(_ctx: ProbeContext) -> Result<u32, c_ushort> {
     Ok(0)
 }

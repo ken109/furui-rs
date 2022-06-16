@@ -14,11 +14,14 @@ pub fn bind(bpf: &mut Bpf) -> anyhow::Result<()> {
             let time = Local::now().format("%H:%M:%S").to_string();
 
             info!(
-                "{} {} PID {} {}",
+                "{} {} PID {} {} {} {} {}",
                 time,
                 to_str(event.container_id),
                 event.pid,
-                to_str(event.comm)
+                to_str(event.comm),
+                event.family,
+                event.lport,
+                event.proto,
             );
         }),
     )?;

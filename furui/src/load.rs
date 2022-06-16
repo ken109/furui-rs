@@ -7,8 +7,8 @@ use log::info;
 
 use crate::handle;
 
-pub fn all(bpf: &mut Bpf, iface: &str) -> anyhow::Result<()> {
-    BpfLogger::init(bpf).unwrap();
+pub fn all_programs(bpf: &mut Bpf, iface: &str) -> anyhow::Result<()> {
+    // BpfLogger::init(bpf)?;
 
     bind(bpf)?;
     connect(bpf)?;

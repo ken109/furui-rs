@@ -96,7 +96,7 @@ impl ParsePolicies {
 
                 // socket
                 for parsed_socket in &parsed_communication.sockets {
-                    let mut socket = domain::Socket {
+                    let socket = domain::Socket {
                         protocol: match parsed_socket.protocol {
                             Protocol::TCP => domain::Protocol::TCP,
                             Protocol::UDP => domain::Protocol::UDP,
@@ -123,7 +123,7 @@ impl ParsePolicies {
 
                 // icmp
                 for parsed_icmp in &parsed_communication.icmp {
-                    let mut icmp = domain::ICMP {
+                    let icmp = domain::ICMP {
                         version: parsed_icmp.version,
                         icmp_type: parsed_icmp.icmp_type,
                         code: parsed_icmp.code,

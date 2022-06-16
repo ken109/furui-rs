@@ -1,3 +1,4 @@
+use aya_bpf::cty::c_ushort;
 use aya_bpf::maps::PerfEventArray;
 use aya_bpf::{
     macros::{kprobe, map},
@@ -15,11 +16,11 @@ static mut CONNECT_EVENTS: PerfEventArray<ConnectEvent> =
 pub fn tcp_connect(ctx: ProbeContext) -> u32 {
     match unsafe { try_tcp_connect(ctx) } {
         Ok(ret) => ret,
-        Err(ret) => ret,
+        Err(ret) => ret as u32,
     }
 }
 
-unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, u32> {
+unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_ushort> {
     let pid = ctx.pid();
     let comm = ctx.command().unwrap();
 
@@ -34,11 +35,11 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, u32> {
 pub fn udp_connect_v4(ctx: ProbeContext) -> u32 {
     match unsafe { try_udp_connect_v4(ctx) } {
         Ok(ret) => ret,
-        Err(ret) => ret,
+        Err(ret) => ret as u32,
     }
 }
 
-unsafe fn try_udp_connect_v4(_ctx: ProbeContext) -> Result<u32, u32> {
+unsafe fn try_udp_connect_v4(_ctx: ProbeContext) -> Result<u32, c_ushort> {
     Ok(0)
 }
 
@@ -46,10 +47,10 @@ unsafe fn try_udp_connect_v4(_ctx: ProbeContext) -> Result<u32, u32> {
 pub fn udp_connect_v6(ctx: ProbeContext) -> u32 {
     match unsafe { try_udp_connect_v6(ctx) } {
         Ok(ret) => ret,
-        Err(ret) => ret,
+        Err(ret) => ret as u32,
     }
 }
 
-unsafe fn try_udp_connect_v6(_ctx: ProbeContext) -> Result<u32, u32> {
+unsafe fn try_udp_connect_v6(_ctx: ProbeContext) -> Result<u32, c_ushort> {
     Ok(0)
 }
