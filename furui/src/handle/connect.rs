@@ -13,7 +13,13 @@ pub fn connect(bpf: &mut Bpf) -> anyhow::Result<()> {
         Box::new(|event: ConnectEvent| {
             let time = Local::now().format("%H:%M:%S").to_string();
 
-            info!("{} PID {} {}", time, event.pid, to_str(event.comm));
+            info!(
+                "{} {} PID {} {}",
+                time,
+                to_str(event.container_id),
+                event.pid,
+                to_str(event.comm)
+            );
         }),
     )?;
 

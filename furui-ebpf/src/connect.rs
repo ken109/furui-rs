@@ -1,4 +1,4 @@
-use aya_bpf::cty::c_ushort;
+use aya_bpf::cty::c_long;
 use aya_bpf::maps::PerfEventArray;
 use aya_bpf::{
     macros::{kprobe, map},
@@ -7,6 +7,8 @@ use aya_bpf::{
 };
 
 use furui_common::ConnectEvent;
+
+use crate::helpers::{get_container_id, is_container_process};
 
 #[map]
 static mut CONNECT_EVENTS: PerfEventArray<ConnectEvent> =
@@ -20,11 +22,19 @@ pub fn tcp_connect(ctx: ProbeContext) -> u32 {
     }
 }
 
-unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_ushort> {
+unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
+    if !is_container_process()? {
+        return Ok(0);
+    }
+
     let pid = ctx.pid();
     let comm = ctx.command().unwrap();
 
-    let event = ConnectEvent { pid, comm };
+    let event = ConnectEvent {
+        container_id: get_container_id()?,
+        pid,
+        comm,
+    };
 
     CONNECT_EVENTS.output(&ctx, &event, 0);
 
@@ -39,7 +49,7 @@ pub fn udp_connect_v4(ctx: ProbeContext) -> u32 {
     }
 }
 
-unsafe fn try_udp_connect_v4(_ctx: ProbeContext) -> Result<u32, c_ushort> {
+unsafe fn try_udp_connect_v4(_ctx: ProbeContext) -> Result<u32, c_long> {
     Ok(0)
 }
 
@@ -51,6 +61,6 @@ pub fn udp_connect_v6(ctx: ProbeContext) -> u32 {
     }
 }
 
-unsafe fn try_udp_connect_v6(_ctx: ProbeContext) -> Result<u32, c_ushort> {
+unsafe fn try_udp_connect_v6(_ctx: ProbeContext) -> Result<u32, c_long> {
     Ok(0)
 }
