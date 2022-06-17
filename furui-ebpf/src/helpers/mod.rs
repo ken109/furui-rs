@@ -1,12 +1,12 @@
-use aya_bpf::cty::{c_char, c_long, c_ushort};
+use aya_bpf::cty::{c_char, c_long};
 use aya_bpf::helpers::{bpf_get_current_task, bpf_probe_read_kernel};
 
 use furui_common::CONTAINER_ID_LEN;
+pub(crate) use net::*;
 
 use crate::vmlinux::task_struct;
 
-pub(crate) static AF_INET: c_ushort = 2;
-pub(crate) static AF_INET6: c_ushort = 10;
+mod net;
 
 #[inline]
 pub(crate) unsafe fn is_container_process() -> Result<bool, c_long> {

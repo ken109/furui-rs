@@ -7,7 +7,7 @@ pub async fn docker(docker: &Docker) {
 
     futures::pin_mut!(container_events);
 
-    while let Some(Ok(event)) = container_events.next().await {
-        println!("{:#?}", event);
+    while let Some(Ok(_event)) = container_events.next().await {
+        // println!("{:#?}", event);
     }
 }
