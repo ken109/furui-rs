@@ -36,7 +36,7 @@ pub struct BindEvent {
 pub struct ConnectEvent {
     // Only 12 characters are in the nodename, so it's 12+termination characters,
     // but I've set it to 16 for memory alignment reasons.
-    // pub container_id: [c_char; 16],
+    pub container_id: [c_char; CONTAINER_ID_LEN],
     pub pid: u32,
     pub comm: [c_char; TASK_COMM_LEN],
 }

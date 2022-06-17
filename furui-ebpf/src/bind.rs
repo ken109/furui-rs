@@ -2,7 +2,7 @@ use core::mem::MaybeUninit;
 
 use aya_bpf::helpers::bpf_probe_read_kernel;
 use aya_bpf::{
-    cty::{c_long, c_ushort},
+    cty::c_long,
     macros::{kprobe, map},
     maps::{HashMap, PerfEventArray},
     programs::ProbeContext,
@@ -63,6 +63,6 @@ pub fn bind_v6(ctx: ProbeContext) -> u32 {
     }
 }
 
-unsafe fn try_bind_v6(_ctx: ProbeContext) -> Result<u32, c_ushort> {
+unsafe fn try_bind_v6(_ctx: ProbeContext) -> Result<u32, c_long> {
     Ok(0)
 }
