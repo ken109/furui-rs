@@ -2,14 +2,11 @@ use std::convert::TryInto;
 
 use aya::programs::{tc, KProbe, SchedClassifier, TcAttachType, TracePoint};
 use aya::Bpf;
-use aya_log::BpfLogger;
 use log::info;
 
 use crate::handle;
 
 pub fn all_programs(bpf: &mut Bpf, iface: &str) -> anyhow::Result<()> {
-    // BpfLogger::init(bpf)?;
-
     bind(bpf)?;
     connect(bpf)?;
     close(bpf)?;
