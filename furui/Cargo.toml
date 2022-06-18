@@ -11,7 +11,10 @@ furui-common = { path = "../furui-common", features = ["user"] }
 anyhow = "1.0"
 
 log = "0.4"
-simplelog = "0.11"
+tracing = "0.1"
+tracing-core = "0.1"
+tracing-log = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json"] }
 structopt = { version = "0.3" }
 tokio = { version = "1.5", features = ["macros", "rt", "rt-multi-thread", "net", "signal", "sync"] }
 serde = "1.0"
@@ -23,6 +26,7 @@ chrono = "0.4"
 dns-lookup = "1.0.8"
 bollard = "0.12.0"
 futures = "0.3.21"
+thiserror = "1"
 
 [[bin]]
 name = "furui"

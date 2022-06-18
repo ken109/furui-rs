@@ -1,6 +1,6 @@
 use aya::Bpf;
 use chrono::Local;
-use log::info;
+use tracing::info;
 
 use furui_common::ConnectEvent;
 
@@ -14,11 +14,10 @@ pub fn connect(bpf: &mut Bpf) -> anyhow::Result<()> {
             let time = Local::now().format("%H:%M:%S").to_string();
 
             info!(
-                "{} {} PID {} {}",
-                time,
-                to_str(event.container_id),
-                event.pid,
-                to_str(event.comm)
+                time = time.as_str(),
+                container_id = to_str(event.container_id).as_str(),
+                pid = event.pid,
+                comm = to_str(event.comm).as_str(),
             );
         }),
     )?;

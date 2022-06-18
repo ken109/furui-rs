@@ -4,10 +4,13 @@ use std::path::PathBuf;
 
 use anyhow::anyhow;
 use aya::{include_bytes_aligned, Bpf};
-use log::info;
-use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TermLogger, TerminalMode};
 use structopt::StructOpt;
+use thiserror::Error;
 use tokio::{signal, task};
+use tracing::info;
+use tracing_core::Level;
+use tracing_log::LogTracer;
+use tracing_subscriber::FmtSubscriber;
 
 use crate::docker::Docker;
 use crate::domain::Containers;
@@ -26,6 +29,13 @@ struct Opt {
     iface: String,
 
     policy_path: PathBuf,
+
+    #[cfg_attr(debug_assertions, structopt(long, default_value = "debug", possible_values = &["trace", "debug", "info", "warn", "error"]))]
+    #[cfg_attr(not(debug_assertions), structopt(long, default_value = "info", possible_values = &["trace", "debug", "info", "warn", "error"]))]
+    log_level: String,
+
+    #[structopt(long, default_value = "text", possible_values = &["json", "text"])]
+    log_fmt: String,
 }
 
 #[tokio::main]
@@ -45,19 +55,7 @@ async fn try_main() -> anyhow::Result<()> {
 
     let opt = Opt::from_args();
 
-    #[cfg(debug_assertions)]
-    let log_level = LevelFilter::Debug;
-    #[cfg(not(debug_assertions))]
-    let log_level = LevelFilter::Info;
-    TermLogger::init(
-        log_level,
-        ConfigBuilder::new()
-            .set_target_level(LevelFilter::Error)
-            .set_location_level(LevelFilter::Error)
-            .build(),
-        TerminalMode::Mixed,
-        ColorChoice::Auto,
-    )?;
+    setup_tracing(&opt)?;
 
     let docker = Docker::new()?;
 
@@ -89,6 +87,49 @@ async fn try_main() -> anyhow::Result<()> {
     info!("Waiting for Ctrl-C...");
     signal::ctrl_c().await?;
     info!("Exiting...");
+
+    Ok(())
+}
+
+#[derive(Error, Debug)]
+enum SetupTracingError {
+    #[error(transparent)]
+    SetLogger(#[from] log::SetLoggerError),
+
+    #[error(transparent)]
+    SetGlobalDefault(#[from] tracing_core::dispatcher::SetGlobalDefaultError),
+
+    #[error("unknown log level")]
+    UnknownLogLevel,
+
+    #[error("unknown log message format")]
+    UnknownLogFormat,
+}
+
+fn setup_tracing(opt: &Opt) -> Result<(), SetupTracingError> {
+    let (level_tracing, level_log) = match opt.log_level.as_str() {
+        "trace" => (Level::TRACE, log::LevelFilter::Trace),
+        "debug" => (Level::DEBUG, log::LevelFilter::Debug),
+        "info" => (Level::INFO, log::LevelFilter::Info),
+        "warn" => (Level::WARN, log::LevelFilter::Warn),
+        "error" => (Level::ERROR, log::LevelFilter::Error),
+        _ => return Err(SetupTracingError::UnknownLogLevel),
+    };
+
+    let builder = FmtSubscriber::builder().with_max_level(level_tracing);
+    match opt.log_fmt.as_str() {
+        "json" => {
+            let subscriber = builder.json().finish();
+            tracing::subscriber::set_global_default(subscriber)?;
+        }
+        "text" => {
+            let subscriber = builder.finish();
+            tracing::subscriber::set_global_default(subscriber)?;
+        }
+        _ => return Err(SetupTracingError::UnknownLogFormat),
+    };
+
+    LogTracer::builder().with_max_level(level_log).init()?;
 
     Ok(())
 }

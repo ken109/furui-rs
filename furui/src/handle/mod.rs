@@ -56,5 +56,12 @@ fn handle_perf_array<E: 'static>(
 }
 
 fn to_str<const N: usize>(array: [c_char; N]) -> String {
-    array.iter().map(|&s| (s as u8) as char).collect::<String>()
+    array
+        .iter()
+        .map(|&s| (s as u8) as char)
+        .collect::<String>()
+        .split("\0")
+        .nth(0)
+        .unwrap_or("")
+        .to_string()
 }
