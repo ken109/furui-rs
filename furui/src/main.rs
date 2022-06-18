@@ -82,6 +82,8 @@ async fn try_main() -> anyhow::Result<()> {
     ))?;
     load::all_programs(&mut bpf, &opt.iface)?;
 
+    handle::all_events(&mut bpf)?;
+
     task::spawn(async move { handle::docker(&docker).await });
 
     info!("Waiting for Ctrl-C...");

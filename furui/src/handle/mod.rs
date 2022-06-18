@@ -8,15 +8,24 @@ use aya_bpf::cty::c_char;
 use bytes::BytesMut;
 use tokio::task;
 
-pub use bind::*;
-pub use close::*;
-pub use connect::*;
-pub use docker::*;
+use bind::*;
+use close::*;
+use connect::*;
+pub use docker::docker;
 
 mod bind;
 mod close;
 mod connect;
 mod docker;
+
+pub fn all_events(bpf: &mut Bpf) -> anyhow::Result<()> {
+    bind(bpf)?;
+    connect(bpf)?;
+    connect6(bpf)?;
+    close(bpf)?;
+
+    Ok(())
+}
 
 type Callback<E> = dyn Fn(E) + Send + Sync + 'static;
 
