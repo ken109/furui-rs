@@ -2,6 +2,7 @@ use std::process::exit;
 
 use structopt::StructOpt;
 
+mod aya_gen;
 mod build_ebpf;
 mod run;
 
@@ -15,6 +16,7 @@ pub struct Options {
 enum Command {
     BuildEbpf(build_ebpf::Options),
     Run(run::Options),
+    AyaGen,
 }
 
 fn main() {
@@ -24,6 +26,7 @@ fn main() {
     let ret = match opts.command {
         BuildEbpf(opts) => build_ebpf::build_ebpf(opts),
         Run(opts) => run::run(opts),
+        AyaGen => aya_gen::aya_gen(),
     };
 
     if let Err(e) = ret {
