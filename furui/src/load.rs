@@ -4,8 +4,6 @@ use aya::programs::{tc, KProbe, SchedClassifier, TcAttachType, TracePoint};
 use aya::Bpf;
 use tracing::info;
 
-use crate::handle;
-
 pub fn all_programs(bpf: &mut Bpf, iface: &str) -> anyhow::Result<()> {
     bind(bpf)?;
     connect(bpf)?;
@@ -27,8 +25,6 @@ fn bind(bpf: &mut Bpf) -> anyhow::Result<()> {
     program_v6.load()?;
     program_v6.attach("inet6_bind", 0)?;
 
-    handle::bind(bpf)?;
-
     info!("Bind program loaded.");
 
     Ok(())
@@ -47,9 +43,6 @@ fn connect(bpf: &mut Bpf) -> anyhow::Result<()> {
     program_udp_v6.load()?;
     program_udp_v6.attach("udp_v6_send_skb", 0)?;
 
-    handle::connect(bpf)?;
-    handle::connect6(bpf)?;
-
     info!("Connect program loaded.");
 
     Ok(())
@@ -59,8 +52,6 @@ fn close(bpf: &mut Bpf) -> anyhow::Result<()> {
     let program: &mut TracePoint = bpf.program_mut("close").unwrap().try_into()?;
     program.load()?;
     program.attach("sched", "sched_process_exit")?;
-
-    handle::close(bpf)?;
 
     info!("Close program loaded.");
 
