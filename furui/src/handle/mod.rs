@@ -11,14 +11,14 @@ use tokio::task;
 use bind::*;
 use close::*;
 use connect::*;
-pub use docker::docker;
+pub use docker::docker_events;
 
 mod bind;
 mod close;
 mod connect;
 mod docker;
 
-pub fn all_events(bpf: &mut Bpf) -> anyhow::Result<()> {
+pub fn all_perf_events(bpf: &mut Bpf) -> anyhow::Result<()> {
     bind(bpf)?;
     connect(bpf)?;
     connect6(bpf)?;

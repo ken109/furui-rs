@@ -1,5 +1,4 @@
 use aya::Bpf;
-use chrono::Local;
 use tracing::info;
 
 use furui_common::{Connect6Event, ConnectEvent};
