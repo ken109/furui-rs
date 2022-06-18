@@ -6,7 +6,7 @@ use anyhow::anyhow;
 use aya::{include_bytes_aligned, Bpf};
 use structopt::StructOpt;
 use thiserror::Error;
-use tokio::{signal, task};
+use tokio::signal;
 use tracing::info;
 use tracing_core::Level;
 use tracing_log::LogTracer;
@@ -82,9 +82,9 @@ async fn try_main() -> anyhow::Result<()> {
     ))?;
     load::all_programs(&mut bpf, &opt.iface)?;
 
-    handle::all_events(&mut bpf)?;
+    handle::all_perf_events(&mut bpf)?;
 
-    task::spawn(async move { handle::docker(&docker).await });
+    handle::docker_events(&docker);
 
     info!("Waiting for Ctrl-C...");
     signal::ctrl_c().await?;
