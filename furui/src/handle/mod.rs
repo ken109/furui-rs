@@ -9,10 +9,12 @@ use bytes::BytesMut;
 use tokio::task;
 
 pub use bind::*;
+pub use close::*;
 pub use connect::*;
 pub use docker::*;
 
 mod bind;
+mod close;
 mod connect;
 mod docker;
 
