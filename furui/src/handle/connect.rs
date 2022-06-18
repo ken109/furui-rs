@@ -11,10 +11,7 @@ pub fn connect(bpf: &mut Bpf) -> anyhow::Result<()> {
         bpf,
         "CONNECT_EVENTS",
         Box::new(|event: ConnectEvent| {
-            let time = Local::now().format("%H:%M:%S").to_string();
-
             info!(
-                time = time.as_str(),
                 container_id = to_str(event.container_id).as_str(),
                 pid = event.pid,
                 comm = to_str(event.comm).as_str(),
@@ -35,10 +32,7 @@ pub fn connect6(bpf: &mut Bpf) -> anyhow::Result<()> {
         bpf,
         "CONNECT6_EVENTS",
         Box::new(|event: Connect6Event| {
-            let time = Local::now().format("%H:%M:%S").to_string();
-
             info!(
-                time = time.as_str(),
                 container_id = to_str(event.container_id).as_str(),
                 pid = event.pid,
                 comm = to_str(event.comm).as_str(),

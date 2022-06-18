@@ -11,10 +11,7 @@ pub fn bind(bpf: &mut Bpf) -> anyhow::Result<()> {
         bpf,
         "BIND_EVENTS",
         Box::new(|event: BindEvent| {
-            let time = Local::now().format("%H:%M:%S").to_string();
-
             info!(
-                time = time.as_str(),
                 container_id = to_str(event.container_id).as_str(),
                 pid = event.pid,
                 comm = to_str(event.comm).as_str(),

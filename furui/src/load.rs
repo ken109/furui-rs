@@ -60,6 +60,8 @@ fn close(bpf: &mut Bpf) -> anyhow::Result<()> {
     program.load()?;
     program.attach("sched", "sched_process_exit")?;
 
+    handle::close(bpf)?;
+
     info!("Close program loaded.");
 
     Ok(())
