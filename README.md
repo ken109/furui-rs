@@ -1,5 +1,7 @@
 # furui
 
+Communication control of the container runtime environment(now only docker) is performed using eBPF.
+
 ## Prerequisites
 
 1. Install a rust stable toolchain: `rustup install stable`
