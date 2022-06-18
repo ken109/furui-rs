@@ -18,9 +18,8 @@ pub fn bind(bpf: &mut Bpf) -> anyhow::Result<()> {
                 container_id = to_str(event.container_id).as_str(),
                 pid = event.pid,
                 comm = to_str(event.comm).as_str(),
-                family = event.family(),
+                protocol = format!("{}{}", event.protocol(), event.family()).as_str(),
                 lport = event.lport,
-                proto = event.proto(),
             );
         }),
     )?;
