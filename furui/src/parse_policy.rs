@@ -4,9 +4,9 @@ use std::net::IpAddr;
 use std::path::PathBuf;
 
 use dns_lookup::lookup_host;
-use log::warn;
 use serde_derive::Deserialize;
 use serde_yaml;
+use tracing::warn;
 
 use crate::domain::{self, Policies};
 

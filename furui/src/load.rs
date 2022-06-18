@@ -2,7 +2,7 @@ use std::convert::TryInto;
 
 use aya::programs::{tc, KProbe, SchedClassifier, TcAttachType, TracePoint};
 use aya::Bpf;
-use log::info;
+use tracing::info;
 
 use crate::handle;
 

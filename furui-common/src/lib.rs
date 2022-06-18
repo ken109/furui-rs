@@ -4,6 +4,8 @@ use aya_bpf::{
     cty::{c_char, c_ushort},
     TASK_COMM_LEN,
 };
+#[cfg(feature = "user")]
+use libc::c_int;
 
 pub const CONTAINER_ID_LEN: usize = 16;
 
@@ -29,6 +31,27 @@ pub struct BindEvent {
     pub lport: c_ushort,
     // // Defined at the very end for memory alignment.
     pub proto: u8,
+}
+
+#[cfg(feature = "user")]
+impl BindEvent {
+    pub fn family(&self) -> &'static str {
+        match self.family as c_int {
+            libc::AF_INET => "v4",
+            libc::AF_INET6 => "v6",
+            _ => "",
+        }
+    }
+
+    pub fn proto(&self) -> &'static str {
+        match self.proto as c_int {
+            libc::IPPROTO_IP => "IP",
+            libc::IPPROTO_TCP => "TCP",
+            libc::IPPROTO_UDP => "UDP",
+            libc::IPPROTO_ICMP => "ICMP",
+            _ => "UNK",
+        }
+    }
 }
 
 #[derive(Copy, Clone)]
