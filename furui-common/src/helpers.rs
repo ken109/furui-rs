@@ -9,7 +9,7 @@ pub(crate) fn family(value: c_ushort) -> &'static str {
     }
 }
 
-pub(crate) fn proto(value: u8) -> &'static str {
+pub(crate) fn protocol(value: u8) -> &'static str {
     match value as c_int {
         libc::IPPROTO_IP => "IP",
         libc::IPPROTO_TCP => "TCP",

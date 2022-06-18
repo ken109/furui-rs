@@ -4,7 +4,7 @@ use aya_bpf::helpers::bpf_probe_read_kernel;
 use aya_bpf::{
     cty::c_long,
     macros::{kprobe, map},
-    maps::{HashMap, PerfEventArray},
+    maps::PerfEventArray,
     programs::ProbeContext,
     BpfContext,
 };
@@ -13,9 +13,7 @@ use furui_common::{BindEvent, PortKey, PortVal};
 
 use crate::helpers::{get_container_id, is_container_process, ntohs, AF_INET, AF_INET6};
 use crate::vmlinux::{sockaddr_in, sockaddr_in6, socket};
-
-#[map]
-static mut PROC_PORTS: HashMap<PortKey, PortVal> = HashMap::with_max_entries(1024, 0);
+use crate::PROC_PORTS;
 
 #[map]
 static mut BIND_EVENTS: PerfEventArray<BindEvent> =
@@ -48,7 +46,7 @@ unsafe fn try_bind_v4(ctx: ProbeContext) -> Result<u32, c_long> {
     if (*event_ptr).family == AF_INET {
         let in_addr = &*bpf_probe_read_kernel(&ctx.arg::<*const sockaddr_in>(1).ok_or(1)?)?;
         (*event_ptr).lport = ntohs(bpf_probe_read_kernel(&in_addr.sin_port)?);
-        (*event_ptr).proto = bpf_probe_read_kernel(&sk.sk_protocol)? as u8;
+        (*event_ptr).protocol = bpf_probe_read_kernel(&sk.sk_protocol)? as u8;
 
         finish_bind(&ctx, &event_ptr, &event_uninit)?;
     }
@@ -83,7 +81,7 @@ unsafe fn try_bind_v6(ctx: ProbeContext) -> Result<u32, c_long> {
     if (*event_ptr).family == AF_INET6 {
         let in_addr = &*bpf_probe_read_kernel(&ctx.arg::<*const sockaddr_in6>(1).ok_or(1)?)?;
         (*event_ptr).lport = ntohs(bpf_probe_read_kernel(&in_addr.sin6_port)?);
-        (*event_ptr).proto = bpf_probe_read_kernel(&sk.sk_protocol)? as u8;
+        (*event_ptr).protocol = bpf_probe_read_kernel(&sk.sk_protocol)? as u8;
 
         finish_bind(&ctx, &event_ptr, &event_uninit)?;
     }
@@ -100,7 +98,7 @@ unsafe fn finish_bind(
         &PortKey {
             container_id: (**ptr).container_id,
             port: (**ptr).lport,
-            proto: (**ptr).proto,
+            proto: (**ptr).protocol,
         },
         &PortVal { comm: (**ptr).comm },
         0,

@@ -48,6 +48,7 @@ fn connect(bpf: &mut Bpf) -> anyhow::Result<()> {
     program_udp_v6.attach("udp_v6_send_skb", 0)?;
 
     handle::connect(bpf)?;
+    handle::connect6(bpf)?;
 
     info!("Connect program loaded.");
 
