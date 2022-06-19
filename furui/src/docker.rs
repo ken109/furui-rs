@@ -1,13 +1,16 @@
 use std::collections::HashMap;
 use std::net::IpAddr;
+use std::sync::Arc;
 
 use bollard;
 use bollard::container::ListContainersOptions;
 use bollard::models::{ContainerSummary, EventMessage};
 use bollard::system::EventsOptions;
 use futures::Stream;
+use tokio::sync::Mutex;
 
-use crate::constant::CONTAINER_ID_LENGTH;
+use furui_common::CONTAINER_ID_LEN;
+
 use crate::domain::{Container, Containers};
 
 pub struct Docker {
@@ -15,10 +18,10 @@ pub struct Docker {
 }
 
 impl Docker {
-    pub fn new() -> anyhow::Result<Docker> {
-        Ok(Docker {
+    pub fn new() -> anyhow::Result<Arc<Docker>> {
+        Ok(Arc::new(Docker {
             docker: bollard::Docker::connect_with_local_defaults()?,
-        })
+        }))
     }
 
     async fn containers(&self) -> anyhow::Result<Vec<ContainerSummary>> {
@@ -60,7 +63,7 @@ impl Docker {
                 .as_ref()
                 .unwrap()
                 .chars()
-                .take(CONTAINER_ID_LENGTH)
+                .take(CONTAINER_ID_LEN)
                 .collect::<String>(),
         );
         container.ip_addresses = Some(addrs);
@@ -72,7 +75,7 @@ impl Docker {
 
     pub async fn add_running_containers_inspect(
         &self,
-        containers: &mut Containers,
+        containers: Arc<Mutex<Containers>>,
     ) -> anyhow::Result<()> {
         let docker_containers = self.containers().await?;
 
@@ -81,7 +84,7 @@ impl Docker {
 
             self.set_container_inspect(&mut container).await?;
 
-            containers.add(container);
+            containers.lock().await.add(container);
         }
 
         Ok(())

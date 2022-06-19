@@ -31,10 +31,3 @@ impl BindEvent {
         protocol(self.protocol)
     }
 }
-
-#[cfg(feature = "user")]
-mod user {
-    use super::*;
-
-    unsafe impl aya::Pod for BindEvent {}
-}

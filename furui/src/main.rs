@@ -14,13 +14,14 @@ use tracing_subscriber::FmtSubscriber;
 
 use crate::docker::Docker;
 use crate::domain::Containers;
+use crate::map::{ContainerMap, Maps};
 use crate::parse_policy::ParsePolicies;
 
-mod constant;
 mod docker;
 mod domain;
 mod handle;
 mod load;
+mod map;
 mod parse_policy;
 
 #[derive(Debug, StructOpt)]
@@ -59,32 +60,26 @@ async fn try_main() -> anyhow::Result<()> {
 
     let docker = Docker::new()?;
 
-    let mut containers = Containers::new();
+    let containers = Containers::new();
 
     docker
-        .add_running_containers_inspect(&mut containers)
+        .add_running_containers_inspect(containers.clone())
         .await?;
 
     let policies = match ParsePolicies::new(opt.policy_path) {
-        Ok(parsed_policies) => parsed_policies.to_domain(containers)?,
+        Ok(parsed_policies) => parsed_policies.to_domain(containers.clone()).await?,
         Err(err) => {
             return Err(err);
         }
     };
 
-    #[cfg(debug_assertions)]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/debug/furui"
-    ))?;
-    #[cfg(not(debug_assertions))]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/release/furui"
-    ))?;
-    load::all_programs(&mut bpf, &opt.iface)?;
+    let mut bpf = load::all_programs(&opt.iface)?;
+    let maps = Maps::new(&mut bpf);
+
+    maps.container.save_id_with_ips(containers.clone()).await?;
 
     handle::all_perf_events(&mut bpf)?;
-
-    handle::docker_events(&docker);
+    handle::docker_events(docker.clone(), containers.clone());
 
     info!("Waiting for Ctrl-C...");
     signal::ctrl_c().await?;

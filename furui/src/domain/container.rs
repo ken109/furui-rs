@@ -1,4 +1,11 @@
+use std::convert::TryInto;
 use std::net::IpAddr;
+use std::sync::Arc;
+
+use aya_bpf::cty::c_char;
+use tokio::sync::Mutex;
+
+use furui_common::CONTAINER_ID_LEN;
 
 #[derive(Debug, Clone)]
 pub struct Container {
@@ -17,6 +24,10 @@ impl Container {
             pid: 0,
         }
     }
+
+    pub fn id(&self) -> [c_char; CONTAINER_ID_LEN] {
+        self.id.as_ref().unwrap().as_bytes().try_into().unwrap()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -25,8 +36,12 @@ pub struct Containers {
 }
 
 impl Containers {
-    pub fn new() -> Containers {
-        Containers { containers: vec![] }
+    pub fn new() -> Arc<Mutex<Containers>> {
+        Arc::new(Mutex::new(Containers { containers: vec![] }))
+    }
+
+    pub fn list(&self) -> Vec<Container> {
+        self.containers.clone()
     }
 
     pub fn add(&mut self, container: Container) {
