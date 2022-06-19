@@ -16,6 +16,46 @@ pub const CONTAINER_ID_LEN: usize = 16;
 pub const IPV6_LEN: usize = 16;
 
 #[derive(Copy, Clone)]
+pub struct PolicyKey {
+    pub container_id: [c_char; CONTAINER_ID_LEN],
+    pub comm: [c_char; TASK_COMM_LEN],
+    pub remote_ip: u32,
+    pub remote_ipv6: [c_char; IPV6_LEN],
+    pub local_port: u16,
+    pub remote_port: u16,
+    pub protocol: u8,
+}
+
+#[derive(Copy, Clone)]
+pub struct PolicyValue {
+    pub comm: [c_char; TASK_COMM_LEN],
+    pub remote_ip: u32,
+    pub remote_ipv6: [c_char; IPV6_LEN],
+    pub local_port: u16,
+    pub remote_port: u16,
+    pub protocol: u8,
+}
+
+#[derive(Copy, Clone)]
+pub struct IcmpPolicyKey {
+    pub container_id: [c_char; CONTAINER_ID_LEN],
+    pub version: u8,
+    pub icmp_type: u8,
+    pub code: u8,
+    pub remote_ip: u32,
+    pub remote_ipv6: [c_char; IPV6_LEN],
+}
+
+#[derive(Copy, Clone)]
+pub struct IcmpPolicyValue {
+    pub version: u8,
+    pub icmp_type: u8,
+    pub code: u8,
+    pub remote_ip: u32,
+    pub remote_ipv6: [c_char; IPV6_LEN],
+}
+
+#[derive(Copy, Clone)]
 pub struct PortKey {
     pub container_id: [c_char; CONTAINER_ID_LEN],
     pub port: u16,
@@ -65,6 +105,10 @@ impl ContainerID {
 mod user {
     use super::*;
 
+    unsafe impl aya::Pod for PolicyKey {}
+    unsafe impl aya::Pod for PolicyValue {}
+    unsafe impl aya::Pod for IcmpPolicyKey {}
+    unsafe impl aya::Pod for IcmpPolicyValue {}
     unsafe impl aya::Pod for ContainerIP {}
     unsafe impl aya::Pod for ContainerID {}
 }

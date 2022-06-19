@@ -1,10 +1,12 @@
 use std::convert::TryInto;
+use std::sync::Arc;
 
 use aya::programs::{tc, KProbe, SchedClassifier, TcAttachType, TracePoint};
 use aya::{include_bytes_aligned, Bpf};
+use tokio::sync::Mutex;
 use tracing::info;
 
-pub fn all_programs(iface: &str) -> anyhow::Result<Bpf> {
+pub fn all_programs(iface: &str) -> anyhow::Result<Arc<Mutex<Bpf>>> {
     #[cfg(debug_assertions)]
     let mut bpf = Bpf::load(include_bytes_aligned!(
         "../../target/bpfel-unknown-none/debug/furui"
@@ -22,7 +24,7 @@ pub fn all_programs(iface: &str) -> anyhow::Result<Bpf> {
     egress(&mut bpf, iface)?;
     egress_icmp(&mut bpf, iface)?;
 
-    Ok(bpf)
+    Ok(Arc::new(Mutex::new(bpf)))
 }
 
 fn bind(bpf: &mut Bpf) -> anyhow::Result<()> {

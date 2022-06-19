@@ -90,7 +90,7 @@ impl ParsePolicies {
     pub async fn to_domain(
         &self,
         containers: Arc<Mutex<domain::Containers>>,
-    ) -> anyhow::Result<Policies> {
+    ) -> anyhow::Result<Arc<Mutex<Policies>>> {
         let mut policies = Policies { policies: vec![] };
 
         for parsed_policy in &self.policies {
@@ -171,6 +171,6 @@ impl ParsePolicies {
             })
         }
 
-        Ok(policies)
+        Ok(Arc::new(Mutex::new(policies)))
     }
 }

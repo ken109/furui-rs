@@ -1,11 +1,14 @@
+use std::sync::Arc;
+
 use aya::Bpf;
+use tokio::sync::Mutex;
 use tracing::info;
 
 use furui_common::BindEvent;
 
 use crate::handle::{handle_perf_array, to_str};
 
-pub fn bind(bpf: &mut Bpf) -> anyhow::Result<()> {
+pub async fn bind(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
     handle_perf_array(
         bpf,
         "BIND_EVENTS",
@@ -18,7 +21,8 @@ pub fn bind(bpf: &mut Bpf) -> anyhow::Result<()> {
                 lport = event.lport,
             );
         }),
-    )?;
+    )
+    .await?;
 
     Ok(())
 }

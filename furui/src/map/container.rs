@@ -9,12 +9,12 @@ use furui_common::{ContainerID, ContainerIP};
 
 use crate::domain;
 
-pub struct ContainerMap<'a> {
-    bpf: &'a mut Bpf,
+pub struct ContainerMap {
+    bpf: Arc<Mutex<Bpf>>,
 }
 
-impl ContainerMap<'_> {
-    pub fn new(bpf: &mut Bpf) -> ContainerMap {
+impl ContainerMap {
+    pub fn new(bpf: Arc<Mutex<Bpf>>) -> ContainerMap {
         ContainerMap { bpf }
     }
 
@@ -22,7 +22,7 @@ impl ContainerMap<'_> {
         &self,
         containers: Arc<Mutex<domain::Containers>>,
     ) -> anyhow::Result<()> {
-        let mut map = HashMap::try_from(self.bpf.map_mut("CONTAINER_ID_FROM_IPS")?)?;
+        let mut map = HashMap::try_from(self.bpf.lock().await.map_mut("CONTAINER_ID_FROM_IPS")?)?;
 
         for container in containers.lock().await.list() {
             for ip in container.ip_addresses.as_ref().unwrap() {

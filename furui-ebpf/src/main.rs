@@ -4,7 +4,10 @@
 use aya_bpf::macros::map;
 use aya_bpf::maps::HashMap;
 
-use furui_common::{ContainerID, ContainerIP, PortKey, PortVal};
+use furui_common::{
+    ContainerID, ContainerIP, IcmpPolicyKey, IcmpPolicyValue, PolicyKey, PolicyValue, PortKey,
+    PortVal,
+};
 
 #[allow(warnings)]
 mod vmlinux;
@@ -21,6 +24,14 @@ mod ingress_icmp;
 
 #[map]
 pub(crate) static mut PROC_PORTS: HashMap<PortKey, PortVal> = HashMap::with_max_entries(1024, 0);
+
+#[map]
+pub(crate) static mut POLICY_LIST: HashMap<PolicyKey, PolicyValue> =
+    HashMap::with_max_entries(1024, 0);
+
+#[map]
+pub(crate) static mut ICMP_POLICY_LIST: HashMap<IcmpPolicyKey, IcmpPolicyValue> =
+    HashMap::with_max_entries(1024, 0);
 
 #[map]
 pub(crate) static mut CONTAINER_ID_FROM_IPS: HashMap<ContainerIP, ContainerID> =

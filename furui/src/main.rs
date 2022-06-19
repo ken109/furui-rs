@@ -3,7 +3,6 @@ extern crate core;
 use std::path::PathBuf;
 
 use anyhow::anyhow;
-use aya::{include_bytes_aligned, Bpf};
 use structopt::StructOpt;
 use thiserror::Error;
 use tokio::signal;
@@ -14,7 +13,7 @@ use tracing_subscriber::FmtSubscriber;
 
 use crate::docker::Docker;
 use crate::domain::Containers;
-use crate::map::{ContainerMap, Maps};
+use crate::map::Maps;
 use crate::parse_policy::ParsePolicies;
 
 mod docker;
@@ -41,7 +40,7 @@ struct Opt {
 
 #[tokio::main]
 async fn main() {
-    match try_main().await {
+    match unsafe { try_main().await } {
         Ok(_) => (),
         Err(err) => {
             println!("{}", err)
@@ -49,8 +48,8 @@ async fn main() {
     }
 }
 
-async fn try_main() -> anyhow::Result<()> {
-    if unsafe { libc::geteuid() } != 0 {
+async unsafe fn try_main() -> anyhow::Result<()> {
+    if libc::geteuid() != 0 {
         return Err(anyhow!("You must be root."));
     }
 
@@ -74,11 +73,12 @@ async fn try_main() -> anyhow::Result<()> {
     };
 
     let mut bpf = load::all_programs(&opt.iface)?;
-    let maps = Maps::new(&mut bpf);
+    let maps = Maps::new(bpf.clone());
 
+    maps.policy.save(policies.clone());
     maps.container.save_id_with_ips(containers.clone()).await?;
 
-    handle::all_perf_events(&mut bpf)?;
+    handle::all_perf_events(bpf.clone()).await?;
     handle::docker_events(docker.clone(), containers.clone());
 
     info!("Waiting for Ctrl-C...");

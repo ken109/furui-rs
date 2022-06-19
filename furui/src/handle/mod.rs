@@ -6,6 +6,7 @@ use aya::util::online_cpus;
 use aya::Bpf;
 use aya_bpf::cty::c_char;
 use bytes::BytesMut;
+use tokio::sync::Mutex;
 use tokio::task;
 
 use bind::*;
@@ -18,25 +19,25 @@ mod close;
 mod connect;
 mod docker;
 
-pub fn all_perf_events(bpf: &mut Bpf) -> anyhow::Result<()> {
-    bind(bpf)?;
-    connect(bpf)?;
-    connect6(bpf)?;
-    close(bpf)?;
+pub async fn all_perf_events(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
+    bind(bpf.clone()).await?;
+    connect(bpf.clone()).await?;
+    connect6(bpf.clone()).await?;
+    close(bpf.clone()).await?;
 
     Ok(())
 }
 
 type Callback<E> = dyn Fn(E) + Send + Sync + 'static;
 
-fn handle_perf_array<E: 'static>(
-    bpf: &mut Bpf,
+async fn handle_perf_array<E: 'static>(
+    bpf: Arc<Mutex<Bpf>>,
     map_name: &str,
     callback: Box<Callback<E>>,
 ) -> anyhow::Result<()> {
     let shared_callback: Arc<Callback<E>> = Arc::from(callback);
 
-    let mut perf_array = AsyncPerfEventArray::try_from(bpf.map_mut(map_name)?)?;
+    let mut perf_array = AsyncPerfEventArray::try_from(bpf.lock().await.map_mut(map_name)?)?;
 
     for cpu_id in online_cpus()? {
         let mut buf = perf_array.open(cpu_id, None)?;

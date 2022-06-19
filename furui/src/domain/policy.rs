@@ -1,3 +1,6 @@
+use aya_bpf::cty::c_char;
+use aya_bpf::TASK_COMM_LEN;
+use std::convert::TryInto;
 use std::net::IpAddr;
 
 use crate::domain::container::Container;
@@ -20,12 +23,32 @@ pub struct Communication {
     pub(crate) icmp: Vec<ICMP>,
 }
 
+impl Communication {
+    pub fn process(&self) -> [c_char; TASK_COMM_LEN] {
+        self.process
+            .as_ref()
+            .unwrap()
+            .as_bytes()
+            .try_into()
+            .unwrap()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Socket {
     pub(crate) protocol: Protocol,
     pub(crate) local_port: Option<u16>,
     pub(crate) remote_ip: Option<IpAddr>,
     pub(crate) remote_port: Option<u16>,
+}
+
+impl Socket {
+    pub fn protocol(&self) -> u8 {
+        match self.protocol {
+            Protocol::TCP => 6,
+            Protocol::UDP => 11,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
