@@ -1,19 +1,28 @@
 use std::convert::TryInto;
 
 use aya::programs::{tc, KProbe, SchedClassifier, TcAttachType, TracePoint};
-use aya::Bpf;
+use aya::{include_bytes_aligned, Bpf};
 use tracing::info;
 
-pub fn all_programs(bpf: &mut Bpf, iface: &str) -> anyhow::Result<()> {
-    bind(bpf)?;
-    connect(bpf)?;
-    close(bpf)?;
-    ingress(bpf, iface)?;
-    ingress_icmp(bpf, iface)?;
-    egress(bpf, iface)?;
-    egress_icmp(bpf, iface)?;
+pub fn all_programs(iface: &str) -> anyhow::Result<Bpf> {
+    #[cfg(debug_assertions)]
+    let mut bpf = Bpf::load(include_bytes_aligned!(
+        "../../target/bpfel-unknown-none/debug/furui"
+    ))?;
+    #[cfg(not(debug_assertions))]
+    let mut bpf = Bpf::load(include_bytes_aligned!(
+        "../../target/bpfel-unknown-none/release/furui"
+    ))?;
 
-    Ok(())
+    bind(&mut bpf)?;
+    connect(&mut bpf)?;
+    close(&mut bpf)?;
+    ingress(&mut bpf, iface)?;
+    ingress_icmp(&mut bpf, iface)?;
+    egress(&mut bpf, iface)?;
+    egress_icmp(&mut bpf, iface)?;
+
+    Ok(bpf)
 }
 
 fn bind(bpf: &mut Bpf) -> anyhow::Result<()> {

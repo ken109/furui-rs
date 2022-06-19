@@ -76,11 +76,3 @@ impl Connect6Event {
         protocol(self.protocol)
     }
 }
-
-#[cfg(feature = "user")]
-mod user {
-    use super::*;
-
-    unsafe impl aya::Pod for ConnectEvent {}
-    unsafe impl aya::Pod for Connect6Event {}
-}

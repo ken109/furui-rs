@@ -2,10 +2,12 @@ use std::fs::File;
 use std::io::Read;
 use std::net::IpAddr;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use dns_lookup::lookup_host;
 use serde_derive::Deserialize;
 use serde_yaml;
+use tokio::sync::Mutex;
 use tracing::warn;
 
 use crate::domain::{self, Policies};
@@ -69,10 +71,13 @@ impl ParsePolicies {
         Ok(serde_yaml::from_str::<ParsePolicies>(&contents)?)
     }
 
-    fn lookup_host(containers: &domain::Containers, remote_host: &str) -> Vec<IpAddr> {
+    async fn lookup_host(
+        containers: Arc<Mutex<domain::Containers>>,
+        remote_host: &str,
+    ) -> Vec<IpAddr> {
         match lookup_host(remote_host) {
             Ok(ips) => ips,
-            Err(err) => match containers.get_container_by_name(remote_host) {
+            Err(err) => match containers.lock().await.get_container_by_name(remote_host) {
                 Some(container) => container.ip_addresses.unwrap(),
                 None => {
                     warn!("failed to look up host: {} err: {}", remote_host, err);
@@ -82,7 +87,10 @@ impl ParsePolicies {
         }
     }
 
-    pub fn to_domain(&self, containers: domain::Containers) -> anyhow::Result<Policies> {
+    pub async fn to_domain(
+        &self,
+        containers: Arc<Mutex<domain::Containers>>,
+    ) -> anyhow::Result<Policies> {
         let mut policies = Policies { policies: vec![] };
 
         for parsed_policy in &self.policies {
@@ -108,7 +116,9 @@ impl ParsePolicies {
 
                     match &parsed_socket.remote_host {
                         Some(remote_host) => {
-                            for addr in ParsePolicies::lookup_host(&containers, remote_host) {
+                            for addr in
+                                ParsePolicies::lookup_host(containers.clone(), remote_host).await
+                            {
                                 communication.sockets.push(domain::Socket {
                                     protocol: socket.protocol.clone(),
                                     local_port: socket.local_port,
@@ -132,7 +142,9 @@ impl ParsePolicies {
 
                     match &parsed_icmp.remote_host {
                         Some(remote_host) => {
-                            for addr in ParsePolicies::lookup_host(&containers, remote_host) {
+                            for addr in
+                                ParsePolicies::lookup_host(containers.clone(), remote_host).await
+                            {
                                 communication.icmp.push(domain::ICMP {
                                     version: parsed_icmp.version,
                                     icmp_type: parsed_icmp.icmp_type,
