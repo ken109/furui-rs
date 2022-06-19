@@ -1,11 +1,14 @@
+use std::sync::Arc;
+
 use aya::Bpf;
+use tokio::sync::Mutex;
 use tracing::info;
 
 use furui_common::{Connect6Event, ConnectEvent};
 
 use crate::handle::{handle_perf_array, to_str};
 
-pub fn connect(bpf: &mut Bpf) -> anyhow::Result<()> {
+pub async fn connect(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
     handle_perf_array(
         bpf,
         "CONNECT_EVENTS",
@@ -21,12 +24,13 @@ pub fn connect(bpf: &mut Bpf) -> anyhow::Result<()> {
                 destination_port = event.dst_port,
             );
         }),
-    )?;
+    )
+    .await?;
 
     Ok(())
 }
 
-pub fn connect6(bpf: &mut Bpf) -> anyhow::Result<()> {
+pub async fn connect6(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
     handle_perf_array(
         bpf,
         "CONNECT6_EVENTS",
@@ -42,7 +46,8 @@ pub fn connect6(bpf: &mut Bpf) -> anyhow::Result<()> {
                 destination_port = event.dst_port,
             );
         }),
-    )?;
+    )
+    .await?;
 
     Ok(())
 }
