@@ -4,7 +4,7 @@ use aya_bpf::{
 };
 
 #[cfg(feature = "user")]
-use crate::helpers::{family, protocol};
+use crate::helpers::{family_value_to_str, protocol_value_to_str};
 use crate::CONTAINER_ID_LEN;
 
 #[derive(Copy, Clone)]
@@ -24,10 +24,10 @@ pub struct BindEvent {
 #[cfg(feature = "user")]
 impl BindEvent {
     pub fn family(&self) -> &'static str {
-        family(self.family)
+        family_value_to_str(self.family)
     }
 
     pub fn protocol(&self) -> &'static str {
-        protocol(self.protocol)
+        protocol_value_to_str(self.protocol)
     }
 }
