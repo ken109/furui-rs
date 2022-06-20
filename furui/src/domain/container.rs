@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::convert::TryInto;
 use std::net::IpAddr;
 use std::sync::Arc;
@@ -26,7 +27,10 @@ impl Container {
     }
 
     pub fn id(&self) -> [c_char; CONTAINER_ID_LEN] {
-        self.id.as_ref().unwrap().as_bytes().try_into().unwrap()
+        match self.id.as_ref() {
+            Some(id) => id.as_bytes().try_into().unwrap(),
+            None => [0; CONTAINER_ID_LEN],
+        }
     }
 }
 
@@ -59,5 +63,16 @@ impl Containers {
             }
         }
         None
+    }
+
+    pub fn id_map(&self) -> HashMap<String, String> {
+        let mut map = HashMap::new();
+        for container in &self.containers {
+            map.insert(
+                container.name.clone().trim_start_matches("/").to_string(),
+                container.id.as_ref().unwrap().clone(),
+            );
+        }
+        map
     }
 }

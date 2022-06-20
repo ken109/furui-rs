@@ -1,10 +1,9 @@
-use std::fs::{read_dir, read_link, File};
+use std::fs::File;
 use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use anyhow::anyhow;
 use tokio::sync::Mutex;
 use tracing::error;
 
@@ -134,7 +133,6 @@ fn get_child_pids(pid: i64) -> Vec<i64> {
 
         match search_stack.pop() {
             Some(search_pid) => {
-                println!("{:?}", search_stack);
                 pid = search_pid;
                 pids.push(search_pid);
             }
