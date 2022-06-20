@@ -22,6 +22,7 @@ mod handle;
 mod load;
 mod map;
 mod parse_policy;
+mod process;
 
 #[derive(Debug, StructOpt)]
 struct Opt {
@@ -72,10 +73,12 @@ async unsafe fn try_main() -> anyhow::Result<()> {
         }
     };
 
-    let mut bpf = load::all_programs(&opt.iface)?;
+    let bpf = load::all_programs(&opt.iface)?;
     let maps = Maps::new(bpf.clone());
 
-    maps.policy.save(policies.clone());
+    let processes = process::get_all(containers.clone()).await;
+
+    maps.policy.save(policies.clone()).await?;
     maps.container.save_id_with_ips(containers.clone()).await?;
 
     handle::all_perf_events(bpf.clone()).await?;

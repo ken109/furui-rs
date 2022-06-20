@@ -6,6 +6,8 @@ use std::net::IpAddr;
 use aya_bpf::{cty::c_char, TASK_COMM_LEN};
 
 pub use event::*;
+#[cfg(feature = "user")]
+pub use helpers::*;
 
 mod event;
 
