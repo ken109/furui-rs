@@ -1,13 +1,36 @@
-use aya_bpf::cty::c_char;
-use aya_bpf::TASK_COMM_LEN;
 use std::convert::TryInto;
 use std::net::IpAddr;
+use std::sync::Arc;
+
+use aya_bpf::cty::c_char;
+use aya_bpf::TASK_COMM_LEN;
+use tokio::sync::Mutex;
 
 use crate::domain::container::Container;
+use crate::Containers;
 
 #[derive(Debug, Clone)]
 pub struct Policies {
     pub(crate) policies: Vec<Policy>,
+}
+
+impl Policies {
+    pub async fn set_container_id(&mut self, containers: Arc<Mutex<Containers>>) {
+        let id_map = containers.lock().await.id_map();
+
+        for mut policy in &mut self.policies {
+            if policy.container.name.len() == 0 {
+                continue;
+            }
+
+            match id_map.get(&policy.container.name) {
+                Some(id) => {
+                    policy.container.id = Some(id.to_string());
+                }
+                None => continue,
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -25,12 +48,10 @@ pub struct Communication {
 
 impl Communication {
     pub fn process(&self) -> [c_char; TASK_COMM_LEN] {
-        self.process
-            .as_ref()
-            .unwrap()
-            .as_bytes()
-            .try_into()
-            .unwrap()
+        match self.process.as_ref().unwrap().as_bytes().try_into() {
+            Ok(process) => process,
+            Err(_) => [0; TASK_COMM_LEN],
+        }
     }
 }
 

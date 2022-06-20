@@ -3,7 +3,7 @@ use std::sync::Arc;
 use futures::StreamExt;
 use tokio::sync::Mutex;
 use tokio::task;
-use tracing::{info, warn};
+use tracing::warn;
 
 use crate::domain::Container;
 use crate::{Containers, Docker};
@@ -48,11 +48,7 @@ async fn add_container(docker: Arc<Docker>, id: String, containers: Arc<Mutex<Co
             warn!("failed to add the container inspection: {}", e);
         });
 
-    println!("{:?}", containers);
-
     containers.lock().await.add(container);
-
-    println!("{:?}", containers);
 }
 
 async fn remove_container(docker: Arc<Docker>, id: String, containers: Arc<Mutex<Containers>>) {}

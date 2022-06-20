@@ -78,6 +78,12 @@ async unsafe fn try_main() -> anyhow::Result<()> {
 
     let processes = process::get_all(containers.clone()).await;
 
+    policies
+        .lock()
+        .await
+        .set_container_id(containers.clone())
+        .await;
+
     maps.policy.save(policies.clone()).await?;
     maps.container.save_id_with_ips(containers.clone()).await?;
 

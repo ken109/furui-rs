@@ -46,23 +46,24 @@ impl PolicyMap {
                 }
 
                 for socket in &communication.sockets {
-                    (*key_ptr).local_port = socket.local_port.unwrap();
-                    (*key_ptr).remote_port = socket.remote_port.unwrap();
+                    (*key_ptr).local_port = socket.local_port.unwrap_or(0);
+                    (*key_ptr).remote_port = socket.remote_port.unwrap_or(0);
                     (*key_ptr).protocol = socket.protocol();
 
-                    (*value_ptr).local_port = socket.remote_port.unwrap();
-                    (*value_ptr).remote_port = socket.remote_port.unwrap();
+                    (*value_ptr).local_port = socket.remote_port.unwrap_or(0);
+                    (*value_ptr).remote_port = socket.remote_port.unwrap_or(0);
                     (*value_ptr).protocol = socket.protocol();
 
-                    match socket.remote_ip.unwrap() {
-                        IpAddr::V4(ip) => {
+                    match socket.remote_ip {
+                        Some(IpAddr::V4(ip)) => {
                             (*key_ptr).remote_ip = ip.into();
                             (*value_ptr).remote_ip = ip.into();
                         }
-                        IpAddr::V6(ip) => {
+                        Some(IpAddr::V6(ip)) => {
                             (*key_ptr).remote_ipv6 = ip.octets();
                             (*value_ptr).remote_ipv6 = ip.octets();
                         }
+                        None => {}
                     }
 
                     policy_list.insert(key_uninit.assume_init(), value_uninit.assume_init(), 0)?;
@@ -73,12 +74,12 @@ impl PolicyMap {
                     let mut key_ptr = key_uninit.as_mut_ptr();
                     (*key_ptr).container_id = policy.container.id();
                     (*key_ptr).icmp_type = icmp.icmp_type;
-                    (*key_ptr).code = icmp.code.unwrap();
+                    (*key_ptr).code = icmp.code.unwrap_or(0);
 
                     let mut value_uninit = MaybeUninit::<IcmpPolicyValue>::zeroed();
                     let mut value_ptr = value_uninit.as_mut_ptr();
                     (*value_ptr).icmp_type = icmp.icmp_type;
-                    (*value_ptr).code = icmp.code.unwrap();
+                    (*value_ptr).code = icmp.code.unwrap_or(0);
 
                     if icmp.version == 4 || icmp.version == 6 {
                         (*key_ptr).version = icmp.version;
