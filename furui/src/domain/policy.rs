@@ -27,7 +27,9 @@ impl Policies {
                 Some(id) => {
                     policy.container.id = Some(id.to_string());
                 }
-                None => continue,
+                None => {
+                    policy.container.id = None;
+                }
             }
         }
     }
