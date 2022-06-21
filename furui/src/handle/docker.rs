@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use futures::StreamExt;
+use log::info;
 use tokio::sync::Mutex;
 use tokio::task;
 use tracing::warn;
@@ -53,7 +54,7 @@ async fn add_container(
     containers: Arc<Mutex<Containers>>,
     policies: Arc<Mutex<Policies>>,
 ) {
-    let mut container = Container::new(id);
+    let mut container = Container::new(id.clone());
 
     docker
         .set_container_inspect(&mut container)
@@ -86,6 +87,8 @@ async fn add_container(
             .await
             .unwrap_or_else(|e| warn!("failed to save policies: {}", e))
     };
+
+    info!("the container inspection added: {}", id.clone());
 }
 
 async fn remove_container(
@@ -122,4 +125,6 @@ async fn remove_container(
             .await
             .unwrap_or_else(|e| warn!("failed to save policies: {}", e))
     };
+
+    info!("the container inspection removed: {}", id.clone());
 }
