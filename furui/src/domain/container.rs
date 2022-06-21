@@ -12,7 +12,7 @@ pub struct Container {
     pub id: Option<String>,
     pub ip_addresses: Option<Vec<IpAddr>>,
     pub name: String,
-    pub pid: i64,
+    pub pid: u32,
 }
 
 impl Container {

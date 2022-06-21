@@ -64,7 +64,7 @@ pub async fn get_all(containers: Arc<Mutex<Containers>>) -> Vec<Process> {
     processes
 }
 
-fn search_process_from_inode(pid: i64, inode: u64) -> Option<(String, i64)> {
+fn search_process_from_inode(pid: u32, inode: u64) -> Option<(String, u32)> {
     let container_shim_pid = get_ppid(pid);
 
     let child_pids = get_child_pids(container_shim_pid);
@@ -78,7 +78,7 @@ fn search_process_from_inode(pid: i64, inode: u64) -> Option<(String, i64)> {
     None
 }
 
-fn get_ppid(pid: i64) -> i64 {
+fn get_ppid(pid: u32) -> u32 {
     let path = Path::new("/proc").join(format!("{}", pid)).join("stat");
 
     let file = match File::open(path) {
@@ -87,7 +87,7 @@ fn get_ppid(pid: i64) -> i64 {
     };
 
     let mut file_buf = BufReader::new(file).lines();
-    i64::from_str(
+    u32::from_str(
         file_buf
             .next()
             .unwrap()
@@ -98,10 +98,10 @@ fn get_ppid(pid: i64) -> i64 {
     .unwrap_or(0)
 }
 
-fn get_child_pids(pid: i64) -> Vec<i64> {
+fn get_child_pids(pid: u32) -> Vec<u32> {
     let mut pid = pid;
 
-    let mut search_stack: Vec<i64> = vec![];
+    let mut search_stack: Vec<u32> = vec![];
     let mut pids = vec![];
 
     loop {
@@ -122,8 +122,8 @@ fn get_child_pids(pid: i64) -> Vec<i64> {
             Some(line) => line
                 .unwrap()
                 .split_whitespace()
-                .map(|pid| pid.parse::<i64>().unwrap())
-                .collect::<Vec<i64>>(),
+                .map(|pid| pid.parse::<u32>().unwrap())
+                .collect::<Vec<u32>>(),
             None => vec![],
         };
 
@@ -143,7 +143,7 @@ fn get_child_pids(pid: i64) -> Vec<i64> {
     pids
 }
 
-fn inode_exists(pid: i64, inode: u64) -> bool {
+fn inode_exists(pid: u32, inode: u64) -> bool {
     let dir_path = Path::new("/proc").join(format!("{}", pid)).join("fd");
 
     let mut dir_list = dir_path.read_dir().unwrap();
@@ -169,7 +169,7 @@ fn inode_exists(pid: i64, inode: u64) -> bool {
     false
 }
 
-fn get_process_name(pid: i64) -> String {
+fn get_process_name(pid: u32) -> String {
     let path = Path::new("/proc").join(format!("{}", pid)).join("comm");
 
     let mut file = match File::open(path) {
