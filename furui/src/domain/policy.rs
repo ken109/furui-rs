@@ -16,14 +16,14 @@ pub struct Policies {
 
 impl Policies {
     pub async fn set_container_id(&mut self, containers: Arc<Mutex<Containers>>) {
-        let id_map = containers.lock().await.id_map();
+        let ids = containers.lock().await.ids();
 
         for mut policy in &mut self.policies {
             if policy.container.name.len() == 0 {
                 continue;
             }
 
-            match id_map.get(&policy.container.name) {
+            match ids.get(&policy.container.name) {
                 Some(id) => {
                     policy.container.id = Some(id.to_string());
                 }
