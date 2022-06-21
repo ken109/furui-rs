@@ -65,7 +65,7 @@ impl Containers {
         None
     }
 
-    pub fn id_map(&self) -> HashMap<String, String> {
+    pub fn ids(&self) -> HashMap<String, String> {
         let mut map = HashMap::new();
         for container in &self.containers {
             map.insert(
