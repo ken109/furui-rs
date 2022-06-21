@@ -1,11 +1,13 @@
 extern crate core;
 
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use anyhow::anyhow;
 use structopt::StructOpt;
 use thiserror::Error;
 use tokio::signal;
+use tokio::sync::Mutex;
 use tracing::info;
 use tracing_core::Level;
 use tracing_log::LogTracer;
@@ -88,7 +90,7 @@ async unsafe fn try_main() -> anyhow::Result<()> {
     maps.container.save_id_with_ips(containers.clone()).await?;
     maps.process.save_all(&processes).await?;
 
-    handle::all_perf_events(bpf.clone(), &processes).await?;
+    handle::all_perf_events(bpf.clone(), Arc::new(Mutex::new(maps)), &processes).await?;
     handle::docker_events(docker.clone(), containers.clone());
 
     info!("Waiting for Ctrl-C...");

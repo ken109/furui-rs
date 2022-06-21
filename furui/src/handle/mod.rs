@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::future::Future;
 use std::mem::MaybeUninit;
-use std::pin::Pin;
 use std::sync::Arc;
 
 use aya::maps::perf::AsyncPerfEventArray;
@@ -17,9 +16,9 @@ use bind::*;
 use close::*;
 use connect::*;
 pub use docker::docker_events;
-use furui_common::{PortKey, CONTAINER_ID_LEN};
 
 use crate::domain::Process;
+use crate::Maps;
 
 mod bind;
 mod close;
@@ -57,6 +56,7 @@ impl PidProcesses {
 
 pub async unsafe fn all_perf_events(
     bpf: Arc<Mutex<Bpf>>,
+    maps: Arc<Mutex<Maps>>,
     processes: &Vec<Process>,
 ) -> anyhow::Result<()> {
     let pid_processes = Arc::new(Mutex::new(PidProcesses::new()));
@@ -70,22 +70,24 @@ pub async unsafe fn all_perf_events(
         );
     }
 
-    bind(bpf.clone(), pid_processes).await?;
-    connect(bpf.clone()).await?;
-    connect6(bpf.clone()).await?;
-    close(bpf.clone()).await?;
+    bind(bpf.clone(), pid_processes.clone()).await?;
+    connect(bpf.clone(), pid_processes.clone()).await?;
+    connect6(bpf.clone(), pid_processes.clone()).await?;
+    close(bpf.clone(), maps, pid_processes.clone()).await?;
 
     Ok(())
 }
 
-async fn handle_perf_array<E, F, Fut>(
+async fn handle_perf_array<A, E, F, Fut>(
     bpf: Arc<Mutex<Bpf>>,
     map_name: &str,
+    args: Arc<Mutex<A>>,
     callback: F,
 ) -> anyhow::Result<()>
 where
+    A: Send + 'static,
     E: Send + 'static,
-    F: Fn(E) -> Fut + Send + Sync + 'static,
+    F: Fn(E, Arc<Mutex<A>>) -> Fut + Send + Sync + 'static,
     Fut: Future<Output = ()> + Send + 'static,
 {
     let shared_callback = Arc::from(callback);
@@ -95,6 +97,7 @@ where
     for cpu_id in online_cpus()? {
         let mut buf = perf_array.open(cpu_id, None)?;
 
+        let current_args = args.clone();
         let current_callback = shared_callback.clone();
 
         task::spawn(async move {
@@ -110,7 +113,7 @@ where
 
                     let event = unsafe { (buf.as_ptr() as *const E).read_unaligned() };
 
-                    current_callback(event).await;
+                    current_callback(event, current_args.clone()).await;
                 }
             }
         });
