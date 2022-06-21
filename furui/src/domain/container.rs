@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::convert::TryInto;
 use std::net::IpAddr;
 use std::sync::Arc;
 
@@ -28,7 +27,7 @@ impl Container {
 
     pub fn id(&self) -> [c_char; CONTAINER_ID_LEN] {
         match self.id.as_ref() {
-            Some(id) => id.as_bytes().try_into().unwrap(),
+            Some(id) => super::string_to_bytes((*id).clone()),
             None => [0; CONTAINER_ID_LEN],
         }
     }

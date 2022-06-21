@@ -111,6 +111,8 @@ mod user {
     unsafe impl aya::Pod for PolicyValue {}
     unsafe impl aya::Pod for IcmpPolicyKey {}
     unsafe impl aya::Pod for IcmpPolicyValue {}
+    unsafe impl aya::Pod for PortKey {}
+    unsafe impl aya::Pod for PortVal {}
     unsafe impl aya::Pod for ContainerIP {}
     unsafe impl aya::Pod for ContainerID {}
 }
