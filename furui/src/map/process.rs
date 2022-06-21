@@ -1,5 +1,4 @@
 use std::convert::TryFrom;
-use std::mem::MaybeUninit;
 use std::sync::Arc;
 
 use aya::maps::{HashMap, MapRefMut};
@@ -23,13 +22,13 @@ impl ProcessMap {
         let mut proc_ports = HashMap::try_from(self.bpf.lock().await.map_mut("PROC_PORTS")?)?;
 
         for process in processes {
-            let mut key = MaybeUninit::<PortKey>::zeroed().assume_init();
+            let mut key: PortKey = std::mem::zeroed();
 
             key.container_id = process.container_id();
             key.port = process.port;
             key.proto = process.protocol;
 
-            let mut value = MaybeUninit::<PortVal>::zeroed().assume_init();
+            let mut value: PortVal = std::mem::zeroed();
 
             value.comm = process.executable();
 
@@ -43,7 +42,7 @@ impl ProcessMap {
         let mut proc_ports: HashMap<MapRefMut, PortKey, PortVal> =
             HashMap::try_from(self.bpf.lock().await.map_mut("PROC_PORTS")?)?;
 
-        let mut key = MaybeUninit::<PortKey>::zeroed().assume_init();
+        let mut key: PortKey = std::mem::zeroed();
 
         key.container_id = process.container_id();
         key.port = process.port;
