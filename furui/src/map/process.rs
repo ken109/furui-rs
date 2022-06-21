@@ -19,7 +19,7 @@ impl ProcessMap {
         ProcessMap { bpf }
     }
 
-    pub async unsafe fn save_all(&self, processes: Vec<Process>) -> anyhow::Result<()> {
+    pub async unsafe fn save_all(&self, processes: &Vec<Process>) -> anyhow::Result<()> {
         let mut proc_ports = HashMap::try_from(self.bpf.lock().await.map_mut("PROC_PORTS")?)?;
 
         for process in processes {

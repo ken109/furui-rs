@@ -9,7 +9,7 @@ pub struct Process {
     pub executable: String,
     pub protocol: u8,
     pub port: u16,
-    pub pid: i64,
+    pub pid: u32,
 }
 
 impl Process {

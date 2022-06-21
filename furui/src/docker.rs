@@ -68,7 +68,7 @@ impl Docker {
         );
         container.ip_addresses = Some(addrs);
         container.name = inspect.name.unwrap();
-        container.pid = inspect.state.unwrap().pid.unwrap();
+        container.pid = inspect.state.unwrap().pid.unwrap() as u32;
 
         Ok(())
     }

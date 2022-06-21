@@ -86,9 +86,9 @@ async unsafe fn try_main() -> anyhow::Result<()> {
 
     maps.policy.save(policies.clone()).await?;
     maps.container.save_id_with_ips(containers.clone()).await?;
-    maps.process.save_all(processes).await?;
+    maps.process.save_all(&processes).await?;
 
-    handle::all_perf_events(bpf.clone()).await?;
+    handle::all_perf_events(bpf.clone(), &processes).await?;
     handle::docker_events(docker.clone(), containers.clone());
 
     info!("Waiting for Ctrl-C...");
