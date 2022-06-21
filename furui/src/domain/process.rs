@@ -3,7 +3,7 @@ use aya_bpf::TASK_COMM_LEN;
 
 use furui_common::CONTAINER_ID_LEN;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Process {
     pub container_id: String,
     pub executable: String,

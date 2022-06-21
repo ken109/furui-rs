@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::future::Future;
-use std::mem::MaybeUninit;
 use std::sync::Arc;
 
 use aya::maps::perf::AsyncPerfEventArray;
@@ -37,18 +36,18 @@ impl PidProcesses {
     }
 
     unsafe fn add(&mut self, pid: u32, container_id: String, port: u16, protocol: u8) {
-        let mut key_uninit = MaybeUninit::<Process>::zeroed();
-        let mut key_ptr = key_uninit.as_mut_ptr();
-        (*key_ptr).container_id = container_id;
-        (*key_ptr).port = port;
-        (*key_ptr).protocol = protocol;
+        let mut key: Process = Default::default();
+
+        key.container_id = container_id;
+        key.port = port;
+        key.protocol = protocol;
 
         match self.map.get_mut(&pid) {
             Some(processes) => {
-                processes.push(key_uninit.assume_init());
+                processes.push(key);
             }
             None => {
-                self.map.insert(pid, vec![key_uninit.assume_init()]);
+                self.map.insert(pid, vec![key]);
             }
         }
     }

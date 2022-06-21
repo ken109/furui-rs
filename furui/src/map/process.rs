@@ -23,17 +23,17 @@ impl ProcessMap {
         let mut proc_ports = HashMap::try_from(self.bpf.lock().await.map_mut("PROC_PORTS")?)?;
 
         for process in processes {
-            let mut key_uninit = MaybeUninit::<PortKey>::zeroed();
-            let mut key_ptr = key_uninit.as_mut_ptr();
-            (*key_ptr).container_id = process.container_id();
-            (*key_ptr).port = process.port;
-            (*key_ptr).proto = process.protocol;
+            let mut key = MaybeUninit::<PortKey>::zeroed().assume_init();
 
-            let mut value_uninit = MaybeUninit::<PortVal>::zeroed();
-            let mut value_ptr = value_uninit.as_mut_ptr();
-            (*value_ptr).comm = process.executable();
+            key.container_id = process.container_id();
+            key.port = process.port;
+            key.proto = process.protocol;
 
-            proc_ports.insert(key_uninit.assume_init(), value_uninit.assume_init(), 0)?;
+            let mut value = MaybeUninit::<PortVal>::zeroed().assume_init();
+
+            value.comm = process.executable();
+
+            proc_ports.insert(key, value, 0)?;
         }
 
         Ok(())
@@ -43,13 +43,13 @@ impl ProcessMap {
         let mut proc_ports: HashMap<MapRefMut, PortKey, PortVal> =
             HashMap::try_from(self.bpf.lock().await.map_mut("PROC_PORTS")?)?;
 
-        let mut key_uninit = MaybeUninit::<PortKey>::zeroed();
-        let mut key_ptr = key_uninit.as_mut_ptr();
-        (*key_ptr).container_id = process.container_id();
-        (*key_ptr).port = process.port;
-        (*key_ptr).proto = process.protocol;
+        let mut key = MaybeUninit::<PortKey>::zeroed().assume_init();
 
-        proc_ports.remove(key_uninit.assume_init_ref())?;
+        key.container_id = process.container_id();
+        key.port = process.port;
+        key.proto = process.protocol;
+
+        proc_ports.remove(&key)?;
 
         Ok(())
     }

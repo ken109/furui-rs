@@ -32,23 +32,22 @@ unsafe fn try_bind_v4(ctx: ProbeContext) -> Result<u32, c_long> {
         return Ok(0);
     }
 
-    let mut event_uninit = MaybeUninit::<BindEvent>::zeroed();
-    let mut event_ptr = event_uninit.as_mut_ptr();
+    let mut event = MaybeUninit::<BindEvent>::zeroed().assume_init();
 
-    (*event_ptr).container_id = get_container_id()?;
-    (*event_ptr).pid = ctx.pid();
-    (*event_ptr).comm = ctx.command()?;
+    event.container_id = get_container_id()?;
+    event.pid = ctx.pid();
+    event.comm = ctx.command()?;
 
     let sock = &*bpf_probe_read_kernel(&ctx.arg::<*const socket>(0).ok_or(1)?)?;
     let sk = &*bpf_probe_read_kernel(&sock.sk)?;
-    (*event_ptr).family = bpf_probe_read_kernel(&sk.__sk_common.skc_family)?;
+    event.family = bpf_probe_read_kernel(&sk.__sk_common.skc_family)?;
 
-    if (*event_ptr).family == AF_INET {
+    if event.family == AF_INET {
         let in_addr = &*bpf_probe_read_kernel(&ctx.arg::<*const sockaddr_in>(1).ok_or(1)?)?;
-        (*event_ptr).lport = ntohs(bpf_probe_read_kernel(&in_addr.sin_port)?);
-        (*event_ptr).protocol = bpf_probe_read_kernel(&sk.sk_protocol)? as u8;
+        event.lport = ntohs(bpf_probe_read_kernel(&in_addr.sin_port)?);
+        event.protocol = bpf_probe_read_kernel(&sk.sk_protocol)? as u8;
 
-        finish_bind(&ctx, &event_ptr, &event_uninit)?;
+        finish_bind(&ctx, &event)?;
     }
 
     Ok(0)
@@ -67,44 +66,39 @@ unsafe fn try_bind_v6(ctx: ProbeContext) -> Result<u32, c_long> {
         return Ok(0);
     }
 
-    let mut event_uninit = MaybeUninit::<BindEvent>::zeroed();
-    let mut event_ptr = event_uninit.as_mut_ptr();
+    let mut event = MaybeUninit::<BindEvent>::zeroed().assume_init();
 
-    (*event_ptr).container_id = get_container_id()?;
-    (*event_ptr).pid = ctx.pid();
-    (*event_ptr).comm = ctx.command()?;
+    event.container_id = get_container_id()?;
+    event.pid = ctx.pid();
+    event.comm = ctx.command()?;
 
     let sock = &*bpf_probe_read_kernel(&ctx.arg::<*const socket>(0).ok_or(1)?)?;
     let sk = &*bpf_probe_read_kernel(&sock.sk)?;
-    (*event_ptr).family = bpf_probe_read_kernel(&sk.__sk_common.skc_family)?;
+    event.family = bpf_probe_read_kernel(&sk.__sk_common.skc_family)?;
 
-    if (*event_ptr).family == AF_INET6 {
+    if event.family == AF_INET6 {
         let in_addr = &*bpf_probe_read_kernel(&ctx.arg::<*const sockaddr_in6>(1).ok_or(1)?)?;
-        (*event_ptr).lport = ntohs(bpf_probe_read_kernel(&in_addr.sin6_port)?);
-        (*event_ptr).protocol = bpf_probe_read_kernel(&sk.sk_protocol)? as u8;
+        event.lport = ntohs(bpf_probe_read_kernel(&in_addr.sin6_port)?);
+        event.protocol = bpf_probe_read_kernel(&sk.sk_protocol)? as u8;
 
-        finish_bind(&ctx, &event_ptr, &event_uninit)?;
+        finish_bind(&ctx, &event)?;
     }
 
     Ok(0)
 }
 
-unsafe fn finish_bind(
-    ctx: &ProbeContext,
-    ptr: &*mut BindEvent,
-    uninit: &MaybeUninit<BindEvent>,
-) -> Result<(), c_long> {
+unsafe fn finish_bind(ctx: &ProbeContext, event: &BindEvent) -> Result<(), c_long> {
     PROC_PORTS.insert(
         &PortKey {
-            container_id: (**ptr).container_id,
-            port: (**ptr).lport,
-            proto: (**ptr).protocol,
+            container_id: event.container_id,
+            port: event.lport,
+            proto: event.protocol,
         },
-        &PortVal { comm: (**ptr).comm },
+        &PortVal { comm: event.comm },
         0,
     )?;
 
-    BIND_EVENTS.output(ctx, (*uninit).assume_init_ref(), 0);
+    BIND_EVENTS.output(ctx, event, 0);
 
     Ok(())
 }
