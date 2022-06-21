@@ -10,7 +10,7 @@ use crate::Maps;
 
 pub async fn close(
     bpf: Arc<Mutex<Bpf>>,
-    maps: Arc<Mutex<Maps>>,
+    maps: Arc<Maps>,
     pid_processes: Arc<Mutex<PidProcesses>>,
 ) -> anyhow::Result<()> {
     let args = Arc::new(Mutex::new((maps, pid_processes)));
@@ -22,9 +22,8 @@ pub async fn close(
 
         match pid_processes.map.get(&event) {
             Some(processes) => unsafe {
-                let process_map = &maps.lock().await.process;
                 for process in processes {
-                    process_map.remove(process.clone()).await.unwrap_or(());
+                    maps.process.remove(process.clone()).await.unwrap_or(());
                 }
 
                 pid_processes.map.remove(&event);

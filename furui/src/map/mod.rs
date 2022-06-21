@@ -18,11 +18,11 @@ pub struct Maps {
 }
 
 impl Maps {
-    pub fn new(bpf: Arc<Mutex<Bpf>>) -> Maps {
-        Maps {
+    pub fn new(bpf: Arc<Mutex<Bpf>>) -> Arc<Maps> {
+        Arc::new(Maps {
             container: ContainerMap::new(bpf.clone()),
             policy: PolicyMap::new(bpf.clone()),
             process: ProcessMap::new(bpf.clone()),
-        }
+        })
     }
 }

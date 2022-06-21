@@ -56,7 +56,7 @@ impl PidProcesses {
 
 pub async unsafe fn all_perf_events(
     bpf: Arc<Mutex<Bpf>>,
-    maps: Arc<Mutex<Maps>>,
+    maps: Arc<Maps>,
     processes: &Vec<Process>,
 ) -> anyhow::Result<()> {
     let pid_processes = Arc::new(Mutex::new(PidProcesses::new()));

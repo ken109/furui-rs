@@ -51,6 +51,17 @@ impl Containers {
         self.containers.push(container)
     }
 
+    pub fn get(&self, id: String) -> Option<Container> {
+        for container in &self.containers {
+            let container_id = container.id.clone().unwrap_or("".to_string());
+
+            if id.starts_with(&container_id) {
+                return Some(container.clone());
+            }
+        }
+        None
+    }
+
     pub fn get_container_by_name(&self, name: &str) -> Option<Container> {
         for container in &self.containers {
             let mut container_name = container.name.clone();
@@ -73,5 +84,14 @@ impl Containers {
             );
         }
         map
+    }
+
+    pub fn remove(&mut self, id: String) {
+        for (i, container) in self.containers.clone().iter().enumerate() {
+            if id.starts_with(&container.id.clone().unwrap()) {
+                self.containers.remove(i);
+                break;
+            }
+        }
     }
 }
