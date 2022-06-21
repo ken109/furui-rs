@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 use std::sync::Arc;
 
-use aya::maps::HashMap;
+use aya::maps::{HashMap, MapRefMut};
 use aya::Bpf;
 use tokio::sync::Mutex;
 
@@ -28,6 +28,17 @@ impl ContainerMap {
             for ip in container.ip_addresses.as_ref().unwrap() {
                 map.insert(ContainerIP::new(*ip), ContainerID::new(container.id()), 0)?;
             }
+        }
+
+        Ok(())
+    }
+
+    pub async fn remove_id_from_ips(&self, container: domain::Container) -> anyhow::Result<()> {
+        let mut map: HashMap<MapRefMut, ContainerIP, ContainerID> =
+            HashMap::try_from(self.bpf.lock().await.map_mut("CONTAINER_ID_FROM_IPS")?)?;
+
+        for ip in container.ip_addresses.unwrap() {
+            map.remove(&ContainerIP::new(ip))?;
         }
 
         Ok(())
