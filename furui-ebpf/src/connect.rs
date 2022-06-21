@@ -50,15 +50,14 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
     let isk = &*(sk as *const sock).cast::<inet_sock>();
     let sport = ntohs(bpf_probe_read_kernel(&isk.inet_sport)?);
 
-    let mut key_uninit = MaybeUninit::<PortKey>::zeroed();
-    let mut key_ptr = key_uninit.as_mut_ptr();
+    let mut key = MaybeUninit::<PortKey>::zeroed().assume_init();
 
-    (*key_ptr).container_id = get_container_id()?;
-    (*key_ptr).port = sport;
-    (*key_ptr).proto = IPPROTO_TCP;
+    key.container_id = get_container_id()?;
+    key.port = sport;
+    key.proto = IPPROTO_TCP;
 
     PROC_PORTS.insert(
-        key_uninit.assume_init_ref(),
+        &key,
         &PortVal {
             comm: ctx.command()?,
         },
@@ -66,49 +65,46 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
     )?;
 
     if family == AF_INET {
-        let mut event_uninit = MaybeUninit::<ConnectEvent>::zeroed();
-        let mut event_ptr = event_uninit.as_mut_ptr();
+        let mut event = MaybeUninit::<ConnectEvent>::zeroed().assume_init();
 
-        (*event_ptr).container_id = get_container_id()?;
-        (*event_ptr).pid = ctx.pid();
-        (*event_ptr).comm = ctx.command()?;
-        (*event_ptr).src_addr = ntohl(bpf_probe_read_kernel(
+        event.container_id = get_container_id()?;
+        event.pid = ctx.pid();
+        event.comm = ctx.command()?;
+        event.src_addr = ntohl(bpf_probe_read_kernel(
             &sk.__sk_common
                 .__bindgen_anon_1
                 .__bindgen_anon_1
                 .skc_rcv_saddr,
         )?);
-        (*event_ptr).dst_addr = ntohl(bpf_probe_read_kernel(
+        event.dst_addr = ntohl(bpf_probe_read_kernel(
             &sk.__sk_common.__bindgen_anon_1.__bindgen_anon_1.skc_daddr,
         )?);
-        (*event_ptr).src_port = sport;
-        (*event_ptr).dst_port = ntohs(bpf_probe_read_kernel(
+        event.src_port = sport;
+        event.dst_port = ntohs(bpf_probe_read_kernel(
             &sk.__sk_common.__bindgen_anon_3.__bindgen_anon_1.skc_dport,
         )?);
-        (*event_ptr).family = family;
-        (*event_ptr).protocol = IPPROTO_TCP;
+        event.family = family;
+        event.protocol = IPPROTO_TCP;
 
-        CONNECT_EVENTS.output(&ctx, event_uninit.assume_init_ref(), 0);
+        CONNECT_EVENTS.output(&ctx, &event, 0);
     } else if family == AF_INET6 {
         let np = &*bpf_probe_read_kernel(&isk.pinet6)?;
 
-        let mut event_uninit = MaybeUninit::<Connect6Event>::zeroed();
-        let mut event_ptr = event_uninit.as_mut_ptr();
+        let mut event = MaybeUninit::<Connect6Event>::zeroed().assume_init();
 
-        (*event_ptr).container_id = get_container_id()?;
-        (*event_ptr).pid = ctx.pid();
-        (*event_ptr).comm = ctx.command()?;
-        (*event_ptr).src_addr = bpf_probe_read_kernel(&np.saddr.in6_u.u6_addr8)?;
-        (*event_ptr).dst_addr =
-            bpf_probe_read_kernel(&isk.sk.__sk_common.skc_v6_daddr.in6_u.u6_addr8)?;
-        (*event_ptr).src_port = sport;
-        (*event_ptr).dst_port = ntohs(bpf_probe_read_kernel(
+        event.container_id = get_container_id()?;
+        event.pid = ctx.pid();
+        event.comm = ctx.command()?;
+        event.src_addr = bpf_probe_read_kernel(&np.saddr.in6_u.u6_addr8)?;
+        event.dst_addr = bpf_probe_read_kernel(&isk.sk.__sk_common.skc_v6_daddr.in6_u.u6_addr8)?;
+        event.src_port = sport;
+        event.dst_port = ntohs(bpf_probe_read_kernel(
             &sk.__sk_common.__bindgen_anon_3.__bindgen_anon_1.skc_dport,
         )?);
-        (*event_ptr).family = family;
-        (*event_ptr).protocol = IPPROTO_TCP;
+        event.family = family;
+        event.protocol = IPPROTO_TCP;
 
-        CONNECT6_EVENTS.output(&ctx, event_uninit.assume_init_ref(), 0);
+        CONNECT6_EVENTS.output(&ctx, &event, 0);
     }
 
     Ok(0)
@@ -130,35 +126,33 @@ unsafe fn try_udp_connect_v4(ctx: ProbeContext) -> Result<u32, c_long> {
     let flow4 = &*bpf_probe_read_kernel(&ctx.arg::<*const flowi4>(1).ok_or(1)?)?;
     let sport = ntohs(bpf_probe_read_kernel(&flow4.uli.ports.sport)?);
 
-    let mut key_uninit = MaybeUninit::<PortKey>::zeroed();
-    let mut key_ptr = key_uninit.as_mut_ptr();
+    let mut key = MaybeUninit::<PortKey>::zeroed().assume_init();
 
-    (*key_ptr).container_id = get_container_id()?;
-    (*key_ptr).port = sport;
-    (*key_ptr).proto = IPPROTO_UDP;
+    key.container_id = get_container_id()?;
+    key.port = sport;
+    key.proto = IPPROTO_UDP;
 
     PROC_PORTS.insert(
-        key_uninit.assume_init_ref(),
+        &key,
         &PortVal {
             comm: ctx.command()?,
         },
         0,
     )?;
 
-    let mut event_uninit = MaybeUninit::<ConnectEvent>::zeroed();
-    let mut event_ptr = event_uninit.as_mut_ptr();
+    let mut event = MaybeUninit::<ConnectEvent>::zeroed().assume_init();
 
-    (*event_ptr).container_id = get_container_id()?;
-    (*event_ptr).pid = ctx.pid();
-    (*event_ptr).comm = ctx.command()?;
-    (*event_ptr).src_addr = ntohl(bpf_probe_read_kernel(&flow4.saddr)?);
-    (*event_ptr).dst_addr = ntohl(bpf_probe_read_kernel(&flow4.daddr)?);
-    (*event_ptr).src_port = sport;
-    (*event_ptr).dst_port = ntohs(bpf_probe_read_kernel(&flow4.uli.ports.dport)?);
-    (*event_ptr).protocol = IPPROTO_UDP;
-    (*event_ptr).family = AF_INET;
+    event.container_id = get_container_id()?;
+    event.pid = ctx.pid();
+    event.comm = ctx.command()?;
+    event.src_addr = ntohl(bpf_probe_read_kernel(&flow4.saddr)?);
+    event.dst_addr = ntohl(bpf_probe_read_kernel(&flow4.daddr)?);
+    event.src_port = sport;
+    event.dst_port = ntohs(bpf_probe_read_kernel(&flow4.uli.ports.dport)?);
+    event.protocol = IPPROTO_UDP;
+    event.family = AF_INET;
 
-    CONNECT_EVENTS.output(&ctx, event_uninit.assume_init_ref(), 0);
+    CONNECT_EVENTS.output(&ctx, &event, 0);
 
     Ok(0)
 }
@@ -179,35 +173,33 @@ unsafe fn try_udp_connect_v6(ctx: ProbeContext) -> Result<u32, c_long> {
     let flow6 = &*bpf_probe_read_kernel(&ctx.arg::<*const flowi6>(1).ok_or(1)?)?;
     let sport = ntohs(bpf_probe_read_kernel(&flow6.uli.ports.sport)?);
 
-    let mut key_uninit = MaybeUninit::<PortKey>::zeroed();
-    let mut key_ptr = key_uninit.as_mut_ptr();
+    let mut key = MaybeUninit::<PortKey>::zeroed().assume_init();
 
-    (*key_ptr).container_id = get_container_id()?;
-    (*key_ptr).port = sport;
-    (*key_ptr).proto = IPPROTO_UDP;
+    key.container_id = get_container_id()?;
+    key.port = sport;
+    key.proto = IPPROTO_UDP;
 
     PROC_PORTS.insert(
-        key_uninit.assume_init_ref(),
+        &key,
         &PortVal {
             comm: ctx.command()?,
         },
         0,
     )?;
 
-    let mut event_uninit = MaybeUninit::<Connect6Event>::zeroed();
-    let mut event_ptr = event_uninit.as_mut_ptr();
+    let mut event = MaybeUninit::<Connect6Event>::zeroed().assume_init();
 
-    (*event_ptr).container_id = get_container_id()?;
-    (*event_ptr).pid = ctx.pid();
-    (*event_ptr).comm = ctx.command()?;
-    (*event_ptr).src_addr = bpf_probe_read_kernel(&flow6.saddr.in6_u.u6_addr8)?;
-    (*event_ptr).dst_addr = bpf_probe_read_kernel(&flow6.daddr.in6_u.u6_addr8)?;
-    (*event_ptr).src_port = sport;
-    (*event_ptr).dst_port = ntohs(bpf_probe_read_kernel(&flow6.uli.ports.dport)?);
-    (*event_ptr).protocol = IPPROTO_UDP;
-    (*event_ptr).family = AF_INET6;
+    event.container_id = get_container_id()?;
+    event.pid = ctx.pid();
+    event.comm = ctx.command()?;
+    event.src_addr = bpf_probe_read_kernel(&flow6.saddr.in6_u.u6_addr8)?;
+    event.dst_addr = bpf_probe_read_kernel(&flow6.daddr.in6_u.u6_addr8)?;
+    event.src_port = sport;
+    event.dst_port = ntohs(bpf_probe_read_kernel(&flow6.uli.ports.dport)?);
+    event.protocol = IPPROTO_UDP;
+    event.family = AF_INET6;
 
-    CONNECT6_EVENTS.output(&ctx, event_uninit.assume_init_ref(), 0);
+    CONNECT6_EVENTS.output(&ctx, &event, 0);
 
     Ok(0)
 }

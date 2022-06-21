@@ -28,82 +28,78 @@ impl PolicyMap {
 
         for policy in &policies.lock().await.policies {
             for communication in &policy.communications {
-                let mut key_uninit = MaybeUninit::<PolicyKey>::zeroed();
-                let mut key_ptr = key_uninit.as_mut_ptr();
-                (*key_ptr).container_id = policy.container.id();
-                (*key_ptr).comm = communication.process();
+                let mut key = MaybeUninit::<PolicyKey>::zeroed().assume_init();
 
-                let mut value_uninit = MaybeUninit::<PolicyValue>::zeroed();
-                let mut value_ptr = value_uninit.as_mut_ptr();
-                (*value_ptr).comm = communication.process();
+                key.container_id = policy.container.id();
+                key.comm = communication.process();
+
+                let mut value = MaybeUninit::<PolicyValue>::zeroed().assume_init();
+
+                value.comm = communication.process();
 
                 if communication.sockets.len() == 0
                     && communication.icmp.len() == 0
                     && communication.process.as_ref().unwrap().len() != 0
                 {
-                    policy_list.insert(key_uninit.assume_init(), value_uninit.assume_init(), 0)?;
+                    policy_list.insert(key, value, 0)?;
                     continue;
                 }
 
                 for socket in &communication.sockets {
-                    (*key_ptr).local_port = socket.local_port.unwrap_or(0);
-                    (*key_ptr).remote_port = socket.remote_port.unwrap_or(0);
-                    (*key_ptr).protocol = socket.protocol();
+                    key.local_port = socket.local_port.unwrap_or(0);
+                    key.remote_port = socket.remote_port.unwrap_or(0);
+                    key.protocol = socket.protocol();
 
-                    (*value_ptr).local_port = socket.remote_port.unwrap_or(0);
-                    (*value_ptr).remote_port = socket.remote_port.unwrap_or(0);
-                    (*value_ptr).protocol = socket.protocol();
+                    value.local_port = socket.remote_port.unwrap_or(0);
+                    value.remote_port = socket.remote_port.unwrap_or(0);
+                    value.protocol = socket.protocol();
 
                     match socket.remote_ip {
                         Some(IpAddr::V4(ip)) => {
-                            (*key_ptr).remote_ip = ip.into();
-                            (*value_ptr).remote_ip = ip.into();
+                            key.remote_ip = ip.into();
+                            value.remote_ip = ip.into();
                         }
                         Some(IpAddr::V6(ip)) => {
-                            (*key_ptr).remote_ipv6 = ip.octets();
-                            (*value_ptr).remote_ipv6 = ip.octets();
+                            key.remote_ipv6 = ip.octets();
+                            value.remote_ipv6 = ip.octets();
                         }
                         None => {}
                     }
 
-                    policy_list.insert(key_uninit.assume_init(), value_uninit.assume_init(), 0)?;
+                    policy_list.insert(key, value, 0)?;
                 }
 
                 for icmp in &communication.icmp {
-                    let mut key_uninit = MaybeUninit::<IcmpPolicyKey>::zeroed();
-                    let mut key_ptr = key_uninit.as_mut_ptr();
-                    (*key_ptr).container_id = policy.container.id();
-                    (*key_ptr).icmp_type = icmp.icmp_type;
-                    (*key_ptr).code = icmp.code.unwrap_or(0);
+                    let mut key = MaybeUninit::<IcmpPolicyKey>::zeroed().assume_init();
 
-                    let mut value_uninit = MaybeUninit::<IcmpPolicyValue>::zeroed();
-                    let mut value_ptr = value_uninit.as_mut_ptr();
-                    (*value_ptr).icmp_type = icmp.icmp_type;
-                    (*value_ptr).code = icmp.code.unwrap_or(0);
+                    key.container_id = policy.container.id();
+                    key.icmp_type = icmp.icmp_type;
+                    key.code = icmp.code.unwrap_or(0);
+
+                    let mut value = MaybeUninit::<IcmpPolicyValue>::zeroed().assume_init();
+
+                    value.icmp_type = icmp.icmp_type;
+                    value.code = icmp.code.unwrap_or(0);
 
                     if icmp.version == 4 || icmp.version == 6 {
-                        (*key_ptr).version = icmp.version;
-                        (*value_ptr).version = icmp.version;
+                        key.version = icmp.version;
+                        value.version = icmp.version;
                     } else {
                         return Err(anyhow!("Please specify icmp version in the policy"));
                     }
 
                     match icmp.remote_ip.unwrap() {
                         IpAddr::V4(ip) => {
-                            (*key_ptr).remote_ip = ip.into();
-                            (*value_ptr).remote_ip = ip.into();
+                            key.remote_ip = ip.into();
+                            value.remote_ip = ip.into();
                         }
                         IpAddr::V6(ip) => {
-                            (*key_ptr).remote_ipv6 = ip.octets();
-                            (*value_ptr).remote_ipv6 = ip.octets();
+                            key.remote_ipv6 = ip.octets();
+                            value.remote_ipv6 = ip.octets();
                         }
                     }
 
-                    icmp_policy_list.insert(
-                        key_uninit.assume_init(),
-                        value_uninit.assume_init(),
-                        0,
-                    )?;
+                    icmp_policy_list.insert(key, value, 0)?;
                 }
             }
         }
@@ -122,60 +118,60 @@ impl PolicyMap {
 
         for policy in &policies.lock().await.policies {
             for communication in &policy.communications {
-                let mut key_uninit = MaybeUninit::<PolicyKey>::zeroed();
-                let mut key_ptr = key_uninit.as_mut_ptr();
-                (*key_ptr).container_id = policy.container.id();
-                (*key_ptr).comm = communication.process();
+                let mut key = MaybeUninit::<PolicyKey>::zeroed().assume_init();
+
+                key.container_id = policy.container.id();
+                key.comm = communication.process();
 
                 if communication.sockets.len() == 0
                     && communication.icmp.len() == 0
                     && communication.process.as_ref().unwrap().len() != 0
                 {
-                    policy_list.remove(key_uninit.assume_init_ref())?;
+                    policy_list.remove(&key)?;
                     continue;
                 }
 
                 for socket in &communication.sockets {
-                    (*key_ptr).local_port = socket.local_port.unwrap_or(0);
-                    (*key_ptr).remote_port = socket.remote_port.unwrap_or(0);
-                    (*key_ptr).protocol = socket.protocol();
+                    key.local_port = socket.local_port.unwrap_or(0);
+                    key.remote_port = socket.remote_port.unwrap_or(0);
+                    key.protocol = socket.protocol();
 
                     match socket.remote_ip {
                         Some(IpAddr::V4(ip)) => {
-                            (*key_ptr).remote_ip = ip.into();
+                            key.remote_ip = ip.into();
                         }
                         Some(IpAddr::V6(ip)) => {
-                            (*key_ptr).remote_ipv6 = ip.octets();
+                            key.remote_ipv6 = ip.octets();
                         }
                         None => {}
                     }
 
-                    policy_list.remove(key_uninit.assume_init_ref())?;
+                    policy_list.remove(&key)?;
                 }
 
                 for icmp in &communication.icmp {
-                    let mut key_uninit = MaybeUninit::<IcmpPolicyKey>::zeroed();
-                    let mut key_ptr = key_uninit.as_mut_ptr();
-                    (*key_ptr).container_id = policy.container.id();
-                    (*key_ptr).icmp_type = icmp.icmp_type;
-                    (*key_ptr).code = icmp.code.unwrap_or(0);
+                    let mut key = MaybeUninit::<IcmpPolicyKey>::zeroed().assume_init();
+
+                    key.container_id = policy.container.id();
+                    key.icmp_type = icmp.icmp_type;
+                    key.code = icmp.code.unwrap_or(0);
 
                     if icmp.version == 4 || icmp.version == 6 {
-                        (*key_ptr).version = icmp.version;
+                        key.version = icmp.version;
                     } else {
                         return Err(anyhow!("Please specify icmp version in the policy"));
                     }
 
                     match icmp.remote_ip.unwrap() {
                         IpAddr::V4(ip) => {
-                            (*key_ptr).remote_ip = ip.into();
+                            key.remote_ip = ip.into();
                         }
                         IpAddr::V6(ip) => {
-                            (*key_ptr).remote_ipv6 = ip.octets();
+                            key.remote_ipv6 = ip.octets();
                         }
                     }
 
-                    icmp_policy_list.remove(key_uninit.assume_init_ref())?;
+                    icmp_policy_list.remove(&key)?;
                 }
             }
         }
