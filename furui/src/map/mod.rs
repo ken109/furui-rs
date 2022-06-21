@@ -1,16 +1,20 @@
-use aya::Bpf;
 use std::sync::Arc;
+
+use aya::Bpf;
 use tokio::sync::Mutex;
 
-use crate::map::policy::PolicyMap;
 pub use container::ContainerMap;
+pub use policy::PolicyMap;
+pub use process::ProcessMap;
 
 mod container;
 mod policy;
+mod process;
 
 pub struct Maps {
     pub container: ContainerMap,
     pub policy: PolicyMap,
+    pub process: ProcessMap,
 }
 
 impl Maps {
@@ -18,6 +22,7 @@ impl Maps {
         Maps {
             container: ContainerMap::new(bpf.clone()),
             policy: PolicyMap::new(bpf.clone()),
+            process: ProcessMap::new(bpf.clone()),
         }
     }
 }
