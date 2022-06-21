@@ -1,5 +1,3 @@
-use core::mem::MaybeUninit;
-
 use aya_bpf::helpers::bpf_probe_read_kernel;
 use aya_bpf::{
     cty::c_long,
@@ -32,7 +30,7 @@ unsafe fn try_bind_v4(ctx: ProbeContext) -> Result<u32, c_long> {
         return Ok(0);
     }
 
-    let mut event = MaybeUninit::<BindEvent>::zeroed().assume_init();
+    let mut event: BindEvent = core::mem::zeroed();
 
     event.container_id = get_container_id()?;
     event.pid = ctx.pid();
@@ -66,7 +64,7 @@ unsafe fn try_bind_v6(ctx: ProbeContext) -> Result<u32, c_long> {
         return Ok(0);
     }
 
-    let mut event = MaybeUninit::<BindEvent>::zeroed().assume_init();
+    let mut event: BindEvent = core::mem::zeroed();
 
     event.container_id = get_container_id()?;
     event.pid = ctx.pid();

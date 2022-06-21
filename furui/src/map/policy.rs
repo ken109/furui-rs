@@ -1,5 +1,4 @@
 use std::convert::TryFrom;
-use std::mem::MaybeUninit;
 use std::net::IpAddr;
 use std::sync::Arc;
 
@@ -28,12 +27,12 @@ impl PolicyMap {
 
         for policy in &policies.lock().await.policies {
             for communication in &policy.communications {
-                let mut key = MaybeUninit::<PolicyKey>::zeroed().assume_init();
+                let mut key: PolicyKey = std::mem::zeroed();
 
                 key.container_id = policy.container.id();
                 key.comm = communication.process();
 
-                let mut value = MaybeUninit::<PolicyValue>::zeroed().assume_init();
+                let mut value: PolicyValue = std::mem::zeroed();
 
                 value.comm = communication.process();
 
@@ -70,13 +69,13 @@ impl PolicyMap {
                 }
 
                 for icmp in &communication.icmp {
-                    let mut key = MaybeUninit::<IcmpPolicyKey>::zeroed().assume_init();
+                    let mut key: IcmpPolicyKey = std::mem::zeroed();
 
                     key.container_id = policy.container.id();
                     key.icmp_type = icmp.icmp_type;
                     key.code = icmp.code.unwrap_or(0);
 
-                    let mut value = MaybeUninit::<IcmpPolicyValue>::zeroed().assume_init();
+                    let mut value: IcmpPolicyValue = std::mem::zeroed();
 
                     value.icmp_type = icmp.icmp_type;
                     value.code = icmp.code.unwrap_or(0);
@@ -118,7 +117,7 @@ impl PolicyMap {
 
         for policy in &policies.lock().await.policies {
             for communication in &policy.communications {
-                let mut key = MaybeUninit::<PolicyKey>::zeroed().assume_init();
+                let mut key: PolicyKey = std::mem::zeroed();
 
                 key.container_id = policy.container.id();
                 key.comm = communication.process();
@@ -150,7 +149,7 @@ impl PolicyMap {
                 }
 
                 for icmp in &communication.icmp {
-                    let mut key = MaybeUninit::<IcmpPolicyKey>::zeroed().assume_init();
+                    let mut key: IcmpPolicyKey = std::mem::zeroed();
 
                     key.container_id = policy.container.id();
                     key.icmp_type = icmp.icmp_type;

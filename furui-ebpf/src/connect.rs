@@ -1,5 +1,3 @@
-use core::mem::MaybeUninit;
-
 use aya_bpf::cty::c_long;
 use aya_bpf::helpers::bpf_probe_read_kernel;
 use aya_bpf::maps::PerfEventArray;
@@ -50,7 +48,7 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
     let isk = &*(sk as *const sock).cast::<inet_sock>();
     let sport = ntohs(bpf_probe_read_kernel(&isk.inet_sport)?);
 
-    let mut key = MaybeUninit::<PortKey>::zeroed().assume_init();
+    let mut key: PortKey = core::mem::zeroed();
 
     key.container_id = get_container_id()?;
     key.port = sport;
@@ -65,7 +63,7 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
     )?;
 
     if family == AF_INET {
-        let mut event = MaybeUninit::<ConnectEvent>::zeroed().assume_init();
+        let mut event: ConnectEvent = core::mem::zeroed();
 
         event.container_id = get_container_id()?;
         event.pid = ctx.pid();
@@ -90,7 +88,7 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
     } else if family == AF_INET6 {
         let np = &*bpf_probe_read_kernel(&isk.pinet6)?;
 
-        let mut event = MaybeUninit::<Connect6Event>::zeroed().assume_init();
+        let mut event: Connect6Event = core::mem::zeroed();
 
         event.container_id = get_container_id()?;
         event.pid = ctx.pid();
@@ -126,7 +124,7 @@ unsafe fn try_udp_connect_v4(ctx: ProbeContext) -> Result<u32, c_long> {
     let flow4 = &*bpf_probe_read_kernel(&ctx.arg::<*const flowi4>(1).ok_or(1)?)?;
     let sport = ntohs(bpf_probe_read_kernel(&flow4.uli.ports.sport)?);
 
-    let mut key = MaybeUninit::<PortKey>::zeroed().assume_init();
+    let mut key: PortKey = core::mem::zeroed();
 
     key.container_id = get_container_id()?;
     key.port = sport;
@@ -140,7 +138,7 @@ unsafe fn try_udp_connect_v4(ctx: ProbeContext) -> Result<u32, c_long> {
         0,
     )?;
 
-    let mut event = MaybeUninit::<ConnectEvent>::zeroed().assume_init();
+    let mut event: ConnectEvent = core::mem::zeroed();
 
     event.container_id = get_container_id()?;
     event.pid = ctx.pid();
@@ -173,7 +171,7 @@ unsafe fn try_udp_connect_v6(ctx: ProbeContext) -> Result<u32, c_long> {
     let flow6 = &*bpf_probe_read_kernel(&ctx.arg::<*const flowi6>(1).ok_or(1)?)?;
     let sport = ntohs(bpf_probe_read_kernel(&flow6.uli.ports.sport)?);
 
-    let mut key = MaybeUninit::<PortKey>::zeroed().assume_init();
+    let mut key: PortKey = core::mem::zeroed();
 
     key.container_id = get_container_id()?;
     key.port = sport;
@@ -187,7 +185,7 @@ unsafe fn try_udp_connect_v6(ctx: ProbeContext) -> Result<u32, c_long> {
         0,
     )?;
 
-    let mut event = MaybeUninit::<Connect6Event>::zeroed().assume_init();
+    let mut event: Connect6Event = core::mem::zeroed();
 
     event.container_id = get_container_id()?;
     event.pid = ctx.pid();

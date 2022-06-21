@@ -1,5 +1,3 @@
-extern crate core;
-
 use std::path::PathBuf;
 
 use anyhow::anyhow;
