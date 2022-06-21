@@ -71,8 +71,8 @@ pub struct PortVal {
 
 #[derive(Debug, Copy, Clone)]
 pub struct ContainerIP {
-    pub ip: Option<u32>,
-    pub ipv6: Option<[c_char; IPV6_LEN]>,
+    pub ip: u32,
+    pub ipv6: [c_char; IPV6_LEN],
 }
 
 #[cfg(feature = "user")]
@@ -80,12 +80,12 @@ impl ContainerIP {
     pub fn new(ip: IpAddr) -> ContainerIP {
         match ip {
             IpAddr::V4(ip) => ContainerIP {
-                ip: Some(ip.into()),
-                ipv6: None,
+                ip: ip.into(),
+                ipv6: Default::default(),
             },
             IpAddr::V6(ip) => ContainerIP {
-                ip: None,
-                ipv6: Some(ip.octets()),
+                ip: Default::default(),
+                ipv6: ip.octets(),
             },
         }
     }

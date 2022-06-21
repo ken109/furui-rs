@@ -91,7 +91,6 @@ async unsafe fn try_main() -> anyhow::Result<()> {
     handle::all_perf_events(bpf.clone(), maps.clone(), &processes).await?;
     handle::docker_events(docker.clone(), maps.clone(), containers.clone(), policies);
 
-    info!("Waiting for Ctrl-C...");
     signal::ctrl_c().await?;
     info!("Exiting...");
 
