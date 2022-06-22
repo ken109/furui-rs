@@ -1,7 +1,13 @@
 use aya_bpf::cty::c_ushort;
 
+use crate::vmlinux::{ethhdr, iphdr};
+
 pub(crate) static AF_INET: c_ushort = 2;
 pub(crate) static AF_INET6: c_ushort = 10;
+
+pub(crate) const ETH_P_IP: u16 = 0x0800;
+pub(crate) const ETH_HDR_LEN: usize = core::mem::size_of::<ethhdr>();
+pub(crate) const IP_HDR_LEN: usize = core::mem::size_of::<iphdr>();
 
 pub(crate) static IPPROTO_TCP: u8 = 6;
 pub(crate) static IPPROTO_UDP: u8 = 17;

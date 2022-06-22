@@ -1,10 +1,12 @@
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use anyhow::anyhow;
 use structopt::StructOpt;
 use thiserror::Error;
 use tokio::signal;
-use tracing::info;
+use tokio::sync::Mutex;
+use tracing::{error, info};
 use tracing_core::Level;
 use tracing_log::LogTracer;
 use tracing_subscriber::FmtSubscriber;
@@ -16,13 +18,13 @@ use crate::parse_policy::ParsePolicies;
 
 mod docker;
 mod domain;
+mod ebpf;
 mod handle;
-mod load;
 mod map;
 mod parse_policy;
 mod process;
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, StructOpt, Clone)]
 struct Opt {
     #[structopt(short, long, default_value = "eth0")]
     iface: String,
@@ -39,20 +41,25 @@ struct Opt {
 
 #[tokio::main]
 async fn main() {
-    match unsafe { try_main().await } {
+    let opt: Opt = Opt::from_args();
+
+    match unsafe { try_main(opt.clone()).await } {
         Ok(_) => (),
         Err(err) => {
-            println!("{}", err)
+            #[cfg(debug_assertions)]
+            println!("{:?}", err);
+            #[cfg(not(debug_assertions))]
+            println!("{}", err);
         }
-    }
+    };
+
+    ebpf::detach_programs(&opt.iface);
 }
 
-async unsafe fn try_main() -> anyhow::Result<()> {
+async unsafe fn try_main(opt: Opt) -> anyhow::Result<()> {
     if libc::geteuid() != 0 {
         return Err(anyhow!("You must be root."));
     }
-
-    let opt = Opt::from_args();
 
     setup_tracing(&opt)?;
 
@@ -71,7 +78,10 @@ async unsafe fn try_main() -> anyhow::Result<()> {
         }
     };
 
-    let bpf = load::all_programs(&opt.iface)?;
+    let mut bpf = ebpf::load_bpf()?;
+    ebpf::attach_programs(&mut bpf, &opt.iface)?;
+
+    let bpf = Arc::new(Mutex::new(bpf));
     let maps = Maps::new(bpf.clone());
 
     let processes = process::get_all(containers.clone()).await;
