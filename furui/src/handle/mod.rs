@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::future::Future;
+use std::ops::DerefMut;
 use std::sync::Arc;
 
 use aya::maps::perf::AsyncPerfEventArray;
@@ -15,6 +16,7 @@ use bind::*;
 use close::*;
 use connect::*;
 pub use docker::docker_events;
+use ingress::*;
 
 use crate::domain::Process;
 use crate::Maps;
@@ -23,6 +25,7 @@ mod bind;
 mod close;
 mod connect;
 mod docker;
+mod ingress;
 
 pub struct PidProcesses {
     map: HashMap<u32, Vec<Process>>,
@@ -73,6 +76,8 @@ pub async unsafe fn all_perf_events(
     connect(bpf.clone(), pid_processes.clone()).await?;
     connect6(bpf.clone(), pid_processes.clone()).await?;
     close(bpf.clone(), maps, pid_processes.clone()).await?;
+
+    ingress(bpf.clone()).await?;
 
     Ok(())
 }
