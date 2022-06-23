@@ -5,7 +5,7 @@ use aya_bpf::{
 
 #[cfg(feature = "user")]
 use crate::helpers::{family_value_to_str, protocol_value_to_str};
-use crate::CONTAINER_ID_LEN;
+use crate::{IpProtocol, CONTAINER_ID_LEN};
 
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -20,7 +20,7 @@ pub struct ConnectEvent {
     pub src_port: u16,
     pub dst_port: u16,
     pub family: c_ushort,
-    pub protocol: u8,
+    pub protocol: IpProtocol,
 }
 
 #[cfg(feature = "user")]
@@ -37,8 +37,8 @@ impl ConnectEvent {
         family_value_to_str(self.family)
     }
 
-    pub fn protocol(&self) -> &'static str {
-        protocol_value_to_str(self.protocol)
+    pub fn protocol(&self) -> String {
+        self.protocol.to_string()
     }
 }
 
@@ -55,7 +55,7 @@ pub struct Connect6Event {
     pub src_port: u16,
     pub dst_port: u16,
     pub family: c_ushort,
-    pub protocol: u8,
+    pub protocol: IpProtocol,
 }
 
 #[cfg(feature = "user")]
@@ -72,7 +72,7 @@ impl Connect6Event {
         family_value_to_str(self.family)
     }
 
-    pub fn protocol(&self) -> &'static str {
-        protocol_value_to_str(self.protocol)
+    pub fn protocol(&self) -> String {
+        self.protocol.to_string()
     }
 }

@@ -3,10 +3,12 @@ use aya_bpf::helpers::{bpf_get_current_task, bpf_probe_read_kernel};
 
 use furui_common::CONTAINER_ID_LEN;
 pub(crate) use net::*;
+pub(crate) use tc::*;
 
 use crate::vmlinux::task_struct;
 
 mod net;
+mod tc;
 
 #[inline]
 pub(crate) unsafe fn is_container_process() -> Result<bool, c_long> {

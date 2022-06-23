@@ -5,9 +5,15 @@ use aya_bpf::{
     programs::SkBuffContext,
 };
 
+use furui_common::{Egress6Event, EgressEvent};
+
 #[map]
-pub(crate) static mut EGRESS_EVENTS: PerfEventArray<u32> =
-    PerfEventArray::<u32>::with_max_entries(1024, 0);
+pub(crate) static mut EGRESS_EVENTS: PerfEventArray<EgressEvent> =
+    PerfEventArray::<EgressEvent>::with_max_entries(1024, 0);
+
+#[map]
+pub(crate) static mut EGRESS6_EVENTS: PerfEventArray<Egress6Event> =
+    PerfEventArray::<Egress6Event>::with_max_entries(1024, 0);
 
 #[classifier(name = "egress")]
 pub fn egress(ctx: SkBuffContext) -> i32 {
@@ -18,6 +24,5 @@ pub fn egress(ctx: SkBuffContext) -> i32 {
 }
 
 unsafe fn try_egress(ctx: SkBuffContext) -> Result<i32, c_long> {
-    EGRESS_EVENTS.output(&ctx, &0, 0);
     Ok(0)
 }

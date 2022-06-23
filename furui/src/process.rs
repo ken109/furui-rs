@@ -7,17 +7,22 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::error;
 
-use furui_common::protocol_str_to_value;
+use furui_common::{protocol_str_to_value, IpProtocol};
 
 use crate::domain::{Containers, Process};
 
-static SUPPORTED_PROTOCOLS: [&str; 4] = ["tcp", "udp", "tcp6", "udp6"];
+static SUPPORTED_PROTOCOLS: [(&str, IpProtocol); 4] = [
+    ("tcp", IpProtocol::TCP),
+    ("udp", IpProtocol::UDP),
+    ("tcp6", IpProtocol::TCP),
+    ("udp6", IpProtocol::UDP),
+];
 
 pub async fn get_all(containers: Arc<Mutex<Containers>>) -> Vec<Process> {
     let mut processes = vec![];
 
     for container in containers.lock().await.list() {
-        for supported_protocol in &SUPPORTED_PROTOCOLS {
+        for (supported_protocol, proto) in &SUPPORTED_PROTOCOLS {
             let net_file_path = Path::new("/proc")
                 .join(format!("{}", container.pid))
                 .join("net")
@@ -53,7 +58,7 @@ pub async fn get_all(containers: Arc<Mutex<Containers>>) -> Vec<Process> {
                 processes.push(Process {
                     container_id: container.id.clone().unwrap(),
                     executable,
-                    protocol: protocol_str_to_value(supported_protocol),
+                    protocol: *proto,
                     port,
                     pid,
                 })

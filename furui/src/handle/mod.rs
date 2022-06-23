@@ -17,6 +17,7 @@ use close::*;
 use connect::*;
 pub use docker::docker_events;
 use egress::*;
+use furui_common::IpProtocol;
 use ingress::*;
 
 use crate::domain::Process;
@@ -40,7 +41,7 @@ impl PidProcesses {
         }
     }
 
-    unsafe fn add(&mut self, pid: u32, container_id: String, port: u16, protocol: u8) {
+    unsafe fn add(&mut self, pid: u32, container_id: String, port: u16, protocol: IpProtocol) {
         let mut key: Process = Default::default();
 
         key.container_id = container_id;
