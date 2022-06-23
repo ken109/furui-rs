@@ -7,7 +7,8 @@ use aya_bpf::{
 };
 
 #[map]
-static mut INGRESS_EVENTS: PerfEventArray<u32> = PerfEventArray::<u32>::with_max_entries(1024, 0);
+pub(crate) static mut INGRESS_EVENTS: PerfEventArray<u32> =
+    PerfEventArray::<u32>::with_max_entries(1024, 0);
 
 #[classifier(name = "ingress")]
 pub fn ingress(ctx: SkBuffContext) -> i32 {
@@ -19,5 +20,5 @@ pub fn ingress(ctx: SkBuffContext) -> i32 {
 
 unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
     INGRESS_EVENTS.output(&ctx, &0, 0);
-    Ok(TC_ACT_SHOT)
+    Ok(TC_ACT_OK)
 }

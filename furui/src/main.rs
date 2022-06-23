@@ -13,6 +13,7 @@ use tracing_subscriber::FmtSubscriber;
 
 use crate::docker::Docker;
 use crate::domain::Containers;
+use crate::ebpf::Loader;
 use crate::map::Maps;
 use crate::parse_policy::ParsePolicies;
 
@@ -26,9 +27,6 @@ mod process;
 
 #[derive(Debug, StructOpt, Clone)]
 struct Opt {
-    #[structopt(short, long, default_value = "eth0")]
-    iface: String,
-
     policy_path: PathBuf,
 
     #[cfg_attr(debug_assertions, structopt(long, default_value = "debug", possible_values = &["trace", "debug", "info", "warn", "error"]))]
@@ -53,7 +51,7 @@ async fn main() {
         }
     };
 
-    ebpf::detach_programs(&opt.iface);
+    ebpf::detach_programs();
 }
 
 async unsafe fn try_main(opt: Opt) -> anyhow::Result<()> {
@@ -78,10 +76,11 @@ async unsafe fn try_main(opt: Opt) -> anyhow::Result<()> {
         }
     };
 
-    let mut bpf = ebpf::load_bpf()?;
-    ebpf::attach_programs(&mut bpf, &opt.iface)?;
+    let bpf = ebpf::load_bpf()?;
+    let loader = Loader::new(bpf.clone());
 
-    let bpf = Arc::new(Mutex::new(bpf));
+    loader.attach_programs().await?;
+
     let maps = Maps::new(bpf.clone());
 
     let processes = process::get_all(containers.clone()).await;

@@ -18,9 +18,7 @@ mod bind;
 mod close;
 mod connect;
 mod egress;
-mod egress_icmp;
 mod ingress;
-mod ingress_icmp;
 
 #[map]
 pub(crate) static mut PROC_PORTS: HashMap<PortKey, PortVal> = HashMap::with_max_entries(1024, 0);
