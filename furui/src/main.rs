@@ -96,7 +96,13 @@ async unsafe fn try_main(opt: Opt) -> anyhow::Result<()> {
     maps.process.save_all(&processes).await?;
 
     handle::all_perf_events(bpf.clone(), maps.clone(), &processes).await?;
-    handle::docker_events(docker.clone(), maps.clone(), containers.clone(), policies);
+    handle::docker_events(
+        loader.clone(),
+        docker.clone(),
+        maps.clone(),
+        containers.clone(),
+        policies,
+    );
 
     signal::ctrl_c().await?;
     info!("Exiting...");
