@@ -17,7 +17,84 @@ mod helpers;
 pub const CONTAINER_ID_LEN: usize = 16;
 pub const IPV6_LEN: usize = 16;
 
+const ETH_P_IP: u16 = 0x0800;
+const ETH_P_IPV6: u16 = 0x86DD;
+
 #[derive(Copy, Clone)]
+#[repr(C)]
+pub enum EthProtocol {
+    IP,
+    IPv6,
+    Other(u16),
+}
+
+impl EthProtocol {
+    pub fn new(proto: u16) -> EthProtocol {
+        if proto == ETH_P_IP {
+            EthProtocol::IP
+        } else if proto == ETH_P_IPV6 {
+            EthProtocol::IPv6
+        } else {
+            EthProtocol::Other(proto)
+        }
+    }
+}
+
+const IPPROTO_TCP: u8 = 6;
+const IPPROTO_UDP: u8 = 17;
+
+#[derive(Debug, Copy, Clone)]
+#[repr(C)]
+pub enum IpProtocol {
+    TCP,
+    UDP,
+    Other(u8),
+}
+
+impl Default for IpProtocol {
+    fn default() -> Self {
+        IpProtocol::Other(0)
+    }
+}
+
+impl IpProtocol {
+    pub fn new(proto: u8) -> IpProtocol {
+        if proto == IPPROTO_TCP {
+            IpProtocol::TCP
+        } else if proto == IPPROTO_UDP {
+            IpProtocol::UDP
+        } else {
+            IpProtocol::Other(proto)
+        }
+    }
+
+    pub fn is_other(&self) -> bool {
+        match self {
+            IpProtocol::TCP => false,
+            IpProtocol::UDP => false,
+            IpProtocol::Other(_) => true,
+        }
+    }
+
+    #[cfg(feature = "user")]
+    pub fn to_string(&self) -> String {
+        match self {
+            IpProtocol::TCP => "TCP".to_string(),
+            IpProtocol::UDP => "UDP".to_string(),
+            IpProtocol::Other(_) => "UNK".to_string(),
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub enum TcAction {
+    Pass,
+    Drop,
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
 pub struct PolicyKey {
     pub container_id: [c_char; CONTAINER_ID_LEN],
     pub comm: [c_char; TASK_COMM_LEN],
@@ -29,6 +106,7 @@ pub struct PolicyKey {
 }
 
 #[derive(Copy, Clone)]
+#[repr(C)]
 pub struct PolicyValue {
     pub comm: [c_char; TASK_COMM_LEN],
     pub remote_ip: u32,
@@ -39,6 +117,7 @@ pub struct PolicyValue {
 }
 
 #[derive(Copy, Clone)]
+#[repr(C)]
 pub struct IcmpPolicyKey {
     pub container_id: [c_char; CONTAINER_ID_LEN],
     pub version: u8,
@@ -49,6 +128,7 @@ pub struct IcmpPolicyKey {
 }
 
 #[derive(Copy, Clone)]
+#[repr(C)]
 pub struct IcmpPolicyValue {
     pub version: u8,
     pub icmp_type: u8,
@@ -58,18 +138,21 @@ pub struct IcmpPolicyValue {
 }
 
 #[derive(Copy, Clone)]
+#[repr(C)]
 pub struct PortKey {
     pub container_id: [c_char; CONTAINER_ID_LEN],
     pub port: u16,
-    pub proto: u8,
+    pub proto: IpProtocol,
 }
 
 #[derive(Copy, Clone)]
+#[repr(C)]
 pub struct PortVal {
     pub comm: [c_char; TASK_COMM_LEN],
 }
 
 #[derive(Debug, Copy, Clone)]
+#[repr(C)]
 pub struct ContainerIP {
     pub ip: u32,
     pub ipv6: [c_char; IPV6_LEN],
@@ -92,6 +175,7 @@ impl ContainerIP {
 }
 
 #[derive(Debug, Copy, Clone)]
+#[repr(C)]
 pub struct ContainerID {
     pub container_id: [c_char; CONTAINER_ID_LEN],
 }

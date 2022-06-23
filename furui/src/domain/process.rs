@@ -1,13 +1,13 @@
 use aya_bpf::cty::c_char;
 use aya_bpf::TASK_COMM_LEN;
 
-use furui_common::CONTAINER_ID_LEN;
+use furui_common::{IpProtocol, CONTAINER_ID_LEN};
 
 #[derive(Debug, Clone, Default)]
 pub struct Process {
     pub container_id: String,
     pub executable: String,
-    pub protocol: u8,
+    pub protocol: IpProtocol,
     pub port: u16,
     pub pid: u32,
 }

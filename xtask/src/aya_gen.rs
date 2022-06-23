@@ -11,6 +11,11 @@ pub fn aya_gen() -> anyhow::Result<()> {
         "sockaddr_in6",
         "inet_sock",
         "__sk_buff",
+        "ipv6hdr",
+        "tcphdr",
+        "udphdr",
+        "icmphdr",
+        "icmp6hdr",
     ];
 
     let bindings = aya_gen::generate(

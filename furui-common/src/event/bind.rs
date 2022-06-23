@@ -5,7 +5,7 @@ use aya_bpf::{
 
 #[cfg(feature = "user")]
 use crate::helpers::{family_value_to_str, protocol_value_to_str};
-use crate::CONTAINER_ID_LEN;
+use crate::{IpProtocol, CONTAINER_ID_LEN};
 
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -18,7 +18,7 @@ pub struct BindEvent {
     pub family: c_ushort,
     pub lport: c_ushort,
     // // Defined at the very end for memory alignment.
-    pub protocol: u8,
+    pub protocol: IpProtocol,
 }
 
 #[cfg(feature = "user")]
@@ -27,7 +27,7 @@ impl BindEvent {
         family_value_to_str(self.family)
     }
 
-    pub fn protocol(&self) -> &'static str {
-        protocol_value_to_str(self.protocol)
+    pub fn protocol(&self) -> String {
+        self.protocol.to_string()
     }
 }

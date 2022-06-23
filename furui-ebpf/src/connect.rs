@@ -7,12 +7,9 @@ use aya_bpf::{
     BpfContext,
 };
 
-use furui_common::{Connect6Event, ConnectEvent, PortKey, PortVal};
+use furui_common::{Connect6Event, ConnectEvent, IpProtocol, PortKey, PortVal};
 
-use crate::helpers::{
-    get_container_id, is_container_process, ntohl, ntohs, AF_INET, AF_INET6, IPPROTO_TCP,
-    IPPROTO_UDP,
-};
+use crate::helpers::{get_container_id, is_container_process, ntohl, ntohs, AF_INET, AF_INET6};
 use crate::vmlinux::{flowi4, flowi6, inet_sock, sock};
 use crate::PROC_PORTS;
 
@@ -52,7 +49,7 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
 
     key.container_id = get_container_id()?;
     key.port = sport;
-    key.proto = IPPROTO_TCP;
+    key.proto = IpProtocol::TCP;
 
     PROC_PORTS.insert(
         &key,
@@ -82,7 +79,7 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
             &sk.__sk_common.__bindgen_anon_3.__bindgen_anon_1.skc_dport,
         )?);
         event.family = family;
-        event.protocol = IPPROTO_TCP;
+        event.protocol = IpProtocol::TCP;
 
         CONNECT_EVENTS.output(&ctx, &event, 0);
     } else if family == AF_INET6 {
@@ -100,7 +97,7 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
             &sk.__sk_common.__bindgen_anon_3.__bindgen_anon_1.skc_dport,
         )?);
         event.family = family;
-        event.protocol = IPPROTO_TCP;
+        event.protocol = IpProtocol::TCP;
 
         CONNECT6_EVENTS.output(&ctx, &event, 0);
     }
@@ -128,7 +125,7 @@ unsafe fn try_udp_connect_v4(ctx: ProbeContext) -> Result<u32, c_long> {
 
     key.container_id = get_container_id()?;
     key.port = sport;
-    key.proto = IPPROTO_UDP;
+    key.proto = IpProtocol::UDP;
 
     PROC_PORTS.insert(
         &key,
@@ -147,7 +144,7 @@ unsafe fn try_udp_connect_v4(ctx: ProbeContext) -> Result<u32, c_long> {
     event.dst_addr = ntohl(bpf_probe_read_kernel(&flow4.daddr)?);
     event.src_port = sport;
     event.dst_port = ntohs(bpf_probe_read_kernel(&flow4.uli.ports.dport)?);
-    event.protocol = IPPROTO_UDP;
+    event.protocol = IpProtocol::UDP;
     event.family = AF_INET;
 
     CONNECT_EVENTS.output(&ctx, &event, 0);
@@ -175,7 +172,7 @@ unsafe fn try_udp_connect_v6(ctx: ProbeContext) -> Result<u32, c_long> {
 
     key.container_id = get_container_id()?;
     key.port = sport;
-    key.proto = IPPROTO_UDP;
+    key.proto = IpProtocol::UDP;
 
     PROC_PORTS.insert(
         &key,
@@ -194,7 +191,7 @@ unsafe fn try_udp_connect_v6(ctx: ProbeContext) -> Result<u32, c_long> {
     event.dst_addr = bpf_probe_read_kernel(&flow6.daddr.in6_u.u6_addr8)?;
     event.src_port = sport;
     event.dst_port = ntohs(bpf_probe_read_kernel(&flow6.uli.ports.dport)?);
-    event.protocol = IPPROTO_UDP;
+    event.protocol = IpProtocol::UDP;
     event.family = AF_INET6;
 
     CONNECT6_EVENTS.output(&ctx, &event, 0);

@@ -7,7 +7,7 @@ use aya_bpf::{
     BpfContext,
 };
 
-use furui_common::{BindEvent, PortKey, PortVal};
+use furui_common::{BindEvent, IpProtocol, PortKey, PortVal};
 
 use crate::helpers::{get_container_id, is_container_process, ntohs, AF_INET, AF_INET6};
 use crate::vmlinux::{sockaddr_in, sockaddr_in6, socket};
@@ -43,7 +43,7 @@ unsafe fn try_bind_v4(ctx: ProbeContext) -> Result<u32, c_long> {
     if event.family == AF_INET {
         let in_addr = &*bpf_probe_read_kernel(&ctx.arg::<*const sockaddr_in>(1).ok_or(1)?)?;
         event.lport = ntohs(bpf_probe_read_kernel(&in_addr.sin_port)?);
-        event.protocol = bpf_probe_read_kernel(&sk.sk_protocol)? as u8;
+        event.protocol = IpProtocol::new(bpf_probe_read_kernel(&sk.sk_protocol)? as u8);
 
         finish_bind(&ctx, &event)?;
     }
@@ -77,7 +77,7 @@ unsafe fn try_bind_v6(ctx: ProbeContext) -> Result<u32, c_long> {
     if event.family == AF_INET6 {
         let in_addr = &*bpf_probe_read_kernel(&ctx.arg::<*const sockaddr_in6>(1).ok_or(1)?)?;
         event.lport = ntohs(bpf_probe_read_kernel(&in_addr.sin6_port)?);
-        event.protocol = bpf_probe_read_kernel(&sk.sk_protocol)? as u8;
+        event.protocol = IpProtocol::new(bpf_probe_read_kernel(&sk.sk_protocol)? as u8);
 
         finish_bind(&ctx, &event)?;
     }
