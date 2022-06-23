@@ -7,9 +7,10 @@ use tokio::task;
 use tracing::warn;
 
 use crate::domain::{Container, Policies};
-use crate::{Containers, Docker, Maps};
+use crate::{Containers, Docker, Loader, Maps};
 
 pub fn docker_events(
+    loader: Arc<Loader>,
     docker: Arc<Docker>,
     maps: Arc<Maps>,
     containers: Arc<Mutex<Containers>>,
@@ -24,6 +25,7 @@ pub fn docker_events(
             match event.action.unwrap().as_str() {
                 "start" | "unpause" => {
                     add_container(
+                        loader.clone(),
                         docker.clone(),
                         maps.clone(),
                         event.actor.unwrap().id.unwrap(),
@@ -48,6 +50,7 @@ pub fn docker_events(
 }
 
 async fn add_container(
+    loader: Arc<Loader>,
     docker: Arc<Docker>,
     maps: Arc<Maps>,
     id: String,
@@ -87,6 +90,8 @@ async fn add_container(
             .await
             .unwrap_or_else(|e| warn!("failed to save policies: {}", e))
     };
+
+    let _ = loader.attach_tc_programs().await;
 
     info!("the container inspection added: {}", id.clone());
 }

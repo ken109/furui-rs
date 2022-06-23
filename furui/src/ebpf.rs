@@ -10,7 +10,7 @@ use aya::programs::{tc, KProbe, Program, SchedClassifier, TcAttachType, TracePoi
 use aya::{include_bytes_aligned, Bpf};
 use tokio::sync::Mutex;
 use tokio::task;
-use tracing::info;
+use tracing::{info, warn};
 
 pub fn load_bpf() -> anyhow::Result<Arc<Mutex<Bpf>>> {
     #[cfg(debug_assertions)]
@@ -30,8 +30,8 @@ pub struct Loader {
 }
 
 impl Loader {
-    pub fn new(bpf: Arc<Mutex<Bpf>>) -> Loader {
-        Loader { bpf }
+    pub fn new(bpf: Arc<Mutex<Bpf>>) -> Arc<Loader> {
+        Arc::new(Loader { bpf })
     }
 
     pub async fn attach_programs(&self) -> anyhow::Result<()> {
