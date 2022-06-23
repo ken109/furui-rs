@@ -16,6 +16,7 @@ use bind::*;
 use close::*;
 use connect::*;
 pub use docker::docker_events;
+use egress::*;
 use ingress::*;
 
 use crate::domain::Process;
@@ -25,6 +26,7 @@ mod bind;
 mod close;
 mod connect;
 mod docker;
+mod egress;
 mod ingress;
 
 pub struct PidProcesses {
@@ -78,6 +80,7 @@ pub async unsafe fn all_perf_events(
     close(bpf.clone(), maps, pid_processes.clone()).await?;
 
     ingress(bpf.clone()).await?;
+    egress(bpf.clone()).await?;
 
     Ok(())
 }

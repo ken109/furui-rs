@@ -27,6 +27,7 @@ dns-lookup = "1.0.8"
 bollard = "0.12.0"
 futures = "0.3.21"
 thiserror = "1"
+pnet_datalink = "0.31.0"
 
 [[bin]]
 name = "furui"

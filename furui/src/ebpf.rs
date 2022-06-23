@@ -12,7 +12,7 @@ use tokio::sync::Mutex;
 use tokio::task;
 use tracing::info;
 
-pub fn load_bpf() -> anyhow::Result<Bpf> {
+pub fn load_bpf() -> anyhow::Result<Arc<Mutex<Bpf>>> {
     #[cfg(debug_assertions)]
     let bpf = Bpf::load(include_bytes_aligned!(
         "../../target/bpfel-unknown-none/debug/furui"
@@ -22,77 +22,94 @@ pub fn load_bpf() -> anyhow::Result<Bpf> {
         "../../target/bpfel-unknown-none/release/furui"
     ))?;
 
-    Ok(bpf)
+    Ok(Arc::new(Mutex::new(bpf)))
 }
 
-static SCHED_CLASSIFIERS: [(&str, &str); 1] = [
-    ("ingress", "ingress"),
-    // ("ingress_icmp", "ingress"),
-    // ("egress", "egress"),
-    // ("egress_icmp", "egress"),
-];
+pub struct Loader {
+    bpf: Arc<Mutex<Bpf>>,
+}
 
-static PIN_DIR: &str = "/sys/fs/bpf/furui-rs/globals";
-
-pub fn attach_programs(bpf: &mut Bpf, iface: &str) -> anyhow::Result<()> {
-    let bind_v4: &mut KProbe = bpf.program_mut("bind_v4").unwrap().try_into()?;
-    bind_v4.load()?;
-    bind_v4.attach("inet_bind", 0)?;
-
-    let bind_v6: &mut KProbe = bpf.program_mut("bind_v6").unwrap().try_into()?;
-    bind_v6.load()?;
-    bind_v6.attach("inet6_bind", 0)?;
-
-    let tcp_connect: &mut KProbe = bpf.program_mut("tcp_connect").unwrap().try_into()?;
-    tcp_connect.load()?;
-    tcp_connect.attach("tcp_connect", 0)?;
-
-    let udp_connect_v4: &mut KProbe = bpf.program_mut("udp_connect_v4").unwrap().try_into()?;
-    udp_connect_v4.load()?;
-    udp_connect_v4.attach("udp_send_skb", 0)?;
-
-    let udp_connect_v6: &mut KProbe = bpf.program_mut("udp_connect_v6").unwrap().try_into()?;
-    udp_connect_v6.load()?;
-    udp_connect_v6.attach("udp_v6_send_skb", 0)?;
-
-    let close: &mut TracePoint = bpf.program_mut("close").unwrap().try_into()?;
-    close.load()?;
-    close.attach("sched", "sched_process_exit")?;
-
-    let _ = tc::qdisc_add_clsact(iface);
-    fs::create_dir_all(PIN_DIR)?;
-
-    for (name, attach_type) in SCHED_CLASSIFIERS {
-        let program = bpf.program_mut(name).unwrap();
-        let classifier: &mut SchedClassifier = program.try_into().unwrap();
-        classifier.load()?;
-
-        let pin_path = format!("/{}/{}", PIN_DIR, name);
-        program.pin(&pin_path)?;
-
-        let args = vec![
-            "filter",
-            "add",
-            "dev",
-            iface,
-            attach_type,
-            "bpf",
-            "da",
-            "object-pinned",
-            &pin_path,
-        ];
-        Command::new("tc").args(&args).output()?;
+impl Loader {
+    pub fn new(bpf: Arc<Mutex<Bpf>>) -> Loader {
+        Loader { bpf }
     }
 
-    info!("bpf programs attached.");
+    pub async fn attach_programs(&self) -> anyhow::Result<()> {
+        let mut bpf = self.bpf.lock().await;
 
-    Ok(())
+        let program: &mut KProbe = bpf.program_mut("bind_v4").unwrap().try_into()?;
+        program.load()?;
+        program.attach("inet_bind", 0)?;
+
+        let program: &mut KProbe = bpf.program_mut("bind_v6").unwrap().try_into()?;
+        program.load()?;
+        program.attach("inet6_bind", 0)?;
+
+        let program: &mut KProbe = bpf.program_mut("tcp_connect").unwrap().try_into()?;
+        program.load()?;
+        program.attach("tcp_connect", 0)?;
+
+        let program: &mut KProbe = bpf.program_mut("udp_connect_v4").unwrap().try_into()?;
+        program.load()?;
+        program.attach("udp_send_skb", 0)?;
+
+        let program: &mut KProbe = bpf.program_mut("udp_connect_v6").unwrap().try_into()?;
+        program.load()?;
+        program.attach("udp_v6_send_skb", 0)?;
+
+        let program: &mut TracePoint = bpf.program_mut("close").unwrap().try_into()?;
+        program.load()?;
+        program.attach("sched", "sched_process_exit")?;
+
+        let program: &mut SchedClassifier = bpf.program_mut("ingress").unwrap().try_into().unwrap();
+        program.load()?;
+
+        let program: &mut SchedClassifier = bpf.program_mut("egress").unwrap().try_into().unwrap();
+        program.load()?;
+
+        drop(bpf);
+
+        self.attach_tc_programs().await?;
+
+        info!("bpf programs attached.");
+
+        Ok(())
+    }
+
+    pub async fn attach_tc_programs(&self) -> anyhow::Result<()> {
+        let mut bpf = self.bpf.lock().await;
+
+        for interface in pnet_datalink::interfaces() {
+            if !interface.name.starts_with("veth") {
+                continue;
+            }
+            let iface = interface.name.as_str();
+
+            let _ = tc::qdisc_add_clsact(iface);
+
+            let program: &mut SchedClassifier =
+                bpf.program_mut("ingress").unwrap().try_into().unwrap();
+            program.attach(iface, TcAttachType::Ingress)?;
+
+            let program: &mut SchedClassifier =
+                bpf.program_mut("egress").unwrap().try_into().unwrap();
+            program.attach(iface, TcAttachType::Egress)?;
+        }
+
+        Ok(())
+    }
 }
 
-pub fn detach_programs(iface: &str) {
-    let _ = fs::remove_dir_all(PIN_DIR);
+pub fn detach_programs() {
+    for interface in pnet_datalink::interfaces() {
+        if !interface.name.starts_with("veth") {
+            continue;
+        }
 
-    let _ = Command::new("tc")
-        .args(&vec!["qdisc", "del", "dev", iface, "clsact"])
-        .output();
+        let iface = interface.name.as_str();
+
+        let _ = Command::new("tc")
+            .args(&vec!["qdisc", "del", "dev", iface, "clsact"])
+            .output();
+    }
 }
