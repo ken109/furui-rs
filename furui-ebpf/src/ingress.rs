@@ -6,7 +6,6 @@ use aya_bpf::{
     macros::{classifier, map},
     programs::SkBuffContext,
 };
-use aya_log_ebpf::warn;
 
 use furui_common::{
     ContainerID, ContainerIP, EthProtocol, Ingress6Event, IngressEvent, IpProtocol, PolicyKey,
@@ -61,7 +60,6 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
 
             id_val = CONTAINER_ID_FROM_IPS.get(&ip_key);
             if id_val.is_none() {
-                warn!(&ctx, "id_val is none");
                 return finish4(&ctx, TcAction::Drop, &mut event);
             }
 

@@ -32,6 +32,7 @@ pub async fn bind(
             }
 
             info!(
+                event = "bind",
                 container_id = to_str(event.container_id).as_str(),
                 pid = event.pid,
                 comm = to_str(event.comm).as_str(),
