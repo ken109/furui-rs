@@ -7,9 +7,9 @@ use aya_bpf::{
     BpfContext,
 };
 
-use furui_common::{Connect6Event, ConnectEvent, IpProtocol, PortKey, PortVal};
+use furui_common::{Connect6Event, ConnectEvent, EthProtocol, IpProtocol, PortKey, PortVal};
 
-use crate::helpers::{get_container_id, is_container_process, ntohl, ntohs, AF_INET, AF_INET6};
+use crate::helpers::{get_container_id, is_container_process, ntohl, ntohs};
 use crate::vmlinux::{flowi4, flowi6, inet_sock, sock};
 use crate::PROC_PORTS;
 
@@ -35,10 +35,10 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
     }
 
     let sk = &*bpf_probe_read_kernel(&ctx.arg::<*const sock>(0).ok_or(1)?)?;
-    let family = bpf_probe_read_kernel(&sk.__sk_common.skc_family)?;
+    let family = EthProtocol::from_family(bpf_probe_read_kernel(&sk.__sk_common.skc_family)?);
 
     // Only IPv4 & IPv6 is supported.
-    if family != AF_INET && family != AF_INET6 {
+    if family.is_other() {
         return Ok(0);
     }
 
@@ -59,7 +59,7 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
         0,
     )?;
 
-    if family == AF_INET {
+    if family.is_ip() {
         let mut event: ConnectEvent = core::mem::zeroed();
 
         event.container_id = get_container_id()?;
@@ -82,7 +82,7 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
         event.protocol = IpProtocol::TCP;
 
         CONNECT_EVENTS.output(&ctx, &event, 0);
-    } else if family == AF_INET6 {
+    } else if family.is_ipv6() {
         let np = &*bpf_probe_read_kernel(&isk.pinet6)?;
 
         let mut event: Connect6Event = core::mem::zeroed();
@@ -145,7 +145,7 @@ unsafe fn try_udp_connect_v4(ctx: ProbeContext) -> Result<u32, c_long> {
     event.src_port = sport;
     event.dst_port = ntohs(bpf_probe_read_kernel(&flow4.uli.ports.dport)?);
     event.protocol = IpProtocol::UDP;
-    event.family = AF_INET;
+    event.family = EthProtocol::IP;
 
     CONNECT_EVENTS.output(&ctx, &event, 0);
 
@@ -192,7 +192,7 @@ unsafe fn try_udp_connect_v6(ctx: ProbeContext) -> Result<u32, c_long> {
     event.src_port = sport;
     event.dst_port = ntohs(bpf_probe_read_kernel(&flow6.uli.ports.dport)?);
     event.protocol = IpProtocol::UDP;
-    event.family = AF_INET6;
+    event.family = EthProtocol::IPv6;
 
     CONNECT6_EVENTS.output(&ctx, &event, 0);
 
