@@ -1,0 +1,57 @@
+name: Build and Publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - x86_64
+          - aarch64
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          components: rust-src
+
+      - uses: Swatinem/rust-cache@v1
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Aya gen
+        uses: actions-rs/cargo@v1
+        with:
+          command: xtask
+          args: aya-gen
+
+      - name: Install bpf-linker
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: bpf-linker
+
+      - name: Build eBPF
+        uses: actions-rs/cargo@v1
+        with:
+          command: xtask
+          args: build-ebpf --release
+
+      - name: Build target
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --release --target ${{ matrix.target }}-unknown-linux-musl
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: furui-${{ matrix.target }}
+          path: target/${{ matrix.target }}-unknown-linux-musl/release/furui

@@ -47,13 +47,18 @@ pub struct Socket {
     pub remote_port: Option<u16>,
 }
 
-#[derive(Debug, Deserialize, Default)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all(deserialize = "lowercase"))]
 pub enum Protocol {
     TCP,
     UDP,
-    #[default]
     None,
+}
+
+impl Default for Protocol {
+    fn default() -> Self {
+        Protocol::None
+    }
 }
 
 #[derive(Debug, Deserialize)]

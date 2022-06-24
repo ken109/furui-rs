@@ -6,7 +6,7 @@ use std::sync::Arc;
 use aya::maps::perf::AsyncPerfEventArray;
 use aya::util::online_cpus;
 use aya::Bpf;
-use aya_bpf::cty::c_char;
+use aya_bpf_cty::c_char;
 use bytes::BytesMut;
 use tokio::sync::Mutex;
 use tokio::task;

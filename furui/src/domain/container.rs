@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::net::IpAddr;
 use std::sync::Arc;
 
-use aya_bpf::cty::c_char;
+use aya_bpf_cty::c_char;
 use tokio::sync::Mutex;
 
 use furui_common::CONTAINER_ID_LEN;

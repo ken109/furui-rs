@@ -1,9 +1,6 @@
-use aya_bpf::{
-    cty::{c_char, c_ushort},
-    TASK_COMM_LEN,
-};
+use aya_bpf_cty::{c_char, c_ushort};
 
-use crate::{EthProtocol, IpProtocol, CONTAINER_ID_LEN};
+use crate::{EthProtocol, IpProtocol, CONTAINER_ID_LEN, TASK_COMM_LEN};
 
 #[derive(Copy, Clone)]
 #[repr(C)]
