@@ -4,8 +4,9 @@ use std::sync::Arc;
 
 use aya::programs::{tc, KProbe, SchedClassifier, TcAttachType, TracePoint};
 use aya::{include_bytes_aligned, Bpf};
+use aya_log::BpfLogger;
 use tokio::sync::Mutex;
-use tracing::info;
+use tracing::{debug, info};
 
 pub fn load_bpf() -> anyhow::Result<Arc<Mutex<Bpf>>> {
     #[cfg(debug_assertions)]
@@ -31,6 +32,8 @@ impl Loader {
 
     pub async fn attach_programs(&self) -> anyhow::Result<()> {
         let mut bpf = self.bpf.lock().await;
+
+        let _ = BpfLogger::init(&mut bpf).map_err(|e| debug!("failed to init BpfLogger: {:?}", e));
 
         let program: &mut KProbe = bpf.program_mut("bind_v4").unwrap().try_into()?;
         program.load()?;
