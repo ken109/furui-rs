@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::future::Future;
-use std::ops::DerefMut;
 use std::sync::Arc;
 
 use aya::maps::perf::AsyncPerfEventArray;

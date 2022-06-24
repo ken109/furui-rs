@@ -4,7 +4,7 @@ use aya_bpf::{
 };
 
 #[cfg(feature = "user")]
-use crate::helpers::{family_value_to_str, protocol_value_to_str};
+use crate::helpers::family_value_to_str;
 use crate::{IpProtocol, CONTAINER_ID_LEN};
 
 #[derive(Copy, Clone)]

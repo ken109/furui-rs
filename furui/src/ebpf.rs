@@ -1,16 +1,11 @@
 use std::convert::TryInto;
-use std::fs;
-use std::ops::DerefMut;
-use std::path::Path;
 use std::process::Command;
 use std::sync::Arc;
 
-use anyhow::anyhow;
-use aya::programs::{tc, KProbe, Program, SchedClassifier, TcAttachType, TracePoint};
+use aya::programs::{tc, KProbe, SchedClassifier, TcAttachType, TracePoint};
 use aya::{include_bytes_aligned, Bpf};
 use tokio::sync::Mutex;
-use tokio::task;
-use tracing::{info, warn};
+use tracing::info;
 
 pub fn load_bpf() -> anyhow::Result<Arc<Mutex<Bpf>>> {
     #[cfg(debug_assertions)]

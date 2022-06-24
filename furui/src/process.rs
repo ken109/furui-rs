@@ -7,7 +7,7 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::error;
 
-use furui_common::{protocol_str_to_value, IpProtocol};
+use furui_common::IpProtocol;
 
 use crate::domain::{Containers, Process};
 

@@ -13,7 +13,7 @@ use furui_common::{
 };
 
 use crate::helpers::{eth_protocol, ip_protocol, ntohl, ntohs, ETH_HDR_LEN, IP_HDR_LEN};
-use crate::vmlinux::{__sk_buff, ethhdr, icmp6hdr, icmphdr, iphdr, ipv6hdr, tcphdr, udphdr};
+use crate::vmlinux::{iphdr, ipv6hdr, tcphdr, udphdr};
 use crate::{CONTAINER_ID_FROM_IPS, POLICY_LIST, PROC_PORTS};
 
 #[map]
@@ -36,9 +36,9 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
     let mut event: IngressEvent = core::mem::zeroed();
     let mut event6: Ingress6Event = core::mem::zeroed();
 
-    let mut id_val: Option<&ContainerID> = core::mem::zeroed();
+    let id_val: Option<&ContainerID>;
 
-    let (mut sport, mut dport) = get_port(&ctx)?;
+    let (sport, dport) = get_port(&ctx)?;
     let eth_proto = eth_protocol(&ctx)?;
     let ip_proto = ip_protocol(&ctx)?;
 

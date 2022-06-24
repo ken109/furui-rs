@@ -1,11 +1,9 @@
 use std::path::PathBuf;
-use std::sync::Arc;
 
 use anyhow::anyhow;
 use structopt::StructOpt;
 use thiserror::Error;
 use tokio::signal;
-use tokio::sync::Mutex;
 use tracing::{error, info};
 use tracing_core::Level;
 use tracing_log::LogTracer;

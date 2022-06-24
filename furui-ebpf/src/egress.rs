@@ -23,6 +23,6 @@ pub fn egress(ctx: SkBuffContext) -> i32 {
     }
 }
 
-unsafe fn try_egress(ctx: SkBuffContext) -> Result<i32, c_long> {
+unsafe fn try_egress(_ctx: SkBuffContext) -> Result<i32, c_long> {
     Ok(0)
 }
