@@ -6,6 +6,7 @@ use aya_bpf::{
     macros::{classifier, map},
     programs::SkBuffContext,
 };
+use aya_log_ebpf::warn;
 
 use furui_common::{
     ContainerID, ContainerIP, EthProtocol, Ingress6Event, IngressEvent, IpProtocol, PolicyKey,
@@ -62,6 +63,8 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
                 return finish(&ctx, TcAction::Drop, &mut event);
             }
 
+            warn!(&ctx, "id_val exists");
+
             if ip_proto.is_other() {
                 return finish(&ctx, TcAction::Pass, &mut event);
             }
@@ -109,6 +112,8 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
         };
     }
 
+    warn!(&ctx, "port_val exists");
+
     let port_val = port_val.unwrap();
 
     let mut policy_key: PolicyKey = core::mem::zeroed();
@@ -137,10 +142,22 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
             }
 
             policy_key.local_port = event.dport;
+            warn!(
+                &ctx,
+                "policy_key: {} {} {} {} {}",
+                core::str::from_utf8_unchecked(&policy_key.container_id),
+                core::str::from_utf8_unchecked(&policy_key.comm),
+                policy_key.local_port,
+                policy_key.remote_ip,
+                policy_key.remote_port
+            );
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
+                warn!(&ctx, "policy_val exists");
                 return finish(&ctx, TcAction::Pass, &mut event);
             }
+
+            warn!(&ctx, "policy_val not exists");
 
             policy_key.remote_ip = event.saddr;
             let policy_val = POLICY_LIST.get(&policy_key);
