@@ -7,7 +7,10 @@ use aya::maps::{HashMap, MapRefMut};
 use aya::Bpf;
 use tokio::sync::Mutex;
 
-use furui_common::{IcmpPolicyKey, IcmpPolicyValue, PolicyKey, PolicyValue};
+use furui_common::{
+    ContainerID, ContainerIP, IcmpPolicyKey, IcmpPolicyValue, PolicyKey, PolicyValue, PortKey,
+    PortVal,
+};
 
 use crate::domain;
 
@@ -47,11 +50,11 @@ impl PolicyMap {
                 for socket in &communication.sockets {
                     key.local_port = socket.local_port.unwrap_or(0);
                     key.remote_port = socket.remote_port.unwrap_or(0);
-                    key.protocol = socket.protocol();
+                    key.protocol = socket.protocol;
 
                     value.local_port = socket.remote_port.unwrap_or(0);
                     value.remote_port = socket.remote_port.unwrap_or(0);
-                    value.protocol = socket.protocol();
+                    value.protocol = socket.protocol;
 
                     match socket.remote_ip {
                         Some(IpAddr::V4(ip)) => {
@@ -133,7 +136,7 @@ impl PolicyMap {
                 for socket in &communication.sockets {
                     key.local_port = socket.local_port.unwrap_or(0);
                     key.remote_port = socket.remote_port.unwrap_or(0);
-                    key.protocol = socket.protocol();
+                    key.protocol = socket.protocol;
 
                     match socket.remote_ip {
                         Some(IpAddr::V4(ip)) => {

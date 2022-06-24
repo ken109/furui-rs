@@ -6,7 +6,7 @@ use furui_common::IngressEvent;
 use tokio::sync::Mutex;
 use tracing::info;
 
-use crate::handle::{handle_perf_array, PidProcesses};
+use crate::handle::{handle_perf_array, to_str, PidProcesses};
 use crate::Maps;
 
 pub async fn ingress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
@@ -18,6 +18,9 @@ pub async fn ingress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
         args,
         |event: IngressEvent, _| async move {
             info!(
+                action = event.action.to_string().as_str(),
+                comm = to_str(event.comm).as_str(),
+                protocol = event.protocol().as_str(),
                 source_addr = event.src_addr().as_str(),
                 source_port = event.sport,
                 destination_addr = event.dst_addr().as_str(),

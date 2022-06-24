@@ -14,13 +14,13 @@ mod event;
 #[cfg(feature = "user")]
 mod helpers;
 
-pub const CONTAINER_ID_LEN: usize = 16;
+pub const CONTAINER_ID_LEN: usize = 12;
 pub const IPV6_LEN: usize = 16;
 
 const ETH_P_IP: u16 = 0x0800;
 const ETH_P_IPV6: u16 = 0x86DD;
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub enum EthProtocol {
     IP,
@@ -86,14 +86,24 @@ impl IpProtocol {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub enum TcAction {
     Pass,
     Drop,
 }
 
-#[derive(Copy, Clone)]
+impl TcAction {
+    #[cfg(feature = "user")]
+    pub fn to_string(&self) -> String {
+        match self {
+            TcAction::Pass => "pass".to_string(),
+            TcAction::Drop => "drop".to_string(),
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub struct PolicyKey {
     pub container_id: [c_char; CONTAINER_ID_LEN],
@@ -102,10 +112,10 @@ pub struct PolicyKey {
     pub remote_ipv6: [c_char; IPV6_LEN],
     pub local_port: u16,
     pub remote_port: u16,
-    pub protocol: u8,
+    pub protocol: IpProtocol,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub struct PolicyValue {
     pub comm: [c_char; TASK_COMM_LEN],
@@ -113,10 +123,10 @@ pub struct PolicyValue {
     pub remote_ipv6: [c_char; IPV6_LEN],
     pub local_port: u16,
     pub remote_port: u16,
-    pub protocol: u8,
+    pub protocol: IpProtocol,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub struct IcmpPolicyKey {
     pub container_id: [c_char; CONTAINER_ID_LEN],
@@ -127,7 +137,7 @@ pub struct IcmpPolicyKey {
     pub remote_ipv6: [c_char; IPV6_LEN],
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub struct IcmpPolicyValue {
     pub version: u8,
@@ -137,7 +147,7 @@ pub struct IcmpPolicyValue {
     pub remote_ipv6: [c_char; IPV6_LEN],
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub struct PortKey {
     pub container_id: [c_char; CONTAINER_ID_LEN],
@@ -145,7 +155,7 @@ pub struct PortKey {
     pub proto: IpProtocol,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub struct PortVal {
     pub comm: [c_char; TASK_COMM_LEN],

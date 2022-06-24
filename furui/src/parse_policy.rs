@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use dns_lookup::lookup_host;
+use furui_common::IpProtocol;
 use serde_derive::Deserialize;
 use serde_yaml;
 use tokio::sync::Mutex;
@@ -39,17 +40,20 @@ pub struct Communication {
 
 #[derive(Debug, Deserialize)]
 pub struct Socket {
+    #[serde(default)]
     pub protocol: Protocol,
     pub local_port: Option<u16>,
     pub remote_host: Option<String>,
     pub remote_port: Option<u16>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
 #[serde(rename_all(deserialize = "lowercase"))]
 pub enum Protocol {
     TCP,
     UDP,
+    #[default]
+    None,
 }
 
 #[derive(Debug, Deserialize)]
@@ -106,8 +110,9 @@ impl ParsePolicies {
                 for parsed_socket in &parsed_communication.sockets {
                     let socket = domain::Socket {
                         protocol: match parsed_socket.protocol {
-                            Protocol::TCP => domain::Protocol::TCP,
-                            Protocol::UDP => domain::Protocol::UDP,
+                            Protocol::TCP => IpProtocol::TCP,
+                            Protocol::UDP => IpProtocol::UDP,
+                            Protocol::None => IpProtocol::default(),
                         },
                         local_port: parsed_socket.local_port,
                         remote_ip: None,
