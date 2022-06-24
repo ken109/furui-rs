@@ -1,12 +1,10 @@
-use std::ops::Deref;
 use std::sync::Arc;
 
 use aya::Bpf;
 use tokio::sync::Mutex;
 use tracing::info;
 
-use crate::handle::{handle_perf_array, PidProcesses};
-use crate::Maps;
+use crate::handle::handle_perf_array;
 
 pub async fn egress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
     let args = Arc::new(Mutex::new(()));

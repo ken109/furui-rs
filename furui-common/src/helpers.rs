@@ -10,16 +10,6 @@ pub(crate) fn family_value_to_str(value: c_ushort) -> &'static str {
     }
 }
 
-pub(crate) fn protocol_value_to_str(value: u8) -> &'static str {
-    match value as c_int {
-        libc::IPPROTO_IP => "IP",
-        libc::IPPROTO_TCP => "TCP",
-        libc::IPPROTO_UDP => "UDP",
-        libc::IPPROTO_ICMP => "ICMP",
-        _ => "UNK",
-    }
-}
-
 pub fn protocol_str_to_value(src: &str) -> u8 {
     match src {
         "ip" => libc::IPPROTO_IP,

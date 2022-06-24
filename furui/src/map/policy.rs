@@ -7,10 +7,7 @@ use aya::maps::{HashMap, MapRefMut};
 use aya::Bpf;
 use tokio::sync::Mutex;
 
-use furui_common::{
-    ContainerID, ContainerIP, IcmpPolicyKey, IcmpPolicyValue, PolicyKey, PolicyValue, PortKey,
-    PortVal,
-};
+use furui_common::{IcmpPolicyKey, IcmpPolicyValue, PolicyKey, PolicyValue};
 
 use crate::domain;
 

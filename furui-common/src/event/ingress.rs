@@ -1,8 +1,6 @@
 use aya_bpf::cty::c_char;
 use aya_bpf::TASK_COMM_LEN;
 
-#[cfg(feature = "user")]
-use crate::helpers::protocol_value_to_str;
 use crate::{IpProtocol, TcAction, IPV6_LEN};
 
 #[derive(Copy, Clone)]

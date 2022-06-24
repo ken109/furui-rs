@@ -8,9 +8,6 @@ pub(crate) static AF_INET6: c_ushort = 10;
 pub(crate) const ETH_HDR_LEN: usize = core::mem::size_of::<ethhdr>();
 pub(crate) const IP_HDR_LEN: usize = core::mem::size_of::<iphdr>();
 
-pub(crate) static IPPROTO_TCP: u8 = 6;
-pub(crate) static IPPROTO_UDP: u8 = 17;
-
 pub(crate) fn ntohs(value: u16) -> u16 {
     u16::from_be(value)
 }
