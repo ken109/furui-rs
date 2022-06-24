@@ -1,17 +1,10 @@
-use aya_bpf::{
-    cty::{c_char, c_ushort},
-    TASK_COMM_LEN,
-};
+use aya_bpf::{cty::c_char, TASK_COMM_LEN};
 
-#[cfg(feature = "user")]
-use crate::helpers::family_value_to_str;
-use crate::{IpProtocol, CONTAINER_ID_LEN};
+use crate::{EthProtocol, IpProtocol, CONTAINER_ID_LEN};
 
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct ConnectEvent {
-    // Only 12 characters are in the nodename, so it's 12+termination characters,
-    // but I've set it to 16 for memory alignment reasons.
     pub container_id: [c_char; CONTAINER_ID_LEN],
     pub pid: u32,
     pub comm: [c_char; TASK_COMM_LEN],
@@ -19,7 +12,7 @@ pub struct ConnectEvent {
     pub dst_addr: u32,
     pub src_port: u16,
     pub dst_port: u16,
-    pub family: c_ushort,
+    pub family: EthProtocol,
     pub protocol: IpProtocol,
 }
 
@@ -32,21 +25,11 @@ impl ConnectEvent {
     pub fn dst_addr(&self) -> String {
         std::net::Ipv4Addr::from(self.dst_addr).to_string()
     }
-
-    pub fn family(&self) -> &'static str {
-        family_value_to_str(self.family)
-    }
-
-    pub fn protocol(&self) -> String {
-        self.protocol.to_string()
-    }
 }
 
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct Connect6Event {
-    // Only 12 characters are in the nodename, so it's 12+termination characters,
-    // but I've set it to 16 for memory alignment reasons.
     pub container_id: [c_char; CONTAINER_ID_LEN],
     pub pid: u32,
     pub comm: [c_char; TASK_COMM_LEN],
@@ -54,7 +37,7 @@ pub struct Connect6Event {
     pub dst_addr: [c_char; 16],
     pub src_port: u16,
     pub dst_port: u16,
-    pub family: c_ushort,
+    pub family: EthProtocol,
     pub protocol: IpProtocol,
 }
 
@@ -66,13 +49,5 @@ impl Connect6Event {
 
     pub fn dst_addr(&self) -> String {
         std::net::Ipv6Addr::from(self.dst_addr).to_string()
-    }
-
-    pub fn family(&self) -> &'static str {
-        family_value_to_str(self.family)
-    }
-
-    pub fn protocol(&self) -> String {
-        self.protocol.to_string()
     }
 }

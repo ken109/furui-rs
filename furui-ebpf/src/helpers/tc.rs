@@ -10,7 +10,7 @@ use crate::vmlinux::{ethhdr, iphdr, ipv6hdr};
 pub(crate) fn eth_protocol(ctx: &SkBuffContext) -> Result<EthProtocol, c_long> {
     let eth = ctx.load::<ethhdr>(0)?;
 
-    Ok(EthProtocol::new(ntohs(eth.h_proto)))
+    Ok(EthProtocol::from_eth(ntohs(eth.h_proto)))
 }
 
 pub(crate) fn ip_protocol(ctx: &SkBuffContext) -> Result<IpProtocol, c_long> {

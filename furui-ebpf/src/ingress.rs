@@ -6,6 +6,7 @@ use aya_bpf::{
     macros::{classifier, map},
     programs::SkBuffContext,
 };
+use aya_log_ebpf::warn;
 
 use furui_common::{
     ContainerID, ContainerIP, EthProtocol, Ingress6Event, IngressEvent, IpProtocol, PolicyKey,
@@ -51,7 +52,8 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
             event.sport = sport;
             event.dport = dport;
 
-            event.protocol = IpProtocol::new(iph.protocol);
+            event.family = eth_proto;
+            event.protocol = ip_proto;
 
             let mut ip_key: ContainerIP = core::mem::zeroed();
 
@@ -59,11 +61,14 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
 
             id_val = CONTAINER_ID_FROM_IPS.get(&ip_key);
             if id_val.is_none() {
-                return finish(&ctx, TcAction::Drop, &mut event);
+                warn!(&ctx, "id_val is none");
+                return finish4(&ctx, TcAction::Drop, &mut event);
             }
 
+            event.container_id = bpf_probe_read_kernel(&id_val.unwrap().container_id)?;
+
             if ip_proto.is_other() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
         }
         EthProtocol::IPv6 => {
@@ -74,7 +79,8 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
             event6.sport = sport;
             event6.dport = dport;
 
-            event6.protocol = IpProtocol::new(iph.nexthdr);
+            event6.family = eth_proto;
+            event6.protocol = ip_proto;
 
             let mut ip_key: ContainerIP = core::mem::zeroed();
 
@@ -84,6 +90,8 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
             if id_val.is_none() {
                 return finish6(&ctx, TcAction::Drop, &mut event6);
             }
+
+            event6.container_id = bpf_probe_read_kernel(&id_val.unwrap().container_id)?;
 
             if ip_proto.is_other() {
                 return finish6(&ctx, TcAction::Pass, &mut event6);
@@ -103,7 +111,7 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
     let port_val = PROC_PORTS.get(&port_key);
     if port_val.is_none() {
         return match eth_proto {
-            EthProtocol::IP => finish(&ctx, TcAction::Drop, &mut event),
+            EthProtocol::IP => finish4(&ctx, TcAction::Drop, &mut event),
             EthProtocol::IPv6 => finish6(&ctx, TcAction::Drop, &mut event6),
             EthProtocol::Other => Ok(TC_ACT_OK),
         };
@@ -119,7 +127,7 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
     policy_key.comm = bpf_probe_read_kernel(&port_val.comm)?;
     let policy_val = POLICY_LIST.get(&policy_key);
     if policy_val.is_some() {
-        return finish_all(&ctx, TcAction::Pass, &mut event, &mut event6);
+        return finish(&ctx, TcAction::Pass, &mut event, &mut event6);
     }
 
     match eth_proto {
@@ -133,25 +141,25 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
             policy_key.remote_port = 0;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             policy_key.local_port = event.dport;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             policy_key.remote_ip = event.saddr;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             policy_key.remote_port = event.sport;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             // Check in the order of local_port, remote_ip, remote_port
@@ -162,19 +170,19 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
             policy_key.remote_port = 0;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             policy_key.remote_ip = event.saddr;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             policy_key.remote_port = event.sport;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             // Check in the order of protocol, remote_ip, remote_port
@@ -184,13 +192,13 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
             policy_key.remote_port = 0;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             policy_key.remote_port = event.sport;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             // Check the combination of protocol and remote_port
@@ -198,7 +206,7 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
             policy_key.remote_ip = 0;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             // Check in the order of local_port, remote_ip, remote_port
@@ -209,19 +217,19 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
             policy_key.remote_port = 0;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             policy_key.remote_ip = event.saddr;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             policy_key.remote_port = event.sport;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             // Check the combination of local_port and remote_port
@@ -231,7 +239,7 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
             policy_key.remote_port = event.sport;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             // Check in the order of remote_ip, remote_port
@@ -241,13 +249,13 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
             policy_key.remote_port = 0;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             policy_key.remote_port = event.sport;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
             // Check in the order of remote_port
@@ -257,10 +265,10 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
             policy_key.remote_port = event.sport;
             let policy_val = POLICY_LIST.get(&policy_key);
             if policy_val.is_some() {
-                return finish(&ctx, TcAction::Pass, &mut event);
+                return finish4(&ctx, TcAction::Pass, &mut event);
             }
 
-            return finish(&ctx, TcAction::Drop, &mut event);
+            return finish4(&ctx, TcAction::Drop, &mut event);
         }
         EthProtocol::IPv6 => {}
         EthProtocol::Other => return Ok(TC_ACT_OK),
@@ -283,17 +291,20 @@ unsafe fn get_port(ctx: &SkBuffContext) -> Result<(u16, u16), c_long> {
     };
 }
 
-unsafe fn finish_all(
+unsafe fn finish(
     ctx: &SkBuffContext,
     action: TcAction,
     event: &mut IngressEvent,
     event6: &mut Ingress6Event,
 ) -> Result<i32, c_long> {
-    let _ = finish(ctx, action, event);
-    finish6(ctx, action, event6)
+    match eth_protocol(ctx)? {
+        EthProtocol::IP => finish4(ctx, action, event),
+        EthProtocol::IPv6 => finish6(ctx, action, event6),
+        EthProtocol::Other => Ok(TC_ACT_OK),
+    }
 }
 
-unsafe fn finish(
+unsafe fn finish4(
     ctx: &SkBuffContext,
     action: TcAction,
     event: &mut IngressEvent,
