@@ -62,12 +62,7 @@ async unsafe fn try_main(opt: Opt) -> anyhow::Result<()> {
     setup_tracing(&opt)?;
 
     let docker = Docker::new()?;
-
     let containers = Containers::new();
-
-    docker
-        .add_running_containers_inspect(containers.clone())
-        .await?;
 
     let policies = match ParsePolicies::new(opt.policy_path) {
         Ok(parsed_policies) => parsed_policies.to_domain(containers.clone()).await?,
@@ -75,6 +70,10 @@ async unsafe fn try_main(opt: Opt) -> anyhow::Result<()> {
             return Err(err);
         }
     };
+
+    docker
+        .add_running_containers_inspect(containers.clone())
+        .await?;
 
     let bpf = ebpf::load_bpf()?;
     let loader = Loader::new(bpf.clone());
@@ -101,7 +100,7 @@ async unsafe fn try_main(opt: Opt) -> anyhow::Result<()> {
         docker.clone(),
         maps.clone(),
         containers.clone(),
-        policies,
+        policies.clone(),
     );
 
     signal::ctrl_c().await?;

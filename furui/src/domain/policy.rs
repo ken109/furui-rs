@@ -1,9 +1,11 @@
 use std::convert::TryInto;
+use std::f32::consts::E;
 use std::net::IpAddr;
 use std::sync::Arc;
 
 use aya_bpf::cty::c_char;
 use aya_bpf::TASK_COMM_LEN;
+use furui_common::IpProtocol;
 use tokio::sync::Mutex;
 
 use crate::domain::container::Container;
@@ -50,34 +52,19 @@ pub struct Communication {
 
 impl Communication {
     pub fn process(&self) -> [c_char; TASK_COMM_LEN] {
-        match self.process.as_ref().unwrap().as_bytes().try_into() {
-            Ok(process) => process,
-            Err(_) => [0; TASK_COMM_LEN],
+        match self.process.as_ref() {
+            Some(process) => super::string_to_bytes((*process).clone()),
+            None => [0; TASK_COMM_LEN],
         }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Socket {
-    pub(crate) protocol: Protocol,
+    pub(crate) protocol: IpProtocol,
     pub(crate) local_port: Option<u16>,
     pub(crate) remote_ip: Option<IpAddr>,
     pub(crate) remote_port: Option<u16>,
-}
-
-impl Socket {
-    pub fn protocol(&self) -> u8 {
-        match self.protocol {
-            Protocol::TCP => 6,
-            Protocol::UDP => 11,
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub enum Protocol {
-    TCP,
-    UDP,
 }
 
 #[derive(Debug, Clone)]

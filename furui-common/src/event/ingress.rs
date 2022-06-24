@@ -3,7 +3,7 @@ use aya_bpf::TASK_COMM_LEN;
 
 #[cfg(feature = "user")]
 use crate::helpers::protocol_value_to_str;
-use crate::{TcAction, IPV6_LEN};
+use crate::{IpProtocol, TcAction, IPV6_LEN};
 
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -12,7 +12,7 @@ pub struct IngressEvent {
     pub daddr: u32,
     pub sport: u16,
     pub dport: u16,
-    pub protocol: u8,
+    pub protocol: IpProtocol,
     pub action: TcAction,
     pub comm: [c_char; TASK_COMM_LEN],
 }
@@ -27,8 +27,8 @@ impl IngressEvent {
         std::net::Ipv4Addr::from(self.daddr).to_string()
     }
 
-    pub fn protocol(&self) -> &'static str {
-        protocol_value_to_str(self.protocol)
+    pub fn protocol(&self) -> String {
+        self.protocol.to_string()
     }
 }
 
@@ -39,7 +39,7 @@ pub struct Ingress6Event {
     pub daddr: [c_char; IPV6_LEN],
     pub sport: u16,
     pub dport: u16,
-    pub protocol: u8,
+    pub protocol: IpProtocol,
     pub action: TcAction,
     pub comm: [c_char; TASK_COMM_LEN],
 }
@@ -54,7 +54,7 @@ impl Ingress6Event {
         std::net::Ipv6Addr::from(self.daddr).to_string()
     }
 
-    pub fn protocol(&self) -> &'static str {
-        protocol_value_to_str(self.protocol)
+    pub fn protocol(&self) -> String {
+        self.protocol.to_string()
     }
 }

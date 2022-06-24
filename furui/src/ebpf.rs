@@ -89,11 +89,11 @@ impl Loader {
 
             let program: &mut SchedClassifier =
                 bpf.program_mut("ingress").unwrap().try_into().unwrap();
-            program.attach(iface, TcAttachType::Ingress)?;
+            program.attach(iface, TcAttachType::Egress)?;
 
             let program: &mut SchedClassifier =
                 bpf.program_mut("egress").unwrap().try_into().unwrap();
-            program.attach(iface, TcAttachType::Egress)?;
+            program.attach(iface, TcAttachType::Ingress)?;
         }
 
         Ok(())

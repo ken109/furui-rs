@@ -8,13 +8,13 @@ use aya_bpf::{
 };
 
 use furui_common::{
-    ContainerID, ContainerIP, EthProtocol, Ingress6Event, IngressEvent, IpProtocol, PortKey,
-    TcAction,
+    ContainerID, ContainerIP, EthProtocol, Ingress6Event, IngressEvent, IpProtocol, PolicyKey,
+    PortKey, TcAction,
 };
 
-use crate::helpers::{eth_protocol, ip_protocol, ntohl, ETH_HDR_LEN, IP_HDR_LEN};
+use crate::helpers::{eth_protocol, ip_protocol, ntohl, ntohs, ETH_HDR_LEN, IP_HDR_LEN};
 use crate::vmlinux::{__sk_buff, ethhdr, icmp6hdr, icmphdr, iphdr, ipv6hdr, tcphdr, udphdr};
-use crate::{CONTAINER_ID_FROM_IPS, PROC_PORTS};
+use crate::{CONTAINER_ID_FROM_IPS, POLICY_LIST, PROC_PORTS};
 
 #[map]
 pub(crate) static mut INGRESS_EVENTS: PerfEventArray<IngressEvent> =
@@ -51,7 +51,7 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
             event.sport = sport;
             event.dport = dport;
 
-            event.protocol = iph.protocol;
+            event.protocol = IpProtocol::new(iph.protocol);
 
             let mut ip_key: ContainerIP = core::mem::zeroed();
 
@@ -74,7 +74,7 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
             event6.sport = sport;
             event6.dport = dport;
 
-            event6.protocol = iph.nexthdr;
+            event6.protocol = IpProtocol::new(iph.nexthdr);
 
             let mut ip_key: ContainerIP = core::mem::zeroed();
 
@@ -92,20 +92,178 @@ unsafe fn try_ingress(ctx: SkBuffContext) -> Result<i32, c_long> {
         EthProtocol::Other(_) => return Ok(TC_ACT_OK),
     }
 
-    let id_val = id_val.unwrap();
+    let cid_val = id_val.unwrap();
 
-    let mut p_key: PortKey = core::mem::zeroed();
-    p_key.container_id = bpf_probe_read_kernel(&id_val.container_id)?;
-    p_key.port = dport;
-    p_key.proto = ip_proto;
+    // port
+    let mut port_key: PortKey = core::mem::zeroed();
+    port_key.container_id = bpf_probe_read_kernel(&cid_val.container_id)?;
+    port_key.port = dport;
+    port_key.proto = ip_proto;
 
-    let p_val = PROC_PORTS.get(&p_key);
-    if p_val.is_none() {
-        match eth_proto {
-            EthProtocol::IP => {}
-            EthProtocol::IPv6 => {}
-            EthProtocol::Other(_) => {}
+    let port_val = PROC_PORTS.get(&port_key);
+    if port_val.is_none() {
+        return match eth_proto {
+            EthProtocol::IP => finish(&ctx, TcAction::Drop, &mut event),
+            EthProtocol::IPv6 => finish6(&ctx, TcAction::Drop, &mut event6),
+            EthProtocol::Other(_) => Ok(TC_ACT_OK),
+        };
+    }
+
+    let port_val = port_val.unwrap();
+
+    let mut policy_key: PolicyKey = core::mem::zeroed();
+
+    // If nothing is specified in the policy except the container name and
+    // executable name, allow all communication to that process.
+    policy_key.container_id = bpf_probe_read_kernel(&cid_val.container_id)?;
+    policy_key.comm = bpf_probe_read_kernel(&port_val.comm)?;
+    let policy_val = POLICY_LIST.get(&policy_key);
+    if policy_val.is_some() {
+        return finish_all(&ctx, TcAction::Pass, &mut event, &mut event6);
+    }
+
+    match eth_proto {
+        EthProtocol::IP => {
+            event.comm = bpf_probe_read_kernel(&port_val.comm)?;
+
+            //  Check in the order of protocol, local_port, remote_ip, remote_port
+            policy_key.protocol = event.protocol;
+            policy_key.local_port = 0;
+            policy_key.remote_ip = 0;
+            policy_key.remote_port = 0;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            policy_key.local_port = event.dport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            policy_key.remote_ip = event.saddr;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            policy_key.remote_port = event.sport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            // Check in the order of local_port, remote_ip, remote_port
+            // The default value for protocol is 255.
+            policy_key.protocol = IpProtocol::default();
+            policy_key.local_port = dport;
+            policy_key.remote_ip = 0;
+            policy_key.remote_port = 0;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            policy_key.remote_ip = event.saddr;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            policy_key.remote_port = event.sport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            // Check in the order of protocol, remote_ip, remote_port
+            policy_key.protocol = event.protocol;
+            policy_key.local_port = 0;
+            policy_key.remote_ip = event.saddr;
+            policy_key.remote_port = 0;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            policy_key.remote_port = event.sport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            // Check the combination of protocol and remote_port
+            policy_key.local_port = 0;
+            policy_key.remote_ip = 0;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            // Check in the order of local_port, remote_ip, remote_port
+            // The default value for protocol is 255.
+            policy_key.protocol = IpProtocol::default();
+            policy_key.local_port = event.dport;
+            policy_key.remote_ip = 0;
+            policy_key.remote_port = 0;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            policy_key.remote_ip = event.saddr;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            policy_key.remote_port = event.sport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            // Check the combination of local_port and remote_port
+            policy_key.protocol = IpProtocol::default();
+            policy_key.local_port = event.dport;
+            policy_key.remote_ip = 0;
+            policy_key.remote_port = event.sport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            // Check in the order of remote_ip, remote_port
+            policy_key.protocol = IpProtocol::default();
+            policy_key.local_port = 0;
+            policy_key.remote_ip = event.saddr;
+            policy_key.remote_port = 0;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            policy_key.remote_port = event.sport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            // Check in the order of remote_port
+            policy_key.protocol = IpProtocol::default();
+            policy_key.local_port = 0;
+            policy_key.remote_ip = 0;
+            policy_key.remote_port = event.sport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish(&ctx, TcAction::Pass, &mut event);
+            }
+
+            return finish(&ctx, TcAction::Drop, &mut event);
         }
+        EthProtocol::IPv6 => {}
+        EthProtocol::Other(_) => {}
     }
 
     Ok(TC_ACT_OK)
@@ -115,14 +273,24 @@ unsafe fn get_port(ctx: &SkBuffContext) -> Result<(u16, u16), c_long> {
     return match ip_protocol(ctx)? {
         IpProtocol::TCP => {
             let tcph = ctx.load::<tcphdr>(ETH_HDR_LEN + IP_HDR_LEN)?;
-            Ok((tcph.source, tcph.dest))
+            Ok((ntohs(tcph.source), ntohs(tcph.dest)))
         }
         IpProtocol::UDP => {
             let udph = ctx.load::<udphdr>(ETH_HDR_LEN + IP_HDR_LEN)?;
-            Ok((udph.source, udph.dest))
+            Ok((ntohs(udph.source), ntohs(udph.dest)))
         }
         IpProtocol::Other(_) => Err(TC_ACT_OK as c_long),
     };
+}
+
+unsafe fn finish_all(
+    ctx: &SkBuffContext,
+    action: TcAction,
+    event: &mut IngressEvent,
+    event6: &mut Ingress6Event,
+) -> Result<i32, c_long> {
+    let _ = finish(ctx, action, event);
+    finish6(ctx, action, event6)
 }
 
 unsafe fn finish(
