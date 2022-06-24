@@ -1,7 +1,6 @@
-use aya_bpf::cty::c_char;
-use aya_bpf::TASK_COMM_LEN;
+use aya_bpf_cty::c_char;
 
-use crate::{EthProtocol, IpProtocol, TcAction, CONTAINER_ID_LEN, IPV6_LEN};
+use crate::{EthProtocol, IpProtocol, TcAction, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN};
 
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -21,8 +20,8 @@ pub struct EgressEvent {
 #[repr(C)]
 pub struct Egress6Event {
     pub container_id: [c_char; CONTAINER_ID_LEN],
-    pub saddr: [c_char; IPV6_LEN],
-    pub daddr: [c_char; IPV6_LEN],
+    pub saddr: [u8; IPV6_LEN],
+    pub daddr: [u8; IPV6_LEN],
     pub sport: u16,
     pub dport: u16,
     pub family: EthProtocol,

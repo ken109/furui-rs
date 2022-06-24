@@ -1,10 +1,9 @@
 #[cfg(feature = "user")]
 use std::net::IpAddr;
 
-use aya_bpf::cty::c_char;
-use aya_bpf::TASK_COMM_LEN;
+use aya_bpf_cty::c_char;
 
-use crate::{IpProtocol, CONTAINER_ID_LEN, IPV6_LEN};
+use crate::{IpProtocol, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN};
 
 #[derive(Debug, Copy, Clone)]
 #[repr(C)]
@@ -12,7 +11,7 @@ pub struct PolicyKey {
     pub container_id: [c_char; CONTAINER_ID_LEN],
     pub comm: [c_char; TASK_COMM_LEN],
     pub remote_ip: u32,
-    pub remote_ipv6: [c_char; IPV6_LEN],
+    pub remote_ipv6: [u8; IPV6_LEN],
     pub local_port: u16,
     pub remote_port: u16,
     pub protocol: IpProtocol,
@@ -23,7 +22,7 @@ pub struct PolicyKey {
 pub struct PolicyValue {
     pub comm: [c_char; TASK_COMM_LEN],
     pub remote_ip: u32,
-    pub remote_ipv6: [c_char; IPV6_LEN],
+    pub remote_ipv6: [u8; IPV6_LEN],
     pub local_port: u16,
     pub remote_port: u16,
     pub protocol: IpProtocol,
@@ -37,7 +36,7 @@ pub struct IcmpPolicyKey {
     pub icmp_type: u8,
     pub code: u8,
     pub remote_ip: u32,
-    pub remote_ipv6: [c_char; IPV6_LEN],
+    pub remote_ipv6: [u8; IPV6_LEN],
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -47,7 +46,7 @@ pub struct IcmpPolicyValue {
     pub icmp_type: u8,
     pub code: u8,
     pub remote_ip: u32,
-    pub remote_ipv6: [c_char; IPV6_LEN],
+    pub remote_ipv6: [u8; IPV6_LEN],
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -68,7 +67,7 @@ pub struct PortVal {
 #[repr(C)]
 pub struct ContainerIP {
     pub ip: u32,
-    pub ipv6: [c_char; IPV6_LEN],
+    pub ipv6: [u8; IPV6_LEN],
 }
 
 #[cfg(feature = "user")]

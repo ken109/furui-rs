@@ -1,6 +1,6 @@
 #![cfg_attr(not(feature = "user"), no_std)]
 
-use aya_bpf::cty::c_ushort;
+use aya_bpf_cty::c_ushort;
 
 pub use event::*;
 #[cfg(feature = "user")]
@@ -12,6 +12,7 @@ mod event;
 mod helpers;
 mod map;
 
+pub const TASK_COMM_LEN: usize = 16;
 pub const CONTAINER_ID_LEN: usize = 12;
 pub const IPV6_LEN: usize = 16;
 
@@ -87,14 +88,19 @@ impl EthProtocol {
 const IPPROTO_TCP: u8 = 6;
 const IPPROTO_UDP: u8 = 17;
 
-#[derive(Debug, Copy, Clone, Default)]
+#[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub enum IpProtocol {
-    #[default]
     Default,
     TCP,
     UDP,
     Other,
+}
+
+impl Default for IpProtocol {
+    fn default() -> Self {
+        IpProtocol::Default
+    }
 }
 
 impl IpProtocol {

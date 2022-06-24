@@ -1,7 +1,6 @@
-use aya_bpf::cty::c_char;
-use aya_bpf::TASK_COMM_LEN;
+use aya_bpf_cty::c_char;
 
-use furui_common::{IpProtocol, CONTAINER_ID_LEN};
+use furui_common::{IpProtocol, CONTAINER_ID_LEN, TASK_COMM_LEN};
 
 #[derive(Debug, Clone, Default)]
 pub struct Process {

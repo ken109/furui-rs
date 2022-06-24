@@ -9,7 +9,7 @@ user = ["aya", "libc"]
 
 [dependencies]
 aya = { version = ">=0.11", optional = true }
-aya-bpf = { git = "https://github.com/aya-rs/aya", branch = "main" }
+aya-bpf-cty = { git = "https://github.com/aya-rs/aya", branch = "main" }
 libc = { version = "0.2", optional = true }
 
 [lib]
