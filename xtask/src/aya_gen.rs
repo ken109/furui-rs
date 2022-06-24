@@ -10,7 +10,6 @@ pub fn aya_gen() -> anyhow::Result<()> {
         "sockaddr_in",
         "sockaddr_in6",
         "inet_sock",
-        "__sk_buff",
         "ipv6hdr",
         "tcphdr",
         "udphdr",
