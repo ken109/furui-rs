@@ -10,7 +10,7 @@ pub async fn egress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
     let args = Arc::new(Mutex::new(()));
 
     handle_perf_array(bpf, "EGRESS_EVENTS", args, |event: u32, _| async move {
-        info!(port = event);
+        info!(event = "egress", port = event);
     })
     .await?;
 

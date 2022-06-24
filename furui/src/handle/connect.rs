@@ -15,9 +15,9 @@ pub async fn connect(
     let args = Arc::new(Mutex::new(pid_processes));
 
     handle_perf_array(
-        bpf,
+        bpf.clone(),
         "CONNECT_EVENTS",
-        args,
+        args.clone(),
         |event: ConnectEvent, args| async move {
             let args = args.lock().await;
             let mut pid_processes = args.lock().await;
@@ -32,6 +32,7 @@ pub async fn connect(
             }
 
             info!(
+                event = "connect",
                 container_id = to_str(event.container_id).as_str(),
                 pid = event.pid,
                 comm = to_str(event.comm).as_str(),
@@ -45,15 +46,6 @@ pub async fn connect(
         },
     )
     .await?;
-
-    Ok(())
-}
-
-pub async fn connect6(
-    bpf: Arc<Mutex<Bpf>>,
-    pid_processes: Arc<Mutex<PidProcesses>>,
-) -> anyhow::Result<()> {
-    let args = Arc::new(Mutex::new(pid_processes));
 
     handle_perf_array(
         bpf,
@@ -73,6 +65,7 @@ pub async fn connect6(
             }
 
             info!(
+                event = "connect",
                 container_id = to_str(event.container_id).as_str(),
                 pid = event.pid,
                 comm = to_str(event.comm).as_str(),

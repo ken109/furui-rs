@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
+use furui_common::CONTAINER_ID_LEN;
 use futures::StreamExt;
-use log::info;
 use tokio::sync::Mutex;
 use tokio::task;
-use tracing::warn;
+use tracing::{info, warn};
 
 use crate::domain::{Container, Policies};
 use crate::{Containers, Docker, Loader, Maps};
@@ -22,26 +22,23 @@ pub fn docker_events(
         futures::pin_mut!(container_events);
 
         while let Some(Ok(event)) = container_events.next().await {
+            let id = event.actor.unwrap().id.unwrap();
+            let id = id.chars().take(CONTAINER_ID_LEN).collect::<String>();
+
             match event.action.unwrap().as_str() {
                 "start" | "unpause" => {
                     add_container(
                         loader.clone(),
                         docker.clone(),
                         maps.clone(),
-                        event.actor.unwrap().id.unwrap(),
+                        id,
                         containers.clone(),
                         policies.clone(),
                     )
                     .await
                 }
                 "pause" | "die" => {
-                    remove_container(
-                        maps.clone(),
-                        event.actor.unwrap().id.unwrap(),
-                        containers.clone(),
-                        policies.clone(),
-                    )
-                    .await
+                    remove_container(maps.clone(), id, containers.clone(), policies.clone()).await
                 }
                 _ => {}
             }
@@ -93,7 +90,10 @@ async fn add_container(
 
     let _ = loader.attach_tc_programs().await;
 
-    info!("the container inspection added: {}", id.clone());
+    info!(
+        container_id = id.as_str(),
+        "the container inspection added."
+    );
 }
 
 async fn remove_container(
@@ -131,5 +131,8 @@ async fn remove_container(
             .unwrap_or_else(|e| warn!("failed to save policies: {}", e))
     };
 
-    info!("the container inspection removed: {}", id.clone());
+    info!(
+        container_id = id.as_str(),
+        "the container inspection removed."
+    );
 }

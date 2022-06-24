@@ -76,7 +76,6 @@ pub async unsafe fn all_perf_events(
 
     bind(bpf.clone(), pid_processes.clone()).await?;
     connect(bpf.clone(), pid_processes.clone()).await?;
-    connect6(bpf.clone(), pid_processes.clone()).await?;
     close(bpf.clone(), maps, pid_processes.clone()).await?;
 
     ingress(bpf.clone()).await?;

@@ -27,7 +27,7 @@ pub async fn close(
                 }
 
                 pid_processes.map.remove(&event);
-                info!(pid = event);
+                info!(event = "close", pid = event,);
             },
             None => {}
         };
