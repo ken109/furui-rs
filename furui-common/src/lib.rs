@@ -25,7 +25,7 @@ const ETH_P_IPV6: u16 = 0x86DD;
 pub enum EthProtocol {
     IP,
     IPv6,
-    Other(u16),
+    Other,
 }
 
 impl EthProtocol {
@@ -35,7 +35,7 @@ impl EthProtocol {
         } else if proto == ETH_P_IPV6 {
             EthProtocol::IPv6
         } else {
-            EthProtocol::Other(proto)
+            EthProtocol::Other
         }
     }
 }
@@ -46,14 +46,15 @@ const IPPROTO_UDP: u8 = 17;
 #[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub enum IpProtocol {
+    Default,
     TCP,
     UDP,
-    Other(u8),
+    Other,
 }
 
 impl Default for IpProtocol {
     fn default() -> Self {
-        IpProtocol::Other(0)
+        IpProtocol::Default
     }
 }
 
@@ -64,15 +65,16 @@ impl IpProtocol {
         } else if proto == IPPROTO_UDP {
             IpProtocol::UDP
         } else {
-            IpProtocol::Other(proto)
+            IpProtocol::Other
         }
     }
 
     pub fn is_other(&self) -> bool {
         match self {
+            IpProtocol::Default => false,
             IpProtocol::TCP => false,
             IpProtocol::UDP => false,
-            IpProtocol::Other(_) => true,
+            IpProtocol::Other => true,
         }
     }
 
@@ -81,7 +83,7 @@ impl IpProtocol {
         match self {
             IpProtocol::TCP => "TCP".to_string(),
             IpProtocol::UDP => "UDP".to_string(),
-            IpProtocol::Other(_) => "UNK".to_string(),
+            IpProtocol::Default | IpProtocol::Other => "UNK".to_string(),
         }
     }
 }

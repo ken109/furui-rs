@@ -25,6 +25,6 @@ pub(crate) fn ip_protocol(ctx: &SkBuffContext) -> Result<IpProtocol, c_long> {
 
             Ok(IpProtocol::new(iph.nexthdr))
         }
-        EthProtocol::Other(_) => Err(TC_ACT_OK as c_long),
+        EthProtocol::Other => Err(TC_ACT_OK as c_long),
     }
 }
