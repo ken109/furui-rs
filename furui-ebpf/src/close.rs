@@ -5,6 +5,7 @@ use aya_bpf::{
     programs::TracePointContext,
     BpfContext,
 };
+use aya_log_ebpf::warn;
 
 use crate::helpers::is_container_process;
 
@@ -13,18 +14,23 @@ static mut CLOSE_EVENTS: PerfEventArray<u32> = PerfEventArray::<u32>::with_max_e
 
 #[tracepoint]
 pub fn close(ctx: TracePointContext) -> u32 {
-    match unsafe { try_close(ctx) } {
+    match unsafe { try_close(&ctx) } {
         Ok(ret) => ret,
-        Err(ret) => ret as u32,
+        Err(ret) => {
+            if ret != 0 {
+                warn!(&ctx, "close event failed in kernel: {}", ret);
+            }
+            ret as u32
+        }
     }
 }
 
-unsafe fn try_close(ctx: TracePointContext) -> Result<u32, c_long> {
+unsafe fn try_close(ctx: &TracePointContext) -> Result<u32, c_long> {
     if !is_container_process()? {
         return Ok(0);
     }
 
-    CLOSE_EVENTS.output(&ctx, &ctx.pid(), 0);
+    CLOSE_EVENTS.output(ctx, &ctx.pid(), 0);
 
     Ok(0)
 }

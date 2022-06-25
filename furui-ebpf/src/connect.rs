@@ -6,6 +6,7 @@ use aya_bpf::{
     programs::ProbeContext,
     BpfContext,
 };
+use aya_log_ebpf::warn;
 
 use furui_common::{Connect6Event, ConnectEvent, EthProtocol, IpProtocol, PortKey, PortVal};
 
@@ -23,13 +24,18 @@ static mut CONNECT6_EVENTS: PerfEventArray<Connect6Event> =
 
 #[kprobe]
 pub fn tcp_connect(ctx: ProbeContext) -> u32 {
-    match unsafe { try_tcp_connect(ctx) } {
+    match unsafe { try_tcp_connect(&ctx) } {
         Ok(ret) => ret,
-        Err(ret) => ret as u32,
+        Err(ret) => {
+            if ret != 0 {
+                warn!(&ctx, "tcp connect event failed in kernel: {}", ret);
+            }
+            ret as u32
+        }
     }
 }
 
-unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
+unsafe fn try_tcp_connect(ctx: &ProbeContext) -> Result<u32, c_long> {
     if !is_container_process()? {
         return Ok(0);
     }
@@ -81,7 +87,7 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
         event.family = family;
         event.protocol = IpProtocol::TCP;
 
-        CONNECT_EVENTS.output(&ctx, &event, 0);
+        CONNECT_EVENTS.output(ctx, &event, 0);
     } else if family.is_ipv6() {
         let np = &*bpf_probe_read_kernel(&isk.pinet6)?;
 
@@ -99,7 +105,7 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
         event.family = family;
         event.protocol = IpProtocol::TCP;
 
-        CONNECT6_EVENTS.output(&ctx, &event, 0);
+        CONNECT6_EVENTS.output(ctx, &event, 0);
     }
 
     Ok(0)
@@ -107,13 +113,18 @@ unsafe fn try_tcp_connect(ctx: ProbeContext) -> Result<u32, c_long> {
 
 #[kprobe]
 pub fn udp_connect_v4(ctx: ProbeContext) -> u32 {
-    match unsafe { try_udp_connect_v4(ctx) } {
+    match unsafe { try_udp_connect_v4(&ctx) } {
         Ok(ret) => ret,
-        Err(ret) => ret as u32,
+        Err(ret) => {
+            if ret != 0 {
+                warn!(&ctx, "udp connect event failed in kernel: {}", ret);
+            }
+            ret as u32
+        }
     }
 }
 
-unsafe fn try_udp_connect_v4(ctx: ProbeContext) -> Result<u32, c_long> {
+unsafe fn try_udp_connect_v4(ctx: &ProbeContext) -> Result<u32, c_long> {
     if !is_container_process()? {
         return Ok(0);
     }
@@ -147,20 +158,25 @@ unsafe fn try_udp_connect_v4(ctx: ProbeContext) -> Result<u32, c_long> {
     event.protocol = IpProtocol::UDP;
     event.family = EthProtocol::IP;
 
-    CONNECT_EVENTS.output(&ctx, &event, 0);
+    CONNECT_EVENTS.output(ctx, &event, 0);
 
     Ok(0)
 }
 
 #[kprobe]
 pub fn udp_connect_v6(ctx: ProbeContext) -> u32 {
-    match unsafe { try_udp_connect_v6(ctx) } {
+    match unsafe { try_udp_connect_v6(&ctx) } {
         Ok(ret) => ret,
-        Err(ret) => ret as u32,
+        Err(ret) => {
+            if ret != 0 {
+                warn!(&ctx, "udp connect6 event failed in kernel: {}", ret);
+            }
+            ret as u32
+        }
     }
 }
 
-unsafe fn try_udp_connect_v6(ctx: ProbeContext) -> Result<u32, c_long> {
+unsafe fn try_udp_connect_v6(ctx: &ProbeContext) -> Result<u32, c_long> {
     if !is_container_process()? {
         return Ok(0);
     }
@@ -194,7 +210,7 @@ unsafe fn try_udp_connect_v6(ctx: ProbeContext) -> Result<u32, c_long> {
     event.protocol = IpProtocol::UDP;
     event.family = EthProtocol::IPv6;
 
-    CONNECT6_EVENTS.output(&ctx, &event, 0);
+    CONNECT6_EVENTS.output(ctx, &event, 0);
 
     Ok(0)
 }

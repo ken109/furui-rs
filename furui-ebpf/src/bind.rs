@@ -6,6 +6,7 @@ use aya_bpf::{
     programs::ProbeContext,
     BpfContext,
 };
+use aya_log_ebpf::warn;
 
 use furui_common::{BindEvent, EthProtocol, IpProtocol, PortKey, PortVal};
 
@@ -19,13 +20,18 @@ static mut BIND_EVENTS: PerfEventArray<BindEvent> =
 
 #[kprobe]
 pub fn bind_v4(ctx: ProbeContext) -> u32 {
-    match unsafe { try_bind_v4(ctx) } {
+    match unsafe { try_bind_v4(&ctx) } {
         Ok(ret) => ret,
-        Err(ret) => ret as u32,
+        Err(ret) => {
+            if ret != 0 {
+                warn!(&ctx, "bind event failed in kernel: {}", ret);
+            }
+            ret as u32
+        }
     }
 }
 
-unsafe fn try_bind_v4(ctx: ProbeContext) -> Result<u32, c_long> {
+unsafe fn try_bind_v4(ctx: &ProbeContext) -> Result<u32, c_long> {
     if !is_container_process()? {
         return Ok(0);
     }
@@ -53,13 +59,18 @@ unsafe fn try_bind_v4(ctx: ProbeContext) -> Result<u32, c_long> {
 
 #[kprobe]
 pub fn bind_v6(ctx: ProbeContext) -> u32 {
-    match unsafe { try_bind_v6(ctx) } {
+    match unsafe { try_bind_v6(&ctx) } {
         Ok(ret) => ret,
-        Err(ret) => ret as u32,
+        Err(ret) => {
+            if ret != 0 {
+                warn!(&ctx, "bind6 event failed in kernel: {}", ret);
+            }
+            ret as u32
+        }
     }
 }
 
-unsafe fn try_bind_v6(ctx: ProbeContext) -> Result<u32, c_long> {
+unsafe fn try_bind_v6(ctx: &ProbeContext) -> Result<u32, c_long> {
     if !is_container_process()? {
         return Ok(0);
     }
@@ -79,7 +90,7 @@ unsafe fn try_bind_v6(ctx: ProbeContext) -> Result<u32, c_long> {
         event.lport = ntohs(bpf_probe_read_kernel(&in_addr.sin6_port)?);
         event.protocol = IpProtocol::new(bpf_probe_read_kernel(&sk.sk_protocol)? as u8);
 
-        finish_bind(&ctx, &event)?;
+        finish_bind(ctx, &event)?;
     }
 
     Ok(0)
