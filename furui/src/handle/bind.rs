@@ -36,8 +36,8 @@ pub async fn bind(
                 container_id = to_str(event.container_id).as_str(),
                 pid = event.pid,
                 comm = to_str(event.comm).as_str(),
-                family = event.family.to_string().as_str(),
-                protocol = event.protocol.to_string().as_str(),
+                family = event.family.to_string(),
+                protocol = event.protocol.to_string(),
                 lport = event.lport,
             );
         },
