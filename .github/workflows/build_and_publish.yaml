@@ -11,9 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target:
+        arch:
           - x86_64
           - aarch64
+    env:
+      CARGO_CFG_BPF_TARGET_ARCH: ${{ matrix.arch }}
     steps:
       - uses: actions/checkout@v2
 
@@ -24,7 +26,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@v1
         with:
-          key: ${{ matrix.target }}
+          key: ${{ matrix.arch }}
 
       - name: Aya gen
         uses: actions-rs/cargo@v1
@@ -49,9 +51,9 @@ jobs:
         with:
           use-cross: true
           command: build
-          args: --release --target ${{ matrix.target }}-unknown-linux-musl
+          args: --release --target ${{ matrix.arch }}-unknown-linux-musl
 
       - uses: actions/upload-artifact@v3
         with:
-          name: furui-${{ matrix.target }}
-          path: target/${{ matrix.target }}-unknown-linux-musl/release/furui
+          name: furui-${{ matrix.arch }}
+          path: target/${{ matrix.arch }}-unknown-linux-musl/release/furui
