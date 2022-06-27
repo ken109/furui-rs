@@ -17,11 +17,11 @@ pub async fn ingress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
         |event: IngressEvent, _| async move {
             info!(
                 event = "ingress",
-                action = event.action.to_string().as_str(),
+                action = event.action.to_string(),
                 container_id = to_str(event.container_id).as_str(),
                 comm = to_str(event.comm).as_str(),
-                family = event.family.to_string().as_str(),
-                protocol = event.protocol.to_string().as_str(),
+                family = event.family.to_string(),
+                protocol = event.protocol.to_string(),
                 source_addr = event.src_addr().as_str(),
                 source_port = event.sport,
                 destination_addr = event.dst_addr().as_str(),
@@ -38,11 +38,11 @@ pub async fn ingress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
         |event: Ingress6Event, _| async move {
             info!(
                 event = "ingress",
-                action = event.action.to_string().as_str(),
+                action = event.action.to_string(),
                 container_id = to_str(event.container_id).as_str(),
                 comm = to_str(event.comm).as_str(),
-                family = event.family.to_string().as_str(),
-                protocol = event.protocol.to_string().as_str(),
+                family = event.family.to_string(),
+                protocol = event.protocol.to_string(),
                 source_addr = event.src_addr().as_str(),
                 source_port = event.sport,
                 destination_addr = event.dst_addr().as_str(),

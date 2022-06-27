@@ -10,10 +10,12 @@ use aya_log_ebpf::warn;
 
 use furui_common::{
     ContainerID, ContainerIP, EthProtocol, Ingress6Event, IngressEvent, IpProtocol, PolicyKey,
-    PortKey, TcAction,
+    PortKey, TcAction, IPV6_LEN,
 };
 
-use crate::helpers::{eth_protocol, ip_protocol, ntohl, ntohs, ETH_HDR_LEN, IP_HDR_LEN};
+use crate::helpers::{
+    eth_protocol, ip_protocol, ntohl, ntohs, ETH_HDR_LEN, IPV6_HDR_LEN, IP_HDR_LEN,
+};
 use crate::vmlinux::{iphdr, ipv6hdr, tcphdr, udphdr};
 use crate::{CONTAINER_ID_FROM_IPS, POLICY_LIST, PROC_PORTS};
 
@@ -134,7 +136,7 @@ unsafe fn try_ingress(ctx: &SkBuffContext) -> Result<i32, c_long> {
         return finish(ctx, TcAction::Pass, &mut event, &mut event6);
     }
 
-    match eth_proto {
+    return match eth_proto {
         EthProtocol::IP => {
             event.comm = bpf_probe_read_kernel(&port_val.comm)?;
 
@@ -252,23 +254,145 @@ unsafe fn try_ingress(ctx: &SkBuffContext) -> Result<i32, c_long> {
                 return finish4(ctx, TcAction::Pass, &mut event);
             }
 
-            return finish4(ctx, TcAction::Drop, &mut event);
+            finish4(ctx, TcAction::Drop, &mut event)
         }
-        EthProtocol::IPv6 => {}
-        EthProtocol::Other => return Ok(TC_ACT_OK),
-    }
+        EthProtocol::IPv6 => {
+            event6.comm = bpf_probe_read_kernel(&port_val.comm)?;
 
-    Ok(TC_ACT_OK)
+            // section
+            policy_key.protocol = event6.protocol;
+            policy_key.local_port = 0;
+            policy_key.remote_ipv6 = [0; IPV6_LEN];
+            policy_key.remote_port = 0;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            policy_key.local_port = event6.dport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            policy_key.remote_ipv6 = event6.saddr;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            policy_key.remote_port = event6.sport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            // section
+            policy_key.protocol = IpProtocol::default();
+            policy_key.local_port = event6.dport;
+            policy_key.remote_ipv6 = [0; IPV6_LEN];
+            policy_key.remote_port = 0;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            policy_key.remote_ipv6 = event6.saddr;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            policy_key.remote_port = event6.sport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            // section
+            policy_key.protocol = IpProtocol::default();
+            policy_key.local_port = 0;
+            policy_key.remote_ipv6 = event6.saddr;
+            policy_key.remote_port = 0;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            policy_key.remote_port = event6.sport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            // section
+            policy_key.protocol = event6.protocol;
+            policy_key.local_port = 0;
+            policy_key.remote_ipv6 = event6.saddr;
+            policy_key.remote_port = 0;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            policy_key.remote_port = event6.sport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            // reverse section
+            policy_key.protocol = IpProtocol::default();
+            policy_key.local_port = 0;
+            policy_key.remote_ipv6 = [0; IPV6_LEN];
+            policy_key.remote_port = event6.sport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            policy_key.local_port = event6.dport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            policy_key.protocol = event6.protocol;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            // reverse section
+            policy_key.protocol = event6.protocol;
+            policy_key.local_port = 0;
+            policy_key.remote_ipv6 = [0; IPV6_LEN];
+            policy_key.remote_port = event6.sport;
+            let policy_val = POLICY_LIST.get(&policy_key);
+            if policy_val.is_some() {
+                return finish6(ctx, TcAction::Pass, &mut event6);
+            }
+
+            finish6(ctx, TcAction::Drop, &mut event6)
+        }
+        EthProtocol::Other => Ok(TC_ACT_OK),
+    };
 }
 
 unsafe fn get_port(ctx: &SkBuffContext) -> Result<(u16, u16), c_long> {
+    let ip_hdr_len = match eth_protocol(ctx)? {
+        EthProtocol::IP => IP_HDR_LEN,
+        EthProtocol::IPv6 => IPV6_HDR_LEN,
+        EthProtocol::Other => return Err(TC_ACT_OK as c_long),
+    };
+
     return match ip_protocol(ctx)? {
         IpProtocol::TCP => {
-            let tcph = ctx.load::<tcphdr>(ETH_HDR_LEN + IP_HDR_LEN)?;
+            let tcph = ctx.load::<tcphdr>(ETH_HDR_LEN + ip_hdr_len)?;
             Ok((ntohs(tcph.source), ntohs(tcph.dest)))
         }
         IpProtocol::UDP => {
-            let udph = ctx.load::<udphdr>(ETH_HDR_LEN + IP_HDR_LEN)?;
+            let udph = ctx.load::<udphdr>(ETH_HDR_LEN + ip_hdr_len)?;
             Ok((ntohs(udph.source), ntohs(udph.dest)))
         }
         IpProtocol::Default | IpProtocol::Other => Err(TC_ACT_OK as c_long),

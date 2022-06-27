@@ -75,12 +75,11 @@ impl EthProtocol {
         }
     }
 
-    #[cfg(feature = "user")]
-    pub fn to_string(&self) -> String {
+    pub fn to_string(&self) -> &'static str {
         match self {
-            EthProtocol::IP => "IP".to_string(),
-            EthProtocol::IPv6 => "IP".to_string(),
-            EthProtocol::Other => "UNK".to_string(),
+            EthProtocol::IP => "IP",
+            EthProtocol::IPv6 => "IPv6",
+            EthProtocol::Other => "UNK",
         }
     }
 }
@@ -123,12 +122,11 @@ impl IpProtocol {
         }
     }
 
-    #[cfg(feature = "user")]
-    pub fn to_string(&self) -> String {
+    pub fn to_string(&self) -> &'static str {
         match self {
-            IpProtocol::TCP => "TCP".to_string(),
-            IpProtocol::UDP => "UDP".to_string(),
-            IpProtocol::Default | IpProtocol::Other => "UNK".to_string(),
+            IpProtocol::TCP => "TCP",
+            IpProtocol::UDP => "UDP",
+            IpProtocol::Default | IpProtocol::Other => "UNK",
         }
     }
 }
@@ -141,11 +139,10 @@ pub enum TcAction {
 }
 
 impl TcAction {
-    #[cfg(feature = "user")]
-    pub fn to_string(&self) -> String {
+    pub fn to_string(&self) -> &'static str {
         match self {
-            TcAction::Pass => "pass".to_string(),
-            TcAction::Drop => "drop".to_string(),
+            TcAction::Pass => "pass",
+            TcAction::Drop => "drop",
         }
     }
 }
