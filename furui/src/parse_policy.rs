@@ -63,11 +63,26 @@ impl Default for Protocol {
 
 #[derive(Debug, Deserialize)]
 pub struct ICMP {
-    pub version: u8,
+    #[serde(default)]
+    pub version: IcmpVersion,
     #[serde(rename = "type")]
-    pub icmp_type: u8,
+    pub type_: u8,
     pub code: Option<u8>,
     pub remote_host: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all(deserialize = "lowercase"))]
+pub enum IcmpVersion {
+    V4,
+    V6,
+    None,
+}
+
+impl Default for IcmpVersion {
+    fn default() -> Self {
+        IcmpVersion::None
+    }
 }
 
 impl ParsePolicies {
@@ -143,9 +158,14 @@ impl ParsePolicies {
 
                 // icmp
                 for parsed_icmp in &parsed_communication.icmp {
+                    let icmp_version = match parsed_icmp.version {
+                        IcmpVersion::V4 => furui_common::IcmpVersion::V4,
+                        IcmpVersion::V6 => furui_common::IcmpVersion::V6,
+                        IcmpVersion::None => furui_common::IcmpVersion::default(),
+                    };
                     let icmp = domain::ICMP {
-                        version: parsed_icmp.version,
-                        icmp_type: parsed_icmp.icmp_type,
+                        version: icmp_version,
+                        type_: parsed_icmp.type_,
                         code: parsed_icmp.code,
                         remote_ip: None,
                     };
@@ -156,8 +176,8 @@ impl ParsePolicies {
                                 ParsePolicies::lookup_host(containers.clone(), remote_host).await
                             {
                                 communication.icmp.push(domain::ICMP {
-                                    version: parsed_icmp.version,
-                                    icmp_type: parsed_icmp.icmp_type,
+                                    version: icmp_version,
+                                    type_: parsed_icmp.type_,
                                     code: parsed_icmp.code,
                                     remote_ip: Some(addr),
                                 })

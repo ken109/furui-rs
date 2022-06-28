@@ -153,3 +153,43 @@ impl TcAction {
         }
     }
 }
+
+#[derive(Debug, Copy, Clone)]
+#[repr(C)]
+pub enum IcmpVersion {
+    Default,
+    V4,
+    V6,
+}
+
+impl Default for IcmpVersion {
+    fn default() -> Self {
+        IcmpVersion::Default
+    }
+}
+
+impl IcmpVersion {
+    pub fn is_v4(&self) -> bool {
+        match self {
+            IcmpVersion::Default => false,
+            IcmpVersion::V4 => true,
+            IcmpVersion::V6 => false,
+        }
+    }
+
+    pub fn is_v6(&self) -> bool {
+        match self {
+            IcmpVersion::Default => false,
+            IcmpVersion::V4 => false,
+            IcmpVersion::V6 => true,
+        }
+    }
+
+    pub fn to_string(&self) -> &'static str {
+        match self {
+            IcmpVersion::V4 => "v4",
+            IcmpVersion::V6 => "v6",
+            IcmpVersion::Default => "UNK",
+        }
+    }
+}

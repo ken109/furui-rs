@@ -4,7 +4,7 @@ use std::sync::Arc;
 use aya_bpf_cty::c_char;
 use tokio::sync::Mutex;
 
-use furui_common::{IpProtocol, TASK_COMM_LEN};
+use furui_common::{IcmpVersion, IpProtocol, TASK_COMM_LEN};
 
 use crate::domain::container::Container;
 use crate::Containers;
@@ -67,8 +67,8 @@ pub struct Socket {
 
 #[derive(Debug, Clone)]
 pub struct ICMP {
-    pub(crate) version: u8,
-    pub(crate) icmp_type: u8,
+    pub(crate) version: IcmpVersion,
+    pub(crate) type_: u8,
     pub(crate) code: Option<u8>,
     pub(crate) remote_ip: Option<IpAddr>,
 }

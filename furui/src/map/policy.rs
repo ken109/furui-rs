@@ -72,30 +72,31 @@ impl PolicyMap {
                     let mut key: IcmpPolicyKey = std::mem::zeroed();
 
                     key.container_id = policy.container.id();
-                    key.icmp_type = icmp.icmp_type;
+                    key.type_ = icmp.type_;
                     key.code = icmp.code.unwrap_or(0);
 
                     let mut value: IcmpPolicyValue = std::mem::zeroed();
 
-                    value.icmp_type = icmp.icmp_type;
+                    value.type_ = icmp.type_;
                     value.code = icmp.code.unwrap_or(0);
 
-                    if icmp.version == 4 || icmp.version == 6 {
+                    if icmp.version.is_v4() || icmp.version.is_v6() {
                         key.version = icmp.version;
                         value.version = icmp.version;
                     } else {
                         return Err(anyhow!("Please specify icmp version in the policy"));
                     }
 
-                    match icmp.remote_ip.unwrap() {
-                        IpAddr::V4(ip) => {
+                    match icmp.remote_ip {
+                        Some(IpAddr::V4(ip)) => {
                             key.remote_ip = ip.into();
                             value.remote_ip = ip.into();
                         }
-                        IpAddr::V6(ip) => {
+                        Some(IpAddr::V6(ip)) => {
                             key.remote_ipv6 = ip.octets();
                             value.remote_ipv6 = ip.octets();
                         }
+                        None => {}
                     }
 
                     icmp_policy_list.insert(key, value, 0)?;
@@ -152,22 +153,23 @@ impl PolicyMap {
                     let mut key: IcmpPolicyKey = std::mem::zeroed();
 
                     key.container_id = policy.container.id();
-                    key.icmp_type = icmp.icmp_type;
+                    key.type_ = icmp.type_;
                     key.code = icmp.code.unwrap_or(0);
 
-                    if icmp.version == 4 || icmp.version == 6 {
+                    if icmp.version.is_v4() || icmp.version.is_v6() {
                         key.version = icmp.version;
                     } else {
                         return Err(anyhow!("Please specify icmp version in the policy"));
                     }
 
-                    match icmp.remote_ip.unwrap() {
-                        IpAddr::V4(ip) => {
+                    match icmp.remote_ip {
+                        Some(IpAddr::V4(ip)) => {
                             key.remote_ip = ip.into();
                         }
-                        IpAddr::V6(ip) => {
+                        Some(IpAddr::V6(ip)) => {
                             key.remote_ipv6 = ip.octets();
                         }
+                        None => {}
                     }
 
                     icmp_policy_list.remove(&key)?;

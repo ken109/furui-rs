@@ -1,6 +1,8 @@
 use aya_bpf_cty::c_char;
 
-use crate::{EthProtocol, IpProtocol, TcAction, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN};
+use crate::{
+    EthProtocol, IcmpVersion, IpProtocol, TcAction, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN,
+};
 
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -60,8 +62,8 @@ pub struct IngressIcmpEvent {
     pub daddr: u32,
     pub family: EthProtocol,
     pub protocol: IpProtocol,
-    pub version: u8,
-    pub ecmp_type: u8,
+    pub version: IcmpVersion,
+    pub type_: u8,
     pub code: u8,
     pub action: TcAction,
 }
@@ -74,8 +76,8 @@ pub struct Ingress6IcmpEvent {
     pub daddr: [u8; IPV6_LEN],
     pub family: EthProtocol,
     pub protocol: IpProtocol,
-    pub version: u8,
-    pub ecmp_type: u8,
+    pub version: IcmpVersion,
+    pub type_: u8,
     pub code: u8,
     pub action: TcAction,
 }
