@@ -7,7 +7,7 @@ use tokio::sync::Mutex;
 
 use furui_common::CONTAINER_ID_LEN;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Container {
     pub id: Option<String>,
     pub ip_addresses: Option<Vec<IpAddr>>,

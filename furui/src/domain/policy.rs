@@ -9,7 +9,7 @@ use furui_common::{IcmpVersion, IpProtocol, TASK_COMM_LEN};
 use crate::domain::container::Container;
 use crate::Containers;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Policies {
     pub(crate) policies: Vec<Policy>,
 }
@@ -35,13 +35,13 @@ impl Policies {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Policy {
     pub(crate) container: Container,
     pub(crate) communications: Vec<Communication>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Communication {
     pub(crate) process: Option<String>,
     pub(crate) sockets: Vec<Socket>,
@@ -57,7 +57,7 @@ impl Communication {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Socket {
     pub(crate) protocol: IpProtocol,
     pub(crate) local_port: Option<u16>,
@@ -65,7 +65,7 @@ pub struct Socket {
     pub(crate) remote_port: Option<u16>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ICMP {
     pub(crate) version: IcmpVersion,
     pub(crate) type_: u8,

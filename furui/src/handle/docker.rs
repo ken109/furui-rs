@@ -70,7 +70,7 @@ async fn add_container(
 
     unsafe {
         maps.policy
-            .remove(policies.clone())
+            .remove()
             .await
             .unwrap_or_else(|e| warn!("failed to remove policies: {}", e))
     };
@@ -113,7 +113,7 @@ async fn remove_container(
 
     unsafe {
         maps.policy
-            .remove(policies.clone())
+            .remove()
             .await
             .unwrap_or_else(|e| warn!("failed to remove policies: {}", e))
     };
