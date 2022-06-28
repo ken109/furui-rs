@@ -5,9 +5,7 @@ use aya_bpf::macros::map;
 use aya_bpf::maps::PerfEventArray;
 use aya_bpf::programs::SkBuffContext;
 
-use furui_common::{
-    ContainerIP, IcmpPolicyKey, IcmpVersion, Ingress6IcmpEvent, TcAction, IPV6_LEN,
-};
+use furui_common::{ContainerIP, Egress6IcmpEvent, IcmpPolicyKey, IcmpVersion, TcAction, IPV6_LEN};
 
 use crate::helpers::{
     eth_protocol, ip_protocol, ETH_HDR_LEN, IPV6_HDR_LEN, NEIGHBOR_ADVERTISEMENT,
@@ -17,11 +15,11 @@ use crate::vmlinux::{icmphdr, ipv6hdr};
 use crate::{CONTAINER_ID_FROM_IPS, ICMP_POLICY_LIST};
 
 #[map]
-static mut INGRESS6_ICMP_EVENTS: PerfEventArray<Ingress6IcmpEvent> =
-    PerfEventArray::<Ingress6IcmpEvent>::with_max_entries(1024, 0);
+static mut EGRESS6_ICMP_EVENTS: PerfEventArray<Egress6IcmpEvent> =
+    PerfEventArray::<Egress6IcmpEvent>::with_max_entries(1024, 0);
 
 pub(crate) unsafe fn ipv6_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
-    let mut event: Ingress6IcmpEvent = core::mem::zeroed();
+    let mut event: Egress6IcmpEvent = core::mem::zeroed();
 
     let iph = ctx.load::<ipv6hdr>(ETH_HDR_LEN)?;
 
@@ -41,7 +39,7 @@ pub(crate) unsafe fn ipv6_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
     }
 
     let mut ip_key: ContainerIP = core::mem::zeroed();
-    ip_key.ipv6 = event.daddr;
+    ip_key.ipv6 = event.saddr;
 
     let cid_val = CONTAINER_ID_FROM_IPS.get(&ip_key);
     if cid_val.is_none() {
@@ -70,7 +68,7 @@ pub(crate) unsafe fn ipv6_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
         return finish(ctx, TcAction::Pass, &mut event);
     }
 
-    policy_key.remote_ipv6 = event.saddr;
+    policy_key.remote_ipv6 = event.daddr;
     let policy_val = ICMP_POLICY_LIST.get(&policy_key);
     if policy_val.is_some() {
         return finish(ctx, TcAction::Pass, &mut event);
@@ -79,7 +77,7 @@ pub(crate) unsafe fn ipv6_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
     // section
     policy_key.type_ = 255;
     policy_key.code = 255;
-    policy_key.remote_ipv6 = event.saddr;
+    policy_key.remote_ipv6 = event.daddr;
     let policy_val = ICMP_POLICY_LIST.get(&policy_key);
     if policy_val.is_some() {
         return finish(ctx, TcAction::Pass, &mut event);
@@ -94,7 +92,7 @@ pub(crate) unsafe fn ipv6_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
     // section
     policy_key.type_ = event.type_;
     policy_key.code = 255;
-    policy_key.remote_ipv6 = event.saddr;
+    policy_key.remote_ipv6 = event.daddr;
     let policy_val = ICMP_POLICY_LIST.get(&policy_key);
     if policy_val.is_some() {
         return finish(ctx, TcAction::Pass, &mut event);
@@ -115,10 +113,10 @@ pub(crate) unsafe fn ipv6_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
 unsafe fn finish(
     ctx: &SkBuffContext,
     action: TcAction,
-    event: &mut Ingress6IcmpEvent,
+    event: &mut Egress6IcmpEvent,
 ) -> Result<i32, c_long> {
     event.action = action;
-    INGRESS6_ICMP_EVENTS.output(ctx, event, 0);
+    EGRESS6_ICMP_EVENTS.output(ctx, event, 0);
     return Ok(match action {
         TcAction::Pass => TC_ACT_OK,
         TcAction::Drop => TC_ACT_SHOT,
