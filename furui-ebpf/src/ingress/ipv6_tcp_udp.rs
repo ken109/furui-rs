@@ -44,11 +44,9 @@ pub(crate) unsafe fn ipv6_tcp_udp(ctx: &SkBuffContext) -> Result<i32, c_long> {
         return finish(ctx, TcAction::Pass, &mut event);
     }
 
-    let cid_val = cid_val.unwrap();
-
     // port
     let mut port_key: PortKey = core::mem::zeroed();
-    port_key.container_id = bpf_probe_read_kernel(&cid_val.container_id)?;
+    port_key.container_id = event.container_id;
     port_key.port = event.dport;
     port_key.proto = event.protocol;
 
@@ -63,7 +61,7 @@ pub(crate) unsafe fn ipv6_tcp_udp(ctx: &SkBuffContext) -> Result<i32, c_long> {
 
     // If nothing is specified in the policy except the container name and
     // executable name, allow all communication to that process.
-    policy_key.container_id = bpf_probe_read_kernel(&cid_val.container_id)?;
+    policy_key.container_id = event.container_id;
     policy_key.comm = bpf_probe_read_kernel(&port_val.comm)?;
     let policy_val = POLICY_LIST.get(&policy_key);
     if policy_val.is_some() {
