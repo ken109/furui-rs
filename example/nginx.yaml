@@ -8,3 +8,8 @@ policies:
             local_port: 80
           - protocol: "tcp"
             local_port: 443
+      - executable: "curl"
+        sockets:
+          - protocol: "udp"
+            remote_port: 53
+          - remote_host: "httpbin.org"
