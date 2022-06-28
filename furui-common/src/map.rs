@@ -3,7 +3,7 @@ use std::net::IpAddr;
 
 use aya_bpf_cty::c_char;
 
-use crate::{IpProtocol, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN};
+use crate::{IcmpVersion, IpProtocol, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN};
 
 #[derive(Debug, Copy, Clone)]
 #[repr(C)]
@@ -32,8 +32,8 @@ pub struct PolicyValue {
 #[repr(C)]
 pub struct IcmpPolicyKey {
     pub container_id: [c_char; CONTAINER_ID_LEN],
-    pub version: u8,
-    pub icmp_type: u8,
+    pub version: IcmpVersion,
+    pub type_: u8,
     pub code: u8,
     pub remote_ip: u32,
     pub remote_ipv6: [u8; IPV6_LEN],
@@ -42,8 +42,8 @@ pub struct IcmpPolicyKey {
 #[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub struct IcmpPolicyValue {
-    pub version: u8,
-    pub icmp_type: u8,
+    pub version: IcmpVersion,
+    pub type_: u8,
     pub code: u8,
     pub remote_ip: u32,
     pub remote_ipv6: [u8; IPV6_LEN],
