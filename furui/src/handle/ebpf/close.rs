@@ -5,7 +5,7 @@ use aya::Bpf;
 use tokio::sync::Mutex;
 use tracing::info;
 
-use crate::handle::{handle_perf_array, PidProcesses};
+use crate::handle::ebpf::{handle_perf_array, PidProcesses};
 use crate::Maps;
 
 pub async fn close(
