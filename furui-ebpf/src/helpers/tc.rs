@@ -7,6 +7,9 @@ use furui_common::{EthProtocol, IpProtocol};
 use crate::helpers::{ntohs, ETH_HDR_LEN, IPV6_HDR_LEN, IP_HDR_LEN};
 use crate::vmlinux::{ethhdr, iphdr, ipv6hdr, tcphdr, udphdr};
 
+pub(crate) const NEIGHBOR_SOLICITAION: u8 = 135;
+pub(crate) const NEIGHBOR_ADVERTISEMENT: u8 = 136;
+
 #[inline]
 pub(crate) fn eth_protocol(ctx: &SkBuffContext) -> Result<EthProtocol, c_long> {
     let eth = ctx.load::<ethhdr>(0)?;
@@ -31,6 +34,7 @@ pub(crate) fn ip_protocol(ctx: &SkBuffContext) -> Result<IpProtocol, c_long> {
     }
 }
 
+#[inline]
 pub(crate) unsafe fn get_port(ctx: &SkBuffContext) -> Result<(u16, u16), c_long> {
     let ip_hdr_len = match eth_protocol(ctx)? {
         EthProtocol::IP => IP_HDR_LEN,

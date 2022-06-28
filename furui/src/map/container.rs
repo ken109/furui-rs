@@ -4,6 +4,7 @@ use std::sync::Arc;
 use aya::maps::{HashMap, MapRefMut};
 use aya::Bpf;
 use tokio::sync::Mutex;
+use tracing::warn;
 
 use furui_common::{ContainerID, ContainerIP};
 
