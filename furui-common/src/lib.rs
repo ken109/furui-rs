@@ -86,6 +86,8 @@ impl EthProtocol {
 
 const IPPROTO_TCP: u8 = 6;
 const IPPROTO_UDP: u8 = 17;
+const IPPROTO_ICMP: u8 = 1;
+const IPPROTO_ICMPV6: u8 = 58;
 
 #[derive(Debug, Copy, Clone)]
 #[repr(C)]
@@ -93,6 +95,7 @@ pub enum IpProtocol {
     Default,
     TCP,
     UDP,
+    ICMP,
     Other,
 }
 
@@ -108,6 +111,8 @@ impl IpProtocol {
             IpProtocol::TCP
         } else if proto == IPPROTO_UDP {
             IpProtocol::UDP
+        } else if proto == IPPROTO_ICMP || proto == IPPROTO_ICMPV6 {
+            IpProtocol::ICMP
         } else {
             IpProtocol::Other
         }
@@ -118,6 +123,7 @@ impl IpProtocol {
             IpProtocol::Default => false,
             IpProtocol::TCP => false,
             IpProtocol::UDP => false,
+            IpProtocol::ICMP => false,
             IpProtocol::Other => true,
         }
     }
@@ -126,6 +132,7 @@ impl IpProtocol {
         match self {
             IpProtocol::TCP => "TCP",
             IpProtocol::UDP => "UDP",
+            IpProtocol::ICMP => "ICMP",
             IpProtocol::Default | IpProtocol::Other => "UNK",
         }
     }

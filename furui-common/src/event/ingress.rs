@@ -51,3 +51,31 @@ impl Ingress6Event {
         std::net::Ipv6Addr::from(self.daddr).to_string()
     }
 }
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct IngressIcmpEvent {
+    pub container_id: [c_char; CONTAINER_ID_LEN],
+    pub saddr: u32,
+    pub daddr: u32,
+    pub family: EthProtocol,
+    pub protocol: IpProtocol,
+    pub version: u8,
+    pub ecmp_type: u8,
+    pub code: u8,
+    pub action: TcAction,
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct Ingress6IcmpEvent {
+    pub container_id: [c_char; CONTAINER_ID_LEN],
+    pub saddr: [u8; IPV6_LEN],
+    pub daddr: [u8; IPV6_LEN],
+    pub family: EthProtocol,
+    pub protocol: IpProtocol,
+    pub version: u8,
+    pub ecmp_type: u8,
+    pub code: u8,
+    pub action: TcAction,
+}
