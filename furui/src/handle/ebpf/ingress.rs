@@ -1,21 +1,20 @@
 use std::sync::Arc;
 
 use aya::Bpf;
+use furui_common::{Ingress6Event, Ingress6IcmpEvent, IngressEvent, IngressIcmpEvent};
 use tokio::sync::Mutex;
 use tracing::info;
 
-use furui_common::{Egress6Event, Egress6IcmpEvent, EgressEvent, EgressIcmpEvent};
+use crate::handle::ebpf::{handle_perf_array, to_str};
 
-use crate::handle::{handle_perf_array, to_str};
-
-pub async fn egress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
+pub async fn ingress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
     let args = Arc::new(Mutex::new(()));
 
     handle_perf_array(
         bpf.clone(),
-        "EGRESS_EVENTS",
+        "INGRESS_EVENTS",
         args.clone(),
-        |event: EgressEvent, _| async move {
+        |event: IngressEvent, _| async move {
             info!(
                 event = "ingress",
                 action = event.action.to_string(),
@@ -34,9 +33,9 @@ pub async fn egress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
 
     handle_perf_array(
         bpf.clone(),
-        "EGRESS_ICMP_EVENTS",
+        "INGRESS_ICMP_EVENTS",
         args.clone(),
-        |event: EgressIcmpEvent, _| async move {
+        |event: IngressIcmpEvent, _| async move {
             info!(
                 event = "ingress",
                 action = event.action.to_string(),
@@ -55,9 +54,9 @@ pub async fn egress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
 
     handle_perf_array(
         bpf.clone(),
-        "EGRESS6_EVENTS",
+        "INGRESS6_EVENTS",
         args.clone(),
-        |event: Egress6Event, _| async move {
+        |event: Ingress6Event, _| async move {
             info!(
                 event = "ingress",
                 action = event.action.to_string(),
@@ -76,9 +75,9 @@ pub async fn egress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
 
     handle_perf_array(
         bpf.clone(),
-        "EGRESS6_ICMP_EVENTS",
+        "INGRESS6_ICMP_EVENTS",
         args.clone(),
-        |event: Egress6IcmpEvent, _| async move {
+        |event: Ingress6IcmpEvent, _| async move {
             info!(
                 event = "ingress",
                 action = event.action.to_string(),

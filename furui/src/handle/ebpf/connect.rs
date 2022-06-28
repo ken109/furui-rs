@@ -6,7 +6,7 @@ use tracing::info;
 
 use furui_common::{Connect6Event, ConnectEvent};
 
-use crate::handle::{handle_perf_array, to_str, PidProcesses};
+use crate::handle::ebpf::{handle_perf_array, to_str, PidProcesses};
 
 pub async fn connect(
     bpf: Arc<Mutex<Bpf>>,
