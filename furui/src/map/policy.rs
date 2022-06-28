@@ -107,74 +107,26 @@ impl PolicyMap {
         Ok(())
     }
 
-    pub async unsafe fn remove(
-        &self,
-        policies: Arc<Mutex<domain::Policies>>,
-    ) -> anyhow::Result<()> {
+    pub async unsafe fn remove(&self) -> anyhow::Result<()> {
         let mut policy_list: HashMap<MapRefMut, PolicyKey, PolicyValue> =
             HashMap::try_from(self.bpf.lock().await.map_mut("POLICY_LIST")?)?;
         let mut icmp_policy_list: HashMap<MapRefMut, IcmpPolicyKey, IcmpPolicyValue> =
             HashMap::try_from(self.bpf.lock().await.map_mut("ICMP_POLICY_LIST")?)?;
 
-        for policy in &policies.lock().await.policies {
-            for communication in &policy.communications {
-                let mut key: PolicyKey = std::mem::zeroed();
+        let mut policy_keys = vec![];
+        for key in policy_list.keys() {
+            policy_keys.push(key.unwrap());
+        }
+        for policy_key in policy_keys {
+            policy_list.remove(&policy_key)?;
+        }
 
-                key.container_id = policy.container.id();
-                key.comm = communication.process();
-
-                if communication.sockets.len() == 0
-                    && communication.icmp.len() == 0
-                    && communication.process.as_ref().unwrap().len() != 0
-                {
-                    policy_list.remove(&key)?;
-                    continue;
-                }
-
-                for socket in &communication.sockets {
-                    key.local_port = socket.local_port.unwrap_or(0);
-                    key.remote_port = socket.remote_port.unwrap_or(0);
-                    key.protocol = socket.protocol;
-
-                    match socket.remote_ip {
-                        Some(IpAddr::V4(ip)) => {
-                            key.remote_ip = ip.into();
-                        }
-                        Some(IpAddr::V6(ip)) => {
-                            key.remote_ipv6 = ip.octets();
-                        }
-                        None => {}
-                    }
-
-                    policy_list.remove(&key)?;
-                }
-
-                for icmp in &communication.icmp {
-                    let mut key: IcmpPolicyKey = std::mem::zeroed();
-
-                    key.container_id = policy.container.id();
-                    key.type_ = icmp.type_;
-                    key.code = icmp.code.unwrap_or(0);
-
-                    if icmp.version.is_v4() || icmp.version.is_v6() {
-                        key.version = icmp.version;
-                    } else {
-                        return Err(anyhow!("Please specify icmp version in the policy"));
-                    }
-
-                    match icmp.remote_ip {
-                        Some(IpAddr::V4(ip)) => {
-                            key.remote_ip = ip.into();
-                        }
-                        Some(IpAddr::V6(ip)) => {
-                            key.remote_ipv6 = ip.octets();
-                        }
-                        None => {}
-                    }
-
-                    icmp_policy_list.remove(&key)?;
-                }
-            }
+        let mut policy_keys = vec![];
+        for key in icmp_policy_list.keys() {
+            policy_keys.push(key.unwrap());
+        }
+        for policy_key in policy_keys {
+            icmp_policy_list.remove(&policy_key)?;
         }
 
         Ok(())

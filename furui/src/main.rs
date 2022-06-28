@@ -62,32 +62,25 @@ async unsafe fn try_main(opt: Opt) -> anyhow::Result<()> {
     let docker = Docker::new()?;
     let containers = Containers::new();
 
-    let policies = match ParsePolicies::new(opt.policy_path) {
+    docker
+        .add_running_containers_inspect(containers.clone())
+        .await?;
+
+    let policies = match ParsePolicies::new(opt.policy_path.clone()) {
         Ok(parsed_policies) => parsed_policies.to_domain(containers.clone()).await?,
         Err(err) => {
             return Err(err);
         }
     };
 
-    docker
-        .add_running_containers_inspect(containers.clone())
-        .await?;
-
     let bpf = ebpf::load_bpf()?;
     let loader = Loader::new(bpf.clone());
 
     loader.attach_programs().await?;
 
-    let maps = Maps::new(bpf.clone());
-
     let processes = process::get_all(containers.clone()).await;
 
-    policies
-        .lock()
-        .await
-        .set_container_id(containers.clone())
-        .await;
-
+    let maps = Maps::new(bpf.clone());
     maps.policy.save(policies.clone()).await?;
     maps.container.save_id_with_ips(containers.clone()).await?;
     maps.process.save_all(&processes).await?;
@@ -100,6 +93,12 @@ async unsafe fn try_main(opt: Opt) -> anyhow::Result<()> {
         containers.clone(),
         policies.clone(),
     );
+    handle::policy_events(
+        opt.policy_path.clone(),
+        maps.clone(),
+        policies.clone(),
+        containers.clone(),
+    )?;
 
     signal::ctrl_c().await?;
     info!("Exiting...");

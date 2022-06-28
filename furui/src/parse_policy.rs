@@ -15,6 +15,8 @@ use crate::domain::{self, Policies};
 
 #[derive(Debug, Deserialize)]
 pub struct ParsePolicies {
+    #[serde(skip)]
+    pub md5: String,
     pub policies: Vec<Policy>,
 }
 
@@ -92,7 +94,11 @@ impl ParsePolicies {
 
         f.read_to_string(&mut contents)?;
 
-        Ok(serde_yaml::from_str::<ParsePolicies>(&contents)?)
+        let mut parsed_policies = serde_yaml::from_str::<ParsePolicies>(&contents)?;
+
+        parsed_policies.md5 = format!("{:x}", md5::compute(contents));
+
+        Ok(parsed_policies)
     }
 
     async fn lookup_host(
@@ -200,6 +206,8 @@ impl ParsePolicies {
                 communications,
             })
         }
+
+        policies.set_container_id(containers.clone()).await;
 
         Ok(Arc::new(Mutex::new(policies)))
     }
