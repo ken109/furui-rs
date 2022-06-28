@@ -68,7 +68,7 @@ pub(crate) unsafe fn ipv4_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
     }
 
     // section
-    policy_key.type_ = 0;
+    policy_key.type_ = 255;
     policy_key.code = 255;
     policy_key.remote_ip = event.saddr;
     let policy_val = ICMP_POLICY_LIST.get(&policy_key);
@@ -92,7 +92,7 @@ pub(crate) unsafe fn ipv4_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
     }
 
     // section
-    policy_key.type_ = 0;
+    policy_key.type_ = 255;
     policy_key.code = event.code;
     policy_key.remote_ip = 0;
     let policy_val = ICMP_POLICY_LIST.get(&policy_key);
