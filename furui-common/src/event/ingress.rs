@@ -68,6 +68,17 @@ pub struct IngressIcmpEvent {
     pub action: TcAction,
 }
 
+#[cfg(feature = "user")]
+impl IngressIcmpEvent {
+    pub fn src_addr(&self) -> String {
+        std::net::Ipv4Addr::from(self.saddr).to_string()
+    }
+
+    pub fn dst_addr(&self) -> String {
+        std::net::Ipv4Addr::from(self.daddr).to_string()
+    }
+}
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct Ingress6IcmpEvent {
@@ -80,4 +91,15 @@ pub struct Ingress6IcmpEvent {
     pub type_: u8,
     pub code: u8,
     pub action: TcAction,
+}
+
+#[cfg(feature = "user")]
+impl Ingress6IcmpEvent {
+    pub fn src_addr(&self) -> String {
+        std::net::Ipv6Addr::from(self.saddr).to_string()
+    }
+
+    pub fn dst_addr(&self) -> String {
+        std::net::Ipv6Addr::from(self.daddr).to_string()
+    }
 }
