@@ -22,7 +22,7 @@ const ETH_P_IPV6: u16 = 0x86DD;
 const AF_INET: c_ushort = 2;
 const AF_INET6: c_ushort = 10;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(C)]
 pub enum EthProtocol {
     IP,
@@ -89,7 +89,7 @@ const IPPROTO_UDP: u8 = 17;
 const IPPROTO_ICMP: u8 = 1;
 const IPPROTO_ICMPV6: u8 = 58;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(C)]
 pub enum IpProtocol {
     Default,
@@ -154,7 +154,7 @@ impl TcAction {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(C)]
 pub enum IcmpVersion {
     Default,

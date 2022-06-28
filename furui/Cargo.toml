@@ -29,6 +29,7 @@ bollard = "0.12.0"
 futures = "0.3.21"
 thiserror = "1"
 pnet_datalink = "0.31.0"
+md5 = "0.7.0"
 
 [[bin]]
 name = "furui"
