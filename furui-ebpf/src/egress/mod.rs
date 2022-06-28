@@ -5,31 +5,31 @@ use aya_log_ebpf::warn;
 
 use furui_common::{EthProtocol, IpProtocol};
 
+use crate::egress::ipv4_icmp::ipv4_icmp;
+use crate::egress::ipv4_tcp_udp::ipv4_tcp_udp;
+use crate::egress::ipv6_icmp::ipv6_icmp;
+use crate::egress::ipv6_tcp_udp::ipv6_tcp_udp;
 use crate::helpers::{eth_protocol, ip_protocol};
-use crate::ingress::ipv4_icmp::ipv4_icmp;
-use crate::ingress::ipv4_tcp_udp::ipv4_tcp_udp;
-use crate::ingress::ipv6_icmp::ipv6_icmp;
-use crate::ingress::ipv6_tcp_udp::ipv6_tcp_udp;
 
 mod ipv4_icmp;
 mod ipv4_tcp_udp;
 mod ipv6_icmp;
 mod ipv6_tcp_udp;
 
-#[classifier(name = "ingress")]
-pub fn ingress(ctx: SkBuffContext) -> i32 {
-    match unsafe { try_ingress(&ctx) } {
+#[classifier(name = "egress")]
+pub fn egress(ctx: SkBuffContext) -> i32 {
+    match unsafe { try_egress(&ctx) } {
         Ok(ret) => ret,
         Err(ret) => {
             if ret != 0 {
-                warn!(&ctx, "ingress event failed in kernel: {}", ret);
+                warn!(&ctx, "egress event failed in kernel: {}", ret);
             }
             ret as i32
         }
     }
 }
 
-unsafe fn try_ingress(ctx: &SkBuffContext) -> Result<i32, c_long> {
+unsafe fn try_egress(ctx: &SkBuffContext) -> Result<i32, c_long> {
     match (eth_protocol(ctx)?, ip_protocol(ctx)?) {
         (EthProtocol::IP, IpProtocol::TCP | IpProtocol::UDP) => ipv4_tcp_udp(ctx),
         (EthProtocol::IP, IpProtocol::ICMP) => ipv4_icmp(ctx),
