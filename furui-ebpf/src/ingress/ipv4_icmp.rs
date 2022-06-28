@@ -41,10 +41,6 @@ pub(crate) unsafe fn ipv4_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
 
     event.container_id = bpf_probe_read_kernel(&cid_val.unwrap().container_id)?;
 
-    if event.protocol.is_other() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
     let mut policy_key: IcmpPolicyKey = core::mem::zeroed();
 
     policy_key.container_id = event.container_id;
@@ -52,7 +48,7 @@ pub(crate) unsafe fn ipv4_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
 
     // section
     policy_key.type_ = event.type_;
-    policy_key.code = 0;
+    policy_key.code = 255;
     policy_key.remote_ip = 0;
     let policy_val = ICMP_POLICY_LIST.get(&policy_key);
     if policy_val.is_some() {
@@ -73,7 +69,7 @@ pub(crate) unsafe fn ipv4_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
 
     // section
     policy_key.type_ = 0;
-    policy_key.code = 0;
+    policy_key.code = 255;
     policy_key.remote_ip = event.saddr;
     let policy_val = ICMP_POLICY_LIST.get(&policy_key);
     if policy_val.is_some() {
@@ -88,7 +84,7 @@ pub(crate) unsafe fn ipv4_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
 
     // section
     policy_key.type_ = event.type_;
-    policy_key.code = 0;
+    policy_key.code = 255;
     policy_key.remote_ip = event.saddr;
     let policy_val = ICMP_POLICY_LIST.get(&policy_key);
     if policy_val.is_some() {

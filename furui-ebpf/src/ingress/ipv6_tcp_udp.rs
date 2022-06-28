@@ -40,10 +40,6 @@ pub(crate) unsafe fn ipv6_tcp_udp(ctx: &SkBuffContext) -> Result<i32, c_long> {
 
     event.container_id = bpf_probe_read_kernel(&cid_val.unwrap().container_id)?;
 
-    if event.protocol.is_other() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
     // port
     let mut port_key: PortKey = core::mem::zeroed();
     port_key.container_id = event.container_id;
