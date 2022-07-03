@@ -58,7 +58,7 @@ impl PidProcesses {
     }
 }
 
-pub async unsafe fn all_perf_events(
+pub async unsafe fn perf_events(
     bpf: Arc<Mutex<Bpf>>,
     maps: Arc<Maps>,
     processes: &Vec<Process>,
