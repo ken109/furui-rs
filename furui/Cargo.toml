@@ -16,7 +16,7 @@ tracing = "0.1"
 tracing-core = "0.1"
 tracing-log = "0.1"
 tracing-subscriber = { version = "0.3", features = ["json"] }
-structopt = { version = "0.3" }
+clap = { version = "3.2.7", features = ["derive"] }
 tokio = { version = "1.5", features = ["macros", "rt", "rt-multi-thread", "net", "signal", "sync"] }
 serde = "1.0"
 serde_derive = "1.0"

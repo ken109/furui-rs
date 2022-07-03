@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/furui-ebpf/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/furui/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/xtask/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/furui/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/furui-ebpf/target" />
     </content>
