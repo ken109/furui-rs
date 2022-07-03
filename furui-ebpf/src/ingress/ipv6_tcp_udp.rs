@@ -35,7 +35,7 @@ pub(crate) unsafe fn ipv6_tcp_udp(ctx: &SkBuffContext) -> Result<i32, c_long> {
 
     let cid_val = CONTAINER_ID_FROM_IPS.get(&ip_key);
     if cid_val.is_none() {
-        return finish(ctx, TcAction::Drop, &mut event);
+        return Ok(TC_ACT_SHOT);
     }
 
     event.container_id = bpf_probe_read_kernel(&cid_val.unwrap().container_id)?;
