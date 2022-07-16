@@ -5,7 +5,7 @@ use aya_bpf::macros::map;
 use aya_bpf::maps::PerfEventArray;
 use aya_bpf::programs::SkBuffContext;
 
-use furui_common::{ContainerIP, Egress6IcmpEvent, IcmpPolicyKey, IcmpVersion, TcAction, IPV6_LEN};
+use furui_common::{ContainerIP, Egress6IcmpEvent, IcmpPolicyKey, IcmpVersion, TcAction};
 
 use crate::helpers::{
     eth_protocol, ip_protocol, ETH_HDR_LEN, IPV6_HDR_LEN, NEIGHBOR_ADVERTISEMENT,
@@ -53,57 +53,9 @@ pub(crate) unsafe fn ipv6_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
     policy_key.container_id = event.container_id;
     policy_key.version = event.version;
 
-    // section
-    policy_key.type_ = event.type_;
-    policy_key.code = 255;
-    policy_key.remote_ipv6 = [0; IPV6_LEN];
-    let policy_val = ICMP_POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.code = event.code;
-    let policy_val = ICMP_POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.remote_ipv6 = event.daddr;
-    let policy_val = ICMP_POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    // section
-    policy_key.type_ = 255;
-    policy_key.code = 255;
-    policy_key.remote_ipv6 = event.daddr;
-    let policy_val = ICMP_POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.code = event.code;
-    let policy_val = ICMP_POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    // section
-    policy_key.type_ = event.type_;
-    policy_key.code = 255;
-    policy_key.remote_ipv6 = event.daddr;
-    let policy_val = ICMP_POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    // section
-    policy_key.type_ = 255;
-    policy_key.code = event.code;
-    policy_key.remote_ipv6 = [0; IPV6_LEN];
-    let policy_val = ICMP_POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
+    if event.search_key(&mut policy_key, |policy_key| {
+        ICMP_POLICY_LIST.get(&policy_key).is_some()
+    }) {
         return finish(ctx, TcAction::Pass, &mut event);
     }
 

@@ -1,2 +1,2 @@
 [workspace]
-members = ["furui", "furui-common", "xtask"]
+members = ["furui", "furui-common", "furui-macros", "xtask"]

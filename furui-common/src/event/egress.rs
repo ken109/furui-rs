@@ -1,18 +1,25 @@
 use aya_bpf_cty::c_char;
 
+use furui_macros::{SearchIcmpPolicyKey, SearchPolicyKey};
+
 use crate::{
-    EthProtocol, IcmpVersion, IpProtocol, TcAction, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN,
+    EthProtocol, IcmpPolicyKey, IcmpVersion, IpProtocol, PolicyKey, TcAction, CONTAINER_ID_LEN,
+    IPV6_LEN, TASK_COMM_LEN,
 };
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, SearchPolicyKey)]
 #[repr(C)]
 pub struct EgressEvent {
     pub container_id: [c_char; CONTAINER_ID_LEN],
     pub saddr: u32,
+    #[search_key(remote_ip = 0)]
     pub daddr: u32,
+    #[search_key(local_port = 0)]
     pub sport: u16,
+    #[search_key(remote_port = 0)]
     pub dport: u16,
     pub family: EthProtocol,
+    #[search_key(protocol = IpProtocol::default())]
     pub protocol: IpProtocol,
     pub action: TcAction,
     pub comm: [c_char; TASK_COMM_LEN],
@@ -29,15 +36,19 @@ impl EgressEvent {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, SearchPolicyKey)]
 #[repr(C)]
 pub struct Egress6Event {
     pub container_id: [c_char; CONTAINER_ID_LEN],
     pub saddr: [u8; IPV6_LEN],
+    #[search_key(remote_ipv6 = [0; IPV6_LEN])]
     pub daddr: [u8; IPV6_LEN],
+    #[search_key(local_port = 0)]
     pub sport: u16,
+    #[search_key(remote_port = 0)]
     pub dport: u16,
     pub family: EthProtocol,
+    #[search_key(protocol = IpProtocol::default())]
     pub protocol: IpProtocol,
     pub action: TcAction,
     pub comm: [c_char; TASK_COMM_LEN],
@@ -54,16 +65,19 @@ impl Egress6Event {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, SearchIcmpPolicyKey)]
 #[repr(C)]
 pub struct EgressIcmpEvent {
     pub container_id: [c_char; CONTAINER_ID_LEN],
     pub saddr: u32,
+    #[search_key(remote_ip = 0)]
     pub daddr: u32,
     pub family: EthProtocol,
     pub protocol: IpProtocol,
     pub version: IcmpVersion,
+    #[search_key(type_ = 255)]
     pub type_: u8,
+    #[search_key(code = 255)]
     pub code: u8,
     pub action: TcAction,
 }
@@ -79,16 +93,19 @@ impl EgressIcmpEvent {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, SearchIcmpPolicyKey)]
 #[repr(C)]
 pub struct Egress6IcmpEvent {
     pub container_id: [c_char; CONTAINER_ID_LEN],
     pub saddr: [u8; IPV6_LEN],
+    #[search_key(remote_ipv6 = [0; IPV6_LEN])]
     pub daddr: [u8; IPV6_LEN],
     pub family: EthProtocol,
     pub protocol: IpProtocol,
     pub version: IcmpVersion,
+    #[search_key(type_ = 255)]
     pub type_: u8,
+    #[search_key(code = 255)]
     pub code: u8,
     pub action: TcAction,
 }

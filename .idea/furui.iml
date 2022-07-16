@@ -7,8 +7,10 @@
       <sourceFolder url="file://$MODULE_DIR$/furui/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/xtask/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/furui/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/furui-macros/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/furui-ebpf/target" />
+      <excludeFolder url="file://$MODULE_DIR$/furui/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
