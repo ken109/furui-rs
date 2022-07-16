@@ -5,7 +5,7 @@ use aya_bpf::macros::map;
 use aya_bpf::maps::PerfEventArray;
 use aya_bpf::programs::SkBuffContext;
 
-use furui_common::{ContainerIP, Egress6Event, IpProtocol, PolicyKey, PortKey, TcAction, IPV6_LEN};
+use furui_common::{ContainerIP, Egress6Event, PolicyKey, PortKey, TcAction};
 
 use crate::helpers::{eth_protocol, get_port, ip_protocol, ETH_HDR_LEN};
 use crate::vmlinux::ipv6hdr;
@@ -64,117 +64,9 @@ pub(crate) unsafe fn ipv6_tcp_udp(ctx: &SkBuffContext) -> Result<i32, c_long> {
 
     event.comm = bpf_probe_read_kernel(&port_val.comm)?;
 
-    // section
-    policy_key.protocol = event.protocol;
-    policy_key.local_port = 0;
-    policy_key.remote_ipv6 = [0; IPV6_LEN];
-    policy_key.remote_port = 0;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.local_port = event.sport;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.remote_ipv6 = event.daddr;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.remote_port = event.dport;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    // section
-    policy_key.protocol = IpProtocol::default();
-    policy_key.local_port = event.sport;
-    policy_key.remote_ipv6 = [0; IPV6_LEN];
-    policy_key.remote_port = 0;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.remote_ipv6 = event.daddr;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.remote_port = event.dport;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    // section
-    policy_key.protocol = IpProtocol::default();
-    policy_key.local_port = 0;
-    policy_key.remote_ipv6 = event.daddr;
-    policy_key.remote_port = 0;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.remote_port = event.dport;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    // section
-    policy_key.protocol = event.protocol;
-    policy_key.local_port = 0;
-    policy_key.remote_ipv6 = event.daddr;
-    policy_key.remote_port = 0;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.remote_port = event.dport;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    // reverse section
-    policy_key.protocol = IpProtocol::default();
-    policy_key.local_port = 0;
-    policy_key.remote_ipv6 = [0; IPV6_LEN];
-    policy_key.remote_port = event.dport;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.local_port = event.dport;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.protocol = event.protocol;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    // reverse section
-    policy_key.protocol = event.protocol;
-    policy_key.local_port = 0;
-    policy_key.remote_ipv6 = [0; IPV6_LEN];
-    policy_key.remote_port = event.dport;
-    let policy_val = POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
+    if event.search_key(&mut policy_key, |policy_key| {
+        POLICY_LIST.get(&policy_key).is_some()
+    }) {
         return finish(ctx, TcAction::Pass, &mut event);
     }
 

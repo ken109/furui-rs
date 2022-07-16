@@ -46,57 +46,9 @@ pub(crate) unsafe fn ipv4_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
     policy_key.container_id = event.container_id;
     policy_key.version = event.version;
 
-    // section
-    policy_key.type_ = event.type_;
-    policy_key.code = 255;
-    policy_key.remote_ip = 0;
-    let policy_val = ICMP_POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.code = event.code;
-    let policy_val = ICMP_POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.remote_ip = event.daddr;
-    let policy_val = ICMP_POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    // section
-    policy_key.type_ = 255;
-    policy_key.code = 255;
-    policy_key.remote_ip = event.daddr;
-    let policy_val = ICMP_POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    policy_key.code = event.code;
-    let policy_val = ICMP_POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    // section
-    policy_key.type_ = event.type_;
-    policy_key.code = 255;
-    policy_key.remote_ip = event.daddr;
-    let policy_val = ICMP_POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
-        return finish(ctx, TcAction::Pass, &mut event);
-    }
-
-    // section
-    policy_key.type_ = 255;
-    policy_key.code = event.code;
-    policy_key.remote_ip = 0;
-    let policy_val = ICMP_POLICY_LIST.get(&policy_key);
-    if policy_val.is_some() {
+    if event.search_key(&mut policy_key, |policy_key| {
+        ICMP_POLICY_LIST.get(&policy_key).is_some()
+    }) {
         return finish(ctx, TcAction::Pass, &mut event);
     }
 
