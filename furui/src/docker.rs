@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::net::IpAddr;
 use std::sync::Arc;
 
+use anyhow::anyhow;
 use bollard;
 use bollard::container::ListContainersOptions;
 use bollard::models::{ContainerSummary, EventMessage};
@@ -19,9 +20,13 @@ pub struct Docker {
 
 impl Docker {
     pub fn new() -> anyhow::Result<Arc<Docker>> {
-        Ok(Arc::new(Docker {
-            docker: bollard::Docker::connect_with_local_defaults()?,
-        }))
+        let docker = match bollard::Docker::connect_with_local_defaults() {
+            Ok(docker) => docker,
+            Err(_) => {
+                return Err(anyhow!("Failed to connect to docker."));
+            }
+        };
+        Ok(Arc::new(Docker { docker }))
     }
 
     async fn containers(&self) -> anyhow::Result<Vec<ContainerSummary>> {
