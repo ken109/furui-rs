@@ -1,35 +1,35 @@
 use std::sync::Arc;
 
-use furui_common::CONTAINER_ID_LEN;
 use futures::StreamExt;
 use tokio::sync::Mutex;
 use tokio::task;
 use tracing::{info, warn};
 
-use crate::domain::{Container, Policies};
-use crate::{Containers, Docker, Loader, Maps};
+use furui_common::CONTAINER_ID_LEN;
 
-pub fn docker_events(
+use crate::domain::{Container, Policies};
+use crate::runtime::ContainerAction;
+use crate::{Containers, Loader, Maps, Runtime};
+
+pub async fn container_events(
     loader: Arc<Loader>,
-    docker: Arc<Docker>,
+    container_engine: Arc<Runtime>,
     maps: Arc<Maps>,
     containers: Arc<Mutex<Containers>>,
     policies: Arc<Mutex<Policies>>,
 ) {
-    let container_events = docker.container_events();
-
     task::spawn(async move {
-        futures::pin_mut!(container_events);
+        let cloned_container_engine = container_engine.clone();
+        let mut container_events = cloned_container_engine.container_events().await;
 
-        while let Some(Ok(event)) = container_events.next().await {
-            let id = event.actor.unwrap().id.unwrap();
-            let id = id.chars().take(CONTAINER_ID_LEN).collect::<String>();
+        while let Some(event) = container_events.next().await {
+            let id = event.id.chars().take(CONTAINER_ID_LEN).collect::<String>();
 
-            match event.action.unwrap().as_str() {
-                "start" | "unpause" => {
+            match event.action {
+                ContainerAction::Start | ContainerAction::Unpause => {
                     add_container(
                         loader.clone(),
-                        docker.clone(),
+                        container_engine.clone(),
                         maps.clone(),
                         id,
                         containers.clone(),
@@ -37,7 +37,7 @@ pub fn docker_events(
                     )
                     .await
                 }
-                "pause" | "die" => {
+                ContainerAction::Pause | ContainerAction::Die => {
                     remove_container(maps.clone(), id, containers.clone(), policies.clone()).await
                 }
                 _ => {}
@@ -48,7 +48,7 @@ pub fn docker_events(
 
 async fn add_container(
     loader: Arc<Loader>,
-    docker: Arc<Docker>,
+    container_engine: Arc<Runtime>,
     maps: Arc<Maps>,
     id: String,
     containers: Arc<Mutex<Containers>>,
@@ -56,7 +56,7 @@ async fn add_container(
 ) {
     let mut container = Container::new(id.clone());
 
-    docker
+    container_engine
         .set_container_inspect(&mut container)
         .await
         .unwrap_or_else(|e| warn!("failed to add the container inspection: {}", e));

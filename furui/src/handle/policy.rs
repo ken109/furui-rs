@@ -21,7 +21,10 @@ pub fn policy_events(
             time::sleep(Duration::from_secs(1)).await;
 
             let now_policies = match ParsePolicies::new(policy_path.clone()) {
-                Ok(parsed_policies) => parsed_policies.to_domain(containers.clone()).await.unwrap(),
+                Ok(parsed_policies) => parsed_policies
+                    .to_policies(containers.clone())
+                    .await
+                    .unwrap(),
                 Err(_) => Arc::new(Mutex::new(Policies::default())),
             };
 

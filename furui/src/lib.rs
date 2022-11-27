@@ -8,22 +8,25 @@ use tracing_core::Level;
 use tracing_log::LogTracer;
 use tracing_subscriber::FmtSubscriber;
 
-use crate::docker::Docker;
 use crate::domain::Containers;
 use crate::ebpf::Loader;
 use crate::map::Maps;
-use crate::parse_policy::ParsePolicies;
+use crate::parse_policies::ParsePolicies;
+use crate::runtime::Runtime;
 
-mod docker;
 mod domain;
 mod ebpf;
 mod handle;
 mod map;
-mod parse_policy;
+mod parse_policies;
 mod process;
+mod runtime;
 
 #[derive(Debug, Clone, Parser)]
 pub struct Opt {
+    #[clap(long, short = 'e', default_value = "docker", possible_values = &["docker", "k8s-cri"])]
+    pub container_engine: String,
+
     pub policy_path: PathBuf,
 
     #[cfg_attr(debug_assertions, clap(long, default_value = "debug", possible_values = &["trace", "debug", "info", "warn", "error"]))]
@@ -41,15 +44,15 @@ pub async unsafe fn start(opt: Opt) -> anyhow::Result<()> {
 
     setup_tracing(&opt)?;
 
-    let docker = Docker::new()?;
+    let container_engine = Runtime::new(&opt).await?;
     let containers = Containers::new();
 
-    docker
+    container_engine
         .add_running_containers_inspect(containers.clone())
         .await?;
 
     let policies = match ParsePolicies::new(opt.policy_path.clone()) {
-        Ok(parsed_policies) => parsed_policies.to_domain(containers.clone()).await?,
+        Ok(parsed_policies) => parsed_policies.to_policies(containers.clone()).await?,
         Err(err) => {
             return Err(err);
         }
@@ -68,13 +71,14 @@ pub async unsafe fn start(opt: Opt) -> anyhow::Result<()> {
     maps.process.save_all(&processes).await?;
 
     handle::perf_events(bpf.clone(), maps.clone(), &processes).await?;
-    handle::docker_events(
+    handle::container_events(
         loader.clone(),
-        docker.clone(),
+        container_engine.clone(),
         maps.clone(),
         containers.clone(),
         policies.clone(),
-    );
+    )
+    .await;
     handle::policy_events(
         opt.policy_path.clone(),
         maps.clone(),

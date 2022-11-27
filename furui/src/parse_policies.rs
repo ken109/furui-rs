@@ -5,18 +5,17 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use dns_lookup::lookup_host;
-use furui_common::IpProtocol;
 use serde_derive::Deserialize;
 use serde_yaml;
 use tokio::sync::Mutex;
 use tracing::warn;
 
+use furui_common::IpProtocol;
+
 use crate::domain::{self, Policies};
 
 #[derive(Debug, Deserialize)]
 pub struct ParsePolicies {
-    #[serde(skip)]
-    pub md5: String,
     pub policies: Vec<Policy>,
 }
 
@@ -94,11 +93,9 @@ impl ParsePolicies {
 
         f.read_to_string(&mut contents)?;
 
-        let mut parsed_policies = serde_yaml::from_str::<ParsePolicies>(&contents)?;
+        let config = serde_yaml::from_str::<ParsePolicies>(&contents)?;
 
-        parsed_policies.md5 = format!("{:x}", md5::compute(contents));
-
-        Ok(parsed_policies)
+        Ok(config)
     }
 
     async fn lookup_host(
@@ -117,7 +114,7 @@ impl ParsePolicies {
         }
     }
 
-    pub async fn to_domain(
+    pub async fn to_policies(
         &self,
         containers: Arc<Mutex<domain::Containers>>,
     ) -> anyhow::Result<Arc<Mutex<Policies>>> {
