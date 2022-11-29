@@ -25,7 +25,7 @@ use crate::domain::{Container, Containers};
 use crate::runtime::k8s_cri::{
     ContainerStateValue, ContainerStatusRequest, ExecSyncRequest, GetEventsRequest,
 };
-use crate::Opt;
+use crate::{ContainerRuntime, Options};
 
 pub mod k8s_cri {
     use tonic;
@@ -48,40 +48,32 @@ pub enum ContainerAction {
     Unknown,
 }
 
-enum RuntimeType {
-    Docker,
-    KubernetesCri,
-}
-
 pub struct Runtime {
-    engine_type: RuntimeType,
+    engine_type: ContainerRuntime,
     docker: Option<RuntimeDocker>,
     kubernetes_cri: Option<RuntimeKubernetesCri>,
 }
 
 impl Runtime {
-    pub async fn new(opt: &Opt) -> anyhow::Result<Arc<Runtime>> {
-        if opt.container_engine == "docker" {
-            Ok(Arc::new(Runtime {
-                engine_type: RuntimeType::Docker,
+    pub async fn new(opt: &Options) -> anyhow::Result<Arc<Runtime>> {
+        match opt.container_engine {
+            ContainerRuntime::Docker => Ok(Arc::new(Runtime {
+                engine_type: opt.container_engine.clone(),
                 docker: Some(RuntimeDocker::new().await?),
                 kubernetes_cri: None,
-            }))
-        } else if opt.container_engine == "k8s-cri" {
-            Ok(Arc::new(Runtime {
-                engine_type: RuntimeType::KubernetesCri,
+            })),
+            ContainerRuntime::KubernetesCri => Ok(Arc::new(Runtime {
+                engine_type: opt.container_engine.clone(),
                 docker: None,
                 kubernetes_cri: Some(RuntimeKubernetesCri::new().await?),
-            }))
-        } else {
-            Err(anyhow!("Unsupported container engine."))
+            })),
         }
     }
 
     async fn container_ids(&self) -> anyhow::Result<Vec<String>> {
         match &self.engine_type {
-            RuntimeType::Docker => self.docker.as_ref().unwrap().container_ids().await,
-            RuntimeType::KubernetesCri => {
+            ContainerRuntime::Docker => self.docker.as_ref().unwrap().container_ids().await,
+            ContainerRuntime::KubernetesCri => {
                 self.kubernetes_cri.as_ref().unwrap().container_ids().await
             }
         }
@@ -98,14 +90,14 @@ impl Runtime {
                 .collect::<String>(),
         );
         match &self.engine_type {
-            RuntimeType::Docker => {
+            ContainerRuntime::Docker => {
                 self.docker
                     .as_ref()
                     .unwrap()
                     .set_container_inspect(container)
                     .await
             }
-            RuntimeType::KubernetesCri => {
+            ContainerRuntime::KubernetesCri => {
                 self.kubernetes_cri
                     .as_ref()
                     .unwrap()
@@ -134,8 +126,8 @@ impl Runtime {
 
     pub async fn container_events(&self) -> BoxStream<ContainerEvent> {
         match &self.engine_type {
-            RuntimeType::Docker => self.docker.as_ref().unwrap().container_events(),
-            RuntimeType::KubernetesCri => {
+            ContainerRuntime::Docker => self.docker.as_ref().unwrap().container_events(),
+            ContainerRuntime::KubernetesCri => {
                 self.kubernetes_cri
                     .as_ref()
                     .unwrap()

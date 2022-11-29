@@ -22,22 +22,43 @@ mod parse_policies;
 mod process;
 mod runtime;
 
+#[derive(clap::ValueEnum, PartialEq, Debug, Clone)]
+pub enum ContainerRuntime {
+    Docker,
+    KubernetesCri,
+}
+
+#[derive(clap::ValueEnum, PartialEq, Debug, Clone)]
+pub enum LogLevel {
+    Error,
+    Warn,
+    Info,
+    Debug,
+    Trace,
+}
+
+#[derive(clap::ValueEnum, PartialEq, Debug, Clone)]
+pub enum LogFormat {
+    Json,
+    Text,
+}
+
 #[derive(Debug, Clone, Parser)]
-pub struct Opt {
-    #[clap(long, short = 'e', default_value = "docker", possible_values = &["docker", "k8s-cri"])]
-    pub container_engine: String,
+pub struct Options {
+    #[arg(long, short = 'e', value_enum, default_value = "docker")]
+    pub container_engine: ContainerRuntime,
 
     pub policy_path: PathBuf,
 
-    #[cfg_attr(debug_assertions, clap(long, default_value = "debug", possible_values = &["trace", "debug", "info", "warn", "error"]))]
-    #[cfg_attr(not(debug_assertions), structopt(long, default_value = "info", possible_values = &["trace", "debug", "info", "warn", "error"]))]
-    pub log_level: String,
+    #[cfg_attr(debug_assertions, arg(long, value_enum, default_value = "debug"))]
+    #[cfg_attr(not(debug_assertions), arg(long, value_enum, default_value = "info"))]
+    pub log_level: LogLevel,
 
-    #[clap(long, default_value = "text", possible_values = &["json", "text"])]
-    pub log_fmt: String,
+    #[arg(long, value_enum, default_value = "text")]
+    pub log_fmt: LogFormat,
 }
 
-pub async unsafe fn start(opt: Opt) -> anyhow::Result<()> {
+pub async unsafe fn start(opt: Options) -> anyhow::Result<()> {
     if libc::geteuid() != 0 {
         return Err(anyhow!("You must be root."));
     }
@@ -99,35 +120,27 @@ enum SetupTracingError {
 
     #[error(transparent)]
     SetGlobalDefault(#[from] tracing_core::dispatcher::SetGlobalDefaultError),
-
-    #[error("unknown log level")]
-    UnknownLogLevel,
-
-    #[error("unknown log message format")]
-    UnknownLogFormat,
 }
 
-fn setup_tracing(opt: &Opt) -> Result<(), SetupTracingError> {
-    let (level_tracing, level_log) = match opt.log_level.as_str() {
-        "trace" => (Level::TRACE, log::LevelFilter::Trace),
-        "debug" => (Level::DEBUG, log::LevelFilter::Debug),
-        "info" => (Level::INFO, log::LevelFilter::Info),
-        "warn" => (Level::WARN, log::LevelFilter::Warn),
-        "error" => (Level::ERROR, log::LevelFilter::Error),
-        _ => return Err(SetupTracingError::UnknownLogLevel),
+fn setup_tracing(opt: &Options) -> Result<(), SetupTracingError> {
+    let (level_tracing, level_log) = match opt.log_level {
+        LogLevel::Trace => (Level::TRACE, log::LevelFilter::Trace),
+        LogLevel::Debug => (Level::DEBUG, log::LevelFilter::Debug),
+        LogLevel::Info => (Level::INFO, log::LevelFilter::Info),
+        LogLevel::Warn => (Level::WARN, log::LevelFilter::Warn),
+        LogLevel::Error => (Level::ERROR, log::LevelFilter::Error),
     };
 
     let builder = FmtSubscriber::builder().with_max_level(level_tracing);
-    match opt.log_fmt.as_str() {
-        "json" => {
+    match opt.log_fmt {
+        LogFormat::Json => {
             let subscriber = builder.json().finish();
             tracing::subscriber::set_global_default(subscriber)?;
         }
-        "text" => {
+        LogFormat::Text => {
             let subscriber = builder.finish();
             tracing::subscriber::set_global_default(subscriber)?;
         }
-        _ => return Err(SetupTracingError::UnknownLogFormat),
     };
 
     LogTracer::builder().with_max_level(level_log).init()?;

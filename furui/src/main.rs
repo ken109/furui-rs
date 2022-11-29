@@ -4,11 +4,11 @@ use tokio::signal::unix::{signal, SignalKind};
 use tracing::info;
 
 use furui;
-use furui::Opt;
+use furui::Options;
 
 #[tokio::main]
 async fn main() {
-    let opt: Opt = Opt::parse();
+    let opt: Options = Options::parse();
 
     match unsafe { try_main(opt.clone()).await } {
         Ok(_) => (),
@@ -23,7 +23,7 @@ async fn main() {
     furui::cleanup();
 }
 
-async unsafe fn try_main(opt: Opt) -> anyhow::Result<()> {
+async unsafe fn try_main(opt: Options) -> anyhow::Result<()> {
     furui::start(opt).await?;
 
     let mut sig_int = signal(SignalKind::interrupt()).unwrap();

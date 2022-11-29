@@ -7,8 +7,9 @@ mod build_ebpf;
 mod run;
 
 #[derive(Debug, Parser)]
+#[command(author, version, about, long_about = None)]
 pub struct Options {
-    #[structopt(subcommand)]
+    #[command(subcommand)]
     command: Command,
 }
 
@@ -20,7 +21,7 @@ enum Command {
 }
 
 fn main() {
-    let opts = Options::from_args();
+    let opts: Options = Options::parse();
 
     use Command::*;
     let ret = match opts.command {
