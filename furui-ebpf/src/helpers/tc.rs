@@ -1,6 +1,6 @@
 use aya_bpf::bindings::TC_ACT_OK;
 use aya_bpf::cty::c_long;
-use aya_bpf::programs::SkBuffContext;
+use aya_bpf::programs::TcContext;
 
 use furui_common::{EthProtocol, IpProtocol};
 
@@ -11,14 +11,14 @@ pub(crate) const NEIGHBOR_SOLICITAION: u8 = 135;
 pub(crate) const NEIGHBOR_ADVERTISEMENT: u8 = 136;
 
 #[inline]
-pub(crate) fn eth_protocol(ctx: &SkBuffContext) -> Result<EthProtocol, c_long> {
+pub(crate) fn eth_protocol(ctx: &TcContext) -> Result<EthProtocol, c_long> {
     let eth = ctx.load::<ethhdr>(0)?;
 
     Ok(EthProtocol::from_eth(ntohs(eth.h_proto)))
 }
 
 #[inline]
-pub(crate) fn ip_protocol(ctx: &SkBuffContext) -> Result<IpProtocol, c_long> {
+pub(crate) fn ip_protocol(ctx: &TcContext) -> Result<IpProtocol, c_long> {
     match eth_protocol(ctx)? {
         EthProtocol::IP => {
             let iph = ctx.load::<iphdr>(ETH_HDR_LEN)?;
@@ -35,7 +35,7 @@ pub(crate) fn ip_protocol(ctx: &SkBuffContext) -> Result<IpProtocol, c_long> {
 }
 
 #[inline]
-pub(crate) unsafe fn get_port(ctx: &SkBuffContext) -> Result<(u16, u16), c_long> {
+pub(crate) unsafe fn get_port(ctx: &TcContext) -> Result<(u16, u16), c_long> {
     let ip_hdr_len = match eth_protocol(ctx)? {
         EthProtocol::IP => IP_HDR_LEN,
         EthProtocol::IPv6 => IPV6_HDR_LEN,

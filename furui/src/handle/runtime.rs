@@ -11,7 +11,7 @@ use crate::domain::{Container, Policies};
 use crate::runtime::ContainerAction;
 use crate::{Containers, Loader, Maps, Runtime};
 
-pub async fn container_events(
+pub fn container_events(
     loader: Arc<Loader>,
     container_engine: Arc<Runtime>,
     maps: Arc<Maps>,
@@ -68,12 +68,10 @@ async fn add_container(
         .await
         .unwrap_or_else(|e| warn!("failed to save container: {}", e));
 
-    unsafe {
-        maps.policy
-            .remove()
-            .await
-            .unwrap_or_else(|e| warn!("failed to remove policies: {}", e))
-    };
+    maps.policy
+        .remove()
+        .await
+        .unwrap_or_else(|e| warn!("failed to remove policies: {}", e));
 
     policies
         .lock()
@@ -81,12 +79,10 @@ async fn add_container(
         .set_container_id(containers.clone())
         .await;
 
-    unsafe {
-        maps.policy
-            .save(policies.clone())
-            .await
-            .unwrap_or_else(|e| warn!("failed to save policies: {}", e))
-    };
+    maps.policy
+        .save(policies.clone())
+        .await
+        .unwrap_or_else(|e| warn!("failed to save policies: {}", e));
 
     let _ = loader.attach_tc_programs().await;
 
@@ -111,12 +107,10 @@ async fn remove_container(
 
     containers.lock().await.remove(id.clone());
 
-    unsafe {
-        maps.policy
-            .remove()
-            .await
-            .unwrap_or_else(|e| warn!("failed to remove policies: {}", e))
-    };
+    maps.policy
+        .remove()
+        .await
+        .unwrap_or_else(|e| warn!("failed to remove policies: {}", e));
 
     policies
         .lock()
@@ -124,12 +118,10 @@ async fn remove_container(
         .set_container_id(containers.clone())
         .await;
 
-    unsafe {
-        maps.policy
-            .save(policies.clone())
-            .await
-            .unwrap_or_else(|e| warn!("failed to save policies: {}", e))
-    };
+    maps.policy
+        .save(policies.clone())
+        .await
+        .unwrap_or_else(|e| warn!("failed to save policies: {}", e));
 
     info!(
         container_id = id.as_str(),

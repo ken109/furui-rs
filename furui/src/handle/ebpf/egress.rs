@@ -75,7 +75,7 @@ pub async fn egress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
     .await?;
 
     handle_perf_array(
-        bpf.clone(),
+        bpf,
         "EGRESS6_ICMP_EVENTS",
         args.clone(),
         |event: Egress6IcmpEvent, _| async move {

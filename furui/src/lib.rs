@@ -77,8 +77,7 @@ pub async unsafe fn start(opt: Opt) -> anyhow::Result<()> {
         maps.clone(),
         containers.clone(),
         policies.clone(),
-    )
-    .await;
+    );
     handle::policy_events(
         opt.policy_path.clone(),
         maps.clone(),

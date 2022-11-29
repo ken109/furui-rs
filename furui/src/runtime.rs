@@ -33,11 +33,13 @@ pub mod k8s_cri {
     tonic::include_proto!("runtime.v1");
 }
 
+#[derive(Debug)]
 pub struct ContainerEvent {
     pub id: String,
     pub action: ContainerAction,
 }
 
+#[derive(Debug)]
 pub enum ContainerAction {
     Start,
     Pause,

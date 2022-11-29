@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 use std::sync::Arc;
 
-use aya::maps::{HashMap, MapRefMut};
+use aya::maps::HashMap;
 use aya::Bpf;
 use tokio::sync::Mutex;
 
@@ -19,7 +19,8 @@ impl ProcessMap {
     }
 
     pub async unsafe fn save_all(&self, processes: &Vec<Process>) -> anyhow::Result<()> {
-        let mut proc_ports = HashMap::try_from(self.bpf.lock().await.map_mut("PROC_PORTS")?)?;
+        let mut bpf = self.bpf.lock().await;
+        let mut proc_ports = HashMap::try_from(bpf.map_mut("PROC_PORTS").unwrap())?;
 
         for process in processes {
             let mut key: PortKey = std::mem::zeroed();
@@ -39,8 +40,9 @@ impl ProcessMap {
     }
 
     pub async unsafe fn remove(&self, process: Process) -> anyhow::Result<()> {
-        let mut proc_ports: HashMap<MapRefMut, PortKey, PortVal> =
-            HashMap::try_from(self.bpf.lock().await.map_mut("PROC_PORTS")?)?;
+        let mut bpf = self.bpf.lock().await;
+        let mut proc_ports: HashMap<_, PortKey, PortVal> =
+            HashMap::try_from(bpf.map_mut("PROC_PORTS").unwrap())?;
 
         let mut key: PortKey = std::mem::zeroed();
 

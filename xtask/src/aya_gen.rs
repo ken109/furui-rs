@@ -1,4 +1,4 @@
-use aya_gen::InputFile;
+use aya_tool::InputFile;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
@@ -17,7 +17,7 @@ pub fn aya_gen() -> anyhow::Result<()> {
         "icmp6hdr",
     ];
 
-    let bindings = aya_gen::generate(
+    let bindings = aya_tool::generate(
         InputFile::Btf(PathBuf::from("/sys/kernel/btf/vmlinux")),
         &names,
         &[],

@@ -1,18 +1,18 @@
 use std::process::exit;
 
-use structopt::StructOpt;
+use clap::Parser;
 
 mod aya_gen;
 mod build_ebpf;
 mod run;
 
-#[derive(StructOpt)]
+#[derive(Debug, Parser)]
 pub struct Options {
     #[structopt(subcommand)]
     command: Command,
 }
 
-#[derive(StructOpt)]
+#[derive(Debug, Parser)]
 enum Command {
     BuildEbpf(build_ebpf::Options),
     Run(run::Options),

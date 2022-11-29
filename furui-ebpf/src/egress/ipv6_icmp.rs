@@ -3,7 +3,7 @@ use aya_bpf::cty::c_long;
 use aya_bpf::helpers::bpf_probe_read_kernel;
 use aya_bpf::macros::map;
 use aya_bpf::maps::PerfEventArray;
-use aya_bpf::programs::SkBuffContext;
+use aya_bpf::programs::TcContext;
 
 use furui_common::{ContainerIP, Egress6IcmpEvent, IcmpPolicyKey, IcmpVersion, TcAction};
 
@@ -18,7 +18,7 @@ use crate::{CONTAINER_ID_FROM_IPS, ICMP_POLICY_LIST};
 static mut EGRESS6_ICMP_EVENTS: PerfEventArray<Egress6IcmpEvent> =
     PerfEventArray::<Egress6IcmpEvent>::with_max_entries(1024, 0);
 
-pub(crate) unsafe fn ipv6_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
+pub(crate) unsafe fn ipv6_icmp(ctx: &TcContext) -> Result<i32, c_long> {
     let mut event: Egress6IcmpEvent = core::mem::zeroed();
 
     let iph = ctx.load::<ipv6hdr>(ETH_HDR_LEN)?;
@@ -63,7 +63,7 @@ pub(crate) unsafe fn ipv6_icmp(ctx: &SkBuffContext) -> Result<i32, c_long> {
 }
 
 unsafe fn finish(
-    ctx: &SkBuffContext,
+    ctx: &TcContext,
     action: TcAction,
     event: &mut Egress6IcmpEvent,
 ) -> Result<i32, c_long> {

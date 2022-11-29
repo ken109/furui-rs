@@ -29,15 +29,11 @@ pub fn policy_events(
             };
 
             if policies.lock().await.deref() != now_policies.lock().await.deref() {
-                unsafe {
-                    let _ = maps.policy.remove().await;
-                }
+                let _ = maps.policy.remove().await;
 
                 policies.lock().await.policies = now_policies.lock().await.policies.clone();
 
-                unsafe {
-                    let _ = maps.policy.save(policies.clone()).await;
-                }
+                let _ = maps.policy.save(policies.clone()).await;
 
                 info!("policy updated.");
             }

@@ -74,7 +74,7 @@ pub async fn ingress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
     .await?;
 
     handle_perf_array(
-        bpf.clone(),
+        bpf,
         "INGRESS6_ICMP_EVENTS",
         args.clone(),
         |event: Ingress6IcmpEvent, _| async move {

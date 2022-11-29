@@ -14,7 +14,6 @@ use tokio::task;
 use bind::*;
 use close::*;
 use connect::*;
-
 use egress::*;
 use furui_common::IpProtocol;
 use ingress::*;
@@ -84,29 +83,32 @@ pub async unsafe fn perf_events(
     Ok(())
 }
 
-async fn handle_perf_array<A, E, F, Fut>(
+async fn handle_perf_array<E, A, F, Fut>(
     bpf: Arc<Mutex<Bpf>>,
     map_name: &str,
     args: Arc<Mutex<A>>,
     callback: F,
 ) -> anyhow::Result<()>
 where
+    E: Send,
     A: Send + 'static,
-    E: Send + 'static,
     F: Fn(E, Arc<Mutex<A>>) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = ()> + Send + 'static,
+    Fut: Future<Output = ()> + Send,
 {
     let shared_callback = Arc::from(callback);
 
-    let mut perf_array = AsyncPerfEventArray::try_from(bpf.lock().await.map_mut(map_name)?)?;
+    let perf_array = Arc::new(Mutex::new(AsyncPerfEventArray::try_from(
+        bpf.lock().await.take_map(map_name).unwrap(),
+    )?));
 
     for cpu_id in online_cpus()? {
-        let mut buf = perf_array.open(cpu_id, None)?;
-
+        let current_perf_array = perf_array.clone();
         let current_args = args.clone();
         let current_callback = shared_callback.clone();
 
         task::spawn(async move {
+            let mut buf = current_perf_array.lock().await.open(cpu_id, None).unwrap();
+
             let mut buffers = (0..10)
                 .map(|_| BytesMut::with_capacity(1024))
                 .collect::<Vec<_>>();

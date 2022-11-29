@@ -9,7 +9,7 @@ user = ["aya", "libc"]
 
 [dependencies]
 furui-macros = { path = "../furui-macros" }
-aya = { version = ">=0.11", optional = true }
+aya = { git = "https://github.com/aya-rs/aya", branch = "main", optional = true }
 aya-bpf-cty = { git = "https://github.com/aya-rs/aya", branch = "main" }
 libc = { version = "0.2", optional = true }
 

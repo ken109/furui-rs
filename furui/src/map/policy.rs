@@ -3,7 +3,7 @@ use std::net::IpAddr;
 use std::sync::Arc;
 
 use anyhow::anyhow;
-use aya::maps::{HashMap, MapRefMut};
+use aya::maps::HashMap;
 use aya::Bpf;
 use tokio::sync::Mutex;
 
@@ -20,10 +20,21 @@ impl PolicyMap {
         PolicyMap { bpf }
     }
 
-    pub async unsafe fn save(&self, policies: Arc<Mutex<domain::Policies>>) -> anyhow::Result<()> {
-        let mut policy_list = HashMap::try_from(self.bpf.lock().await.map_mut("POLICY_LIST")?)?;
-        let mut icmp_policy_list =
-            HashMap::try_from(self.bpf.lock().await.map_mut("ICMP_POLICY_LIST")?)?;
+    pub async fn save(&self, policies: Arc<Mutex<domain::Policies>>) -> anyhow::Result<()> {
+        unsafe {
+            self.save_policy_list(policies.clone()).await?;
+            self.save_icmp_policy_list(policies.clone()).await?;
+        }
+
+        Ok(())
+    }
+
+    async unsafe fn save_policy_list(
+        &self,
+        policies: Arc<Mutex<domain::Policies>>,
+    ) -> anyhow::Result<()> {
+        let mut bpf = self.bpf.lock().await;
+        let mut policy_list = HashMap::try_from(bpf.map_mut("POLICY_LIST").unwrap())?;
 
         for policy in &policies.lock().await.policies {
             for communication in &policy.communications {
@@ -67,7 +78,21 @@ impl PolicyMap {
 
                     policy_list.insert(key, value, 0)?;
                 }
+            }
+        }
+        Ok(())
+    }
 
+    async unsafe fn save_icmp_policy_list(
+        &self,
+        policies: Arc<Mutex<domain::Policies>>,
+    ) -> anyhow::Result<()> {
+        let mut locked_bpf = self.bpf.lock().await;
+        let mut icmp_policy_list =
+            HashMap::try_from(locked_bpf.map_mut("ICMP_POLICY_LIST").unwrap())?;
+
+        for policy in &policies.lock().await.policies {
+            for communication in &policy.communications {
                 for icmp in &communication.icmp {
                     let mut key: IcmpPolicyKey = std::mem::zeroed();
 
@@ -107,11 +132,19 @@ impl PolicyMap {
         Ok(())
     }
 
-    pub async unsafe fn remove(&self) -> anyhow::Result<()> {
-        let mut policy_list: HashMap<MapRefMut, PolicyKey, PolicyValue> =
-            HashMap::try_from(self.bpf.lock().await.map_mut("POLICY_LIST")?)?;
-        let mut icmp_policy_list: HashMap<MapRefMut, IcmpPolicyKey, IcmpPolicyValue> =
-            HashMap::try_from(self.bpf.lock().await.map_mut("ICMP_POLICY_LIST")?)?;
+    pub async fn remove(&self) -> anyhow::Result<()> {
+        unsafe {
+            self.remove_policy_list().await?;
+            self.remove_icmp_policy_list().await?;
+        }
+
+        Ok(())
+    }
+
+    async unsafe fn remove_policy_list(&self) -> anyhow::Result<()> {
+        let mut bpf = self.bpf.lock().await;
+        let mut policy_list: HashMap<_, PolicyKey, PolicyValue> =
+            HashMap::try_from(bpf.map_mut("POLICY_LIST").unwrap())?;
 
         let mut policy_keys = vec![];
         for key in policy_list.keys() {
@@ -120,6 +153,14 @@ impl PolicyMap {
         for policy_key in policy_keys {
             policy_list.remove(&policy_key)?;
         }
+
+        Ok(())
+    }
+
+    async unsafe fn remove_icmp_policy_list(&self) -> anyhow::Result<()> {
+        let mut bpf = self.bpf.lock().await;
+        let mut icmp_policy_list: HashMap<_, IcmpPolicyKey, IcmpPolicyValue> =
+            HashMap::try_from(bpf.map_mut("ICMP_POLICY_LIST").unwrap())?;
 
         let mut policy_keys = vec![];
         for key in icmp_policy_list.keys() {

@@ -1,6 +1,6 @@
 use aya_bpf::bindings::TC_ACT_OK;
 use aya_bpf::cty::c_long;
-use aya_bpf::{macros::classifier, programs::SkBuffContext};
+use aya_bpf::{macros::classifier, programs::TcContext};
 use aya_log_ebpf::warn;
 
 use furui_common::{EthProtocol, IpProtocol};
@@ -17,7 +17,7 @@ mod ipv6_icmp;
 mod ipv6_tcp_udp;
 
 #[classifier(name = "egress")]
-pub fn egress(ctx: SkBuffContext) -> i32 {
+pub fn egress(ctx: TcContext) -> i32 {
     match unsafe { try_egress(&ctx) } {
         Ok(ret) => ret,
         Err(ret) => {
@@ -29,7 +29,7 @@ pub fn egress(ctx: SkBuffContext) -> i32 {
     }
 }
 
-unsafe fn try_egress(ctx: &SkBuffContext) -> Result<i32, c_long> {
+unsafe fn try_egress(ctx: &TcContext) -> Result<i32, c_long> {
     match (eth_protocol(ctx)?, ip_protocol(ctx)?) {
         (EthProtocol::IP, IpProtocol::TCP | IpProtocol::UDP) => ipv4_tcp_udp(ctx),
         (EthProtocol::IP, IpProtocol::ICMP) => ipv4_icmp(ctx),

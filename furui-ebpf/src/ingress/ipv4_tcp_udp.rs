@@ -3,7 +3,7 @@ use aya_bpf::cty::c_long;
 use aya_bpf::helpers::bpf_probe_read_kernel;
 use aya_bpf::macros::map;
 use aya_bpf::maps::PerfEventArray;
-use aya_bpf::programs::SkBuffContext;
+use aya_bpf::programs::TcContext;
 
 use furui_common::{ContainerIP, IngressEvent, PolicyKey, PortKey, TcAction};
 
@@ -15,7 +15,7 @@ use crate::{CONTAINER_ID_FROM_IPS, POLICY_LIST, PROC_PORTS};
 static mut INGRESS_EVENTS: PerfEventArray<IngressEvent> =
     PerfEventArray::<IngressEvent>::with_max_entries(1024, 0);
 
-pub(crate) unsafe fn ipv4_tcp_udp(ctx: &SkBuffContext) -> Result<i32, c_long> {
+pub(crate) unsafe fn ipv4_tcp_udp(ctx: &TcContext) -> Result<i32, c_long> {
     let mut event: IngressEvent = core::mem::zeroed();
 
     let iph = ctx.load::<iphdr>(ETH_HDR_LEN)?;
@@ -74,7 +74,7 @@ pub(crate) unsafe fn ipv4_tcp_udp(ctx: &SkBuffContext) -> Result<i32, c_long> {
 }
 
 unsafe fn finish(
-    ctx: &SkBuffContext,
+    ctx: &TcContext,
     action: TcAction,
     event: &mut IngressEvent,
 ) -> Result<i32, c_long> {
