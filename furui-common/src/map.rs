@@ -9,7 +9,7 @@ use crate::{IcmpVersion, IpProtocol, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN};
 #[repr(C)]
 pub struct PolicyKey {
     pub container_id: [c_char; CONTAINER_ID_LEN],
-    pub comm: [c_char; TASK_COMM_LEN],
+    pub comm: [u8; TASK_COMM_LEN],
     pub remote_ip: u32,
     pub remote_ipv6: [u8; IPV6_LEN],
     pub local_port: u16,
@@ -20,7 +20,7 @@ pub struct PolicyKey {
 #[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub struct PolicyValue {
-    pub comm: [c_char; TASK_COMM_LEN],
+    pub comm: [u8; TASK_COMM_LEN],
     pub remote_ip: u32,
     pub remote_ipv6: [u8; IPV6_LEN],
     pub local_port: u16,
@@ -60,7 +60,7 @@ pub struct PortKey {
 #[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub struct PortVal {
-    pub comm: [c_char; TASK_COMM_LEN],
+    pub comm: [u8; TASK_COMM_LEN],
 }
 
 #[derive(Debug, Copy, Clone)]

@@ -16,7 +16,7 @@ impl Process {
         super::string_to_bytes(self.container_id.clone())
     }
 
-    pub fn executable(&self) -> [c_char; TASK_COMM_LEN] {
+    pub fn executable(&self) -> [u8; TASK_COMM_LEN] {
         super::string_to_bytes(self.executable.clone())
     }
 }

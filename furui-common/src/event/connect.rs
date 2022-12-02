@@ -7,7 +7,7 @@ use crate::{EthProtocol, IpProtocol, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN};
 pub struct ConnectEvent {
     pub container_id: [c_char; CONTAINER_ID_LEN],
     pub pid: u32,
-    pub comm: [c_char; TASK_COMM_LEN],
+    pub comm: [u8; TASK_COMM_LEN],
     pub src_addr: u32,
     pub dst_addr: u32,
     pub src_port: u16,
@@ -32,7 +32,7 @@ impl ConnectEvent {
 pub struct Connect6Event {
     pub container_id: [c_char; CONTAINER_ID_LEN],
     pub pid: u32,
-    pub comm: [c_char; TASK_COMM_LEN],
+    pub comm: [u8; TASK_COMM_LEN],
     pub src_addr: [u8; IPV6_LEN],
     pub dst_addr: [u8; IPV6_LEN],
     pub src_port: u16,

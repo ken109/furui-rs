@@ -22,7 +22,7 @@ pub struct IngressEvent {
     #[search_key(protocol = IpProtocol::default())]
     pub protocol: IpProtocol,
     pub action: TcAction,
-    pub comm: [c_char; TASK_COMM_LEN],
+    pub comm: [u8; TASK_COMM_LEN],
 }
 
 #[cfg(feature = "user")]
@@ -51,7 +51,7 @@ pub struct Ingress6Event {
     #[search_key(protocol = IpProtocol::default())]
     pub protocol: IpProtocol,
     pub action: TcAction,
-    pub comm: [c_char; TASK_COMM_LEN],
+    pub comm: [u8; TASK_COMM_LEN],
 }
 
 #[cfg(feature = "user")]
