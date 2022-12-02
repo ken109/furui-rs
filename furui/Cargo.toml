@@ -36,6 +36,7 @@ tonic = "0.8.2"
 tower = "0.4"
 
 [build-dependencies]
+protobuf-src = "*"
 tonic-build = "0.8.2"
 
 [[bin]]

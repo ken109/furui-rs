@@ -1,7 +1,6 @@
 use std::net::IpAddr;
 use std::sync::Arc;
 
-use aya_bpf_cty::c_char;
 use tokio::sync::Mutex;
 
 use furui_common::{IcmpVersion, IpProtocol, TASK_COMM_LEN};

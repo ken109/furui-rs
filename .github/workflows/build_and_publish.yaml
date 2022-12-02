@@ -17,16 +17,16 @@ jobs:
     env:
       CARGO_CFG_BPF_TARGET_ARCH: ${{ matrix.arch }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
           components: rust-src
 
-      - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v2
         with:
-          key: ${{ matrix.arch }}
+          prefix-key: ${{ matrix.arch }}
 
       - name: Aya gen
         uses: actions-rs/cargo@v1
