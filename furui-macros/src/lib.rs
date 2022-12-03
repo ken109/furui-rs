@@ -100,12 +100,10 @@ fn generate_search_policy_key(
     let struct_name = &derive_input.ident;
 
     let policy_key_name = if is_icmp {
-        "IcmpPolicyKey"
+        quote!(IcmpPolicyKey)
     } else {
-        "PolicyKey"
-    }
-    .parse::<proc_macro2::TokenStream>()
-    .unwrap();
+        quote!(PolicyKey)
+    };
 
     Ok(quote!(
         impl #struct_name {
