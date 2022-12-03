@@ -6,7 +6,7 @@ use tracing::info;
 
 use furui_common::BindEvent;
 
-use crate::handle::ebpf::{c_char_array_to_str, handle_perf_array, u8_array_to_str, PidProcesses};
+use crate::handle::ebpf::{handle_perf_array, PidProcesses};
 
 pub async fn bind(
     bpf: Arc<Mutex<Bpf>>,
@@ -23,19 +23,14 @@ pub async fn bind(
             let mut pid_processes = arg.lock().await;
 
             unsafe {
-                pid_processes.add(
-                    event.pid,
-                    c_char_array_to_str(event.container_id),
-                    event.lport,
-                    event.protocol,
-                );
+                pid_processes.add(event.pid, event.container_id(), event.lport, event.protocol);
             }
 
             info!(
                 event = "bind",
-                container_id = c_char_array_to_str(event.container_id).as_str(),
+                container_id = event.container_id().as_str(),
                 pid = event.pid,
-                comm = u8_array_to_str(event.comm).as_str(),
+                comm = event.comm().as_str(),
                 family = event.family.to_string(),
                 protocol = event.protocol.to_string(),
                 lport = event.lport,

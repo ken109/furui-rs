@@ -1,5 +1,7 @@
 use aya_bpf_cty::{c_char, c_ushort};
 
+#[cfg(feature = "user")]
+use crate::event::common;
 use crate::{EthProtocol, IpProtocol, CONTAINER_ID_LEN, TASK_COMM_LEN};
 
 #[derive(Copy, Clone)]
@@ -11,4 +13,15 @@ pub struct BindEvent {
     pub family: EthProtocol,
     pub lport: c_ushort,
     pub protocol: IpProtocol,
+}
+
+#[cfg(feature = "user")]
+impl BindEvent {
+    pub fn container_id(&self) -> String {
+        common::c_char_array_to_str(self.container_id)
+    }
+
+    pub fn comm(&self) -> String {
+        common::u8_array_to_str(self.comm)
+    }
 }

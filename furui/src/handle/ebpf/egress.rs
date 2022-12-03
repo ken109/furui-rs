@@ -6,7 +6,7 @@ use tracing::info;
 
 use furui_common::{Egress6Event, Egress6IcmpEvent, EgressEvent, EgressIcmpEvent};
 
-use crate::handle::ebpf::{c_char_array_to_str, handle_perf_array, u8_array_to_str};
+use crate::handle::ebpf::handle_perf_array;
 
 pub async fn egress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
     let args = Arc::new(Mutex::new(()));
@@ -19,8 +19,8 @@ pub async fn egress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
             info!(
                 event = "egress",
                 action = event.action.to_string(),
-                container_id = c_char_array_to_str(event.container_id).as_str(),
-                comm = u8_array_to_str(event.comm).as_str(),
+                container_id = event.container_id().as_str(),
+                comm = event.comm().as_str(),
                 family = event.family.to_string(),
                 protocol = event.protocol.to_string(),
                 source_addr = event.src_addr().as_str(),
@@ -40,7 +40,7 @@ pub async fn egress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
             info!(
                 event = "egress",
                 action = event.action.to_string(),
-                container_id = c_char_array_to_str(event.container_id).as_str(),
+                container_id = event.container_id().as_str(),
                 family = event.family.to_string(),
                 protocol = event.protocol.to_string(),
                 source_addr = event.src_addr().as_str(),
@@ -61,8 +61,8 @@ pub async fn egress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
             info!(
                 event = "egress",
                 action = event.action.to_string(),
-                container_id = c_char_array_to_str(event.container_id).as_str(),
-                comm = u8_array_to_str(event.comm).as_str(),
+                container_id = event.container_id().as_str(),
+                comm = event.comm().as_str(),
                 family = event.family.to_string(),
                 protocol = event.protocol.to_string(),
                 source_addr = event.src_addr().as_str(),
@@ -82,7 +82,7 @@ pub async fn egress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
             info!(
                 event = "egress",
                 action = event.action.to_string(),
-                container_id = c_char_array_to_str(event.container_id).as_str(),
+                container_id = event.container_id().as_str(),
                 family = event.family.to_string(),
                 protocol = event.protocol.to_string(),
                 source_addr = event.src_addr().as_str(),

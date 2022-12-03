@@ -1,5 +1,7 @@
 use aya_bpf_cty::c_char;
 
+#[cfg(feature = "user")]
+use crate::event::common;
 use crate::{EthProtocol, IpProtocol, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN};
 
 #[derive(Copy, Clone)]
@@ -18,6 +20,14 @@ pub struct ConnectEvent {
 
 #[cfg(feature = "user")]
 impl ConnectEvent {
+    pub fn container_id(&self) -> String {
+        common::c_char_array_to_str(self.container_id)
+    }
+
+    pub fn comm(&self) -> String {
+        common::u8_array_to_str(self.comm)
+    }
+
     pub fn src_addr(&self) -> String {
         std::net::Ipv4Addr::from(self.src_addr).to_string()
     }
@@ -43,6 +53,14 @@ pub struct Connect6Event {
 
 #[cfg(feature = "user")]
 impl Connect6Event {
+    pub fn container_id(&self) -> String {
+        common::c_char_array_to_str(self.container_id)
+    }
+
+    pub fn comm(&self) -> String {
+        common::u8_array_to_str(self.comm)
+    }
+
     pub fn src_addr(&self) -> String {
         std::net::Ipv6Addr::from(self.src_addr).to_string()
     }

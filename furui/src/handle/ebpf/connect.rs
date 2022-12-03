@@ -6,7 +6,7 @@ use tracing::info;
 
 use furui_common::{Connect6Event, ConnectEvent};
 
-use crate::handle::ebpf::{c_char_array_to_str, handle_perf_array, u8_array_to_str, PidProcesses};
+use crate::handle::ebpf::{handle_perf_array, PidProcesses};
 
 pub async fn connect(
     bpf: Arc<Mutex<Bpf>>,
@@ -25,7 +25,7 @@ pub async fn connect(
             unsafe {
                 pid_processes.add(
                     event.pid,
-                    c_char_array_to_str(event.container_id),
+                    event.container_id(),
                     event.src_port,
                     event.protocol,
                 );
@@ -33,9 +33,9 @@ pub async fn connect(
 
             info!(
                 event = "connect",
-                container_id = c_char_array_to_str(event.container_id).as_str(),
+                container_id = event.container_id().as_str(),
                 pid = event.pid,
-                comm = u8_array_to_str(event.comm).as_str(),
+                comm = event.comm().as_str(),
                 family = event.family.to_string(),
                 protocol = event.protocol.to_string(),
                 source_addr = event.src_addr().as_str(),
@@ -58,7 +58,7 @@ pub async fn connect(
             unsafe {
                 pid_processes.add(
                     event.pid,
-                    c_char_array_to_str(event.container_id),
+                    event.container_id(),
                     event.src_port,
                     event.protocol,
                 );
@@ -66,9 +66,9 @@ pub async fn connect(
 
             info!(
                 event = "connect",
-                container_id = c_char_array_to_str(event.container_id).as_str(),
+                container_id = event.container_id().as_str(),
                 pid = event.pid,
-                comm = u8_array_to_str(event.comm).as_str(),
+                comm = event.comm().as_str(),
                 family = event.family.to_string(),
                 protocol = event.protocol.to_string(),
                 source_addr = event.src_addr().as_str(),

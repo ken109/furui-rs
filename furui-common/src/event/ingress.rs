@@ -2,6 +2,8 @@ use aya_bpf_cty::c_char;
 
 use furui_macros::{SearchIcmpPolicyKey, SearchPolicyKey};
 
+#[cfg(feature = "user")]
+use crate::event::common;
 use crate::{
     EthProtocol, IcmpPolicyKey, IcmpVersion, IpProtocol, PolicyKey, TcAction, CONTAINER_ID_LEN,
     IPV6_LEN, TASK_COMM_LEN,
@@ -27,6 +29,14 @@ pub struct IngressEvent {
 
 #[cfg(feature = "user")]
 impl IngressEvent {
+    pub fn container_id(&self) -> String {
+        common::c_char_array_to_str(self.container_id)
+    }
+
+    pub fn comm(&self) -> String {
+        common::u8_array_to_str(self.comm)
+    }
+
     pub fn src_addr(&self) -> String {
         std::net::Ipv4Addr::from(self.saddr).to_string()
     }
@@ -56,6 +66,14 @@ pub struct Ingress6Event {
 
 #[cfg(feature = "user")]
 impl Ingress6Event {
+    pub fn container_id(&self) -> String {
+        common::c_char_array_to_str(self.container_id)
+    }
+
+    pub fn comm(&self) -> String {
+        common::u8_array_to_str(self.comm)
+    }
+
     pub fn src_addr(&self) -> String {
         std::net::Ipv6Addr::from(self.saddr).to_string()
     }
@@ -84,6 +102,10 @@ pub struct IngressIcmpEvent {
 
 #[cfg(feature = "user")]
 impl IngressIcmpEvent {
+    pub fn container_id(&self) -> String {
+        common::c_char_array_to_str(self.container_id)
+    }
+
     pub fn src_addr(&self) -> String {
         std::net::Ipv4Addr::from(self.saddr).to_string()
     }
@@ -112,6 +134,10 @@ pub struct Ingress6IcmpEvent {
 
 #[cfg(feature = "user")]
 impl Ingress6IcmpEvent {
+    pub fn container_id(&self) -> String {
+        common::c_char_array_to_str(self.container_id)
+    }
+
     pub fn src_addr(&self) -> String {
         std::net::Ipv6Addr::from(self.saddr).to_string()
     }
