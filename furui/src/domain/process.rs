@@ -13,10 +13,10 @@ pub struct Process {
 
 impl Process {
     pub fn container_id(&self) -> [c_char; CONTAINER_ID_LEN] {
-        super::string_to_bytes(self.container_id.clone())
+        super::string_to_c_char_bytes(self.container_id.clone())
     }
 
     pub fn executable(&self) -> [u8; TASK_COMM_LEN] {
-        super::string_to_bytes(self.executable.clone())
+        super::string_to_u8_bytes(self.executable.clone())
     }
 }

@@ -50,7 +50,7 @@ pub struct Communication {
 impl Communication {
     pub fn process(&self) -> [u8; TASK_COMM_LEN] {
         match self.process.as_ref() {
-            Some(process) => super::string_to_bytes((*process).clone()),
+            Some(process) => super::string_to_u8_bytes((*process).clone()),
             None => [0; TASK_COMM_LEN],
         }
     }

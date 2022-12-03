@@ -27,7 +27,7 @@ impl Container {
 
     pub fn id(&self) -> [c_char; CONTAINER_ID_LEN] {
         match self.id.as_ref() {
-            Some(id) => super::string_to_bytes((*id).clone()),
+            Some(id) => super::string_to_c_char_bytes((*id).clone()),
             None => [0; CONTAINER_ID_LEN],
         }
     }
