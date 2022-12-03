@@ -6,6 +6,7 @@ use std::sync::Arc;
 use aya::maps::perf::AsyncPerfEventArray;
 use aya::util::online_cpus;
 use aya::Bpf;
+use aya_bpf_cty::c_char;
 use bytes::BytesMut;
 use tokio::sync::Mutex;
 use tokio::task;
@@ -129,10 +130,21 @@ where
     Ok(())
 }
 
-fn to_str<const N: usize>(array: [u8; N]) -> String {
+fn u8_array_to_str<const N: usize>(array: [u8; N]) -> String {
     array
         .iter()
         .map(|&s| s as char)
+        .collect::<String>()
+        .split("\0")
+        .nth(0)
+        .unwrap_or("")
+        .to_string()
+}
+
+fn c_char_array_to_str<const N: usize>(array: [c_char; N]) -> String {
+    array
+        .iter()
+        .map(|&s| (s as u8) as char)
         .collect::<String>()
         .split("\0")
         .nth(0)

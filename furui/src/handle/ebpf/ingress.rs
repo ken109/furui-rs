@@ -1,11 +1,12 @@
 use std::sync::Arc;
 
 use aya::Bpf;
-use furui_common::{Ingress6Event, Ingress6IcmpEvent, IngressEvent, IngressIcmpEvent};
 use tokio::sync::Mutex;
 use tracing::info;
 
-use crate::handle::ebpf::{handle_perf_array, to_str};
+use furui_common::{Ingress6Event, Ingress6IcmpEvent, IngressEvent, IngressIcmpEvent};
+
+use crate::handle::ebpf::{c_char_array_to_str, handle_perf_array, u8_array_to_str};
 
 pub async fn ingress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
     let args = Arc::new(Mutex::new(()));
@@ -18,8 +19,8 @@ pub async fn ingress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
             info!(
                 event = "ingress",
                 action = event.action.to_string(),
-                container_id = to_str(event.container_id).as_str(),
-                comm = to_str(event.comm).as_str(),
+                container_id = c_char_array_to_str(event.container_id).as_str(),
+                comm = u8_array_to_str(event.comm).as_str(),
                 family = event.family.to_string(),
                 protocol = event.protocol.to_string(),
                 source_addr = event.src_addr().as_str(),
@@ -39,7 +40,7 @@ pub async fn ingress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
             info!(
                 event = "ingress",
                 action = event.action.to_string(),
-                container_id = to_str(event.container_id).as_str(),
+                container_id = c_char_array_to_str(event.container_id).as_str(),
                 family = event.family.to_string(),
                 protocol = event.protocol.to_string(),
                 source_addr = event.src_addr().as_str(),
@@ -60,8 +61,8 @@ pub async fn ingress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
             info!(
                 event = "ingress",
                 action = event.action.to_string(),
-                container_id = to_str(event.container_id).as_str(),
-                comm = to_str(event.comm).as_str(),
+                container_id = c_char_array_to_str(event.container_id).as_str(),
+                comm = u8_array_to_str(event.comm).as_str(),
                 family = event.family.to_string(),
                 protocol = event.protocol.to_string(),
                 source_addr = event.src_addr().as_str(),
@@ -81,7 +82,7 @@ pub async fn ingress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
             info!(
                 event = "ingress",
                 action = event.action.to_string(),
-                container_id = to_str(event.container_id).as_str(),
+                container_id = c_char_array_to_str(event.container_id).as_str(),
                 family = event.family.to_string(),
                 protocol = event.protocol.to_string(),
                 source_addr = event.src_addr().as_str(),

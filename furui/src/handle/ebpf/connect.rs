@@ -6,7 +6,7 @@ use tracing::info;
 
 use furui_common::{Connect6Event, ConnectEvent};
 
-use crate::handle::ebpf::{handle_perf_array, to_str, PidProcesses};
+use crate::handle::ebpf::{c_char_array_to_str, handle_perf_array, u8_array_to_str, PidProcesses};
 
 pub async fn connect(
     bpf: Arc<Mutex<Bpf>>,
@@ -25,7 +25,7 @@ pub async fn connect(
             unsafe {
                 pid_processes.add(
                     event.pid,
-                    to_str(event.container_id),
+                    c_char_array_to_str(event.container_id),
                     event.src_port,
                     event.protocol,
                 );
@@ -33,9 +33,9 @@ pub async fn connect(
 
             info!(
                 event = "connect",
-                container_id = to_str(event.container_id).as_str(),
+                container_id = c_char_array_to_str(event.container_id).as_str(),
                 pid = event.pid,
-                comm = to_str(event.comm).as_str(),
+                comm = u8_array_to_str(event.comm).as_str(),
                 family = event.family.to_string(),
                 protocol = event.protocol.to_string(),
                 source_addr = event.src_addr().as_str(),
@@ -58,7 +58,7 @@ pub async fn connect(
             unsafe {
                 pid_processes.add(
                     event.pid,
-                    to_str(event.container_id),
+                    u8_array_to_str(event.container_id),
                     event.src_port,
                     event.protocol,
                 );
@@ -66,9 +66,9 @@ pub async fn connect(
 
             info!(
                 event = "connect",
-                container_id = to_str(event.container_id).as_str(),
+                container_id = u8_array_to_str(event.container_id).as_str(),
                 pid = event.pid,
-                comm = to_str(event.comm).as_str(),
+                comm = u8_array_to_str(event.comm).as_str(),
                 family = event.family.to_string(),
                 protocol = event.protocol.to_string(),
                 source_addr = event.src_addr().as_str(),
