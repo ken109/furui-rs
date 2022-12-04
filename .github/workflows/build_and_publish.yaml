@@ -38,7 +38,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: install
-          args: bpf-linker
+          args: bpf-linker --git https://github.com/ken109/bpf-linker --branch bpf-v2
 
       - name: Build eBPF
         uses: actions-rs/cargo@v1
