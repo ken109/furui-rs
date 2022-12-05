@@ -23,14 +23,14 @@ pub fn aya_gen() -> anyhow::Result<()> {
         &[],
     )?;
 
-    let mut vmlinux = File::create("./furui-ebpf/src/vmlinux.rs")?;
+    let dest_path = "./furui-ebpf/src/vmlinux.rs";
+
+    let mut vmlinux = File::create(dest_path)?;
 
     vmlinux.write_all(bindings.as_bytes())?;
     vmlinux.flush()?;
 
-    let status = Command::new("rustfmt")
-        .args(&vec!["./furui-ebpf/src/vmlinux.rs"])
-        .status()?;
+    let status = Command::new("rustfmt").args(&vec![dest_path]).status()?;
 
     assert!(status.success());
 
