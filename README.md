@@ -6,7 +6,11 @@ Communication control of the container runtime environment(now only docker) is p
 
 1. Install a rust stable toolchain: `rustup install stable`
 1. Install a rust nightly toolchain: `rustup install nightly`
+1. Install LLVM
 1. Install bpf-linker: `cargo install bpf-linker`
+1. Install bpftool: `sudo apt install linux-tools-generic`
+1. Install bindgen-cli: `cargo install bindgen-cli`
+1. `cargo xtask aya-gen`
 
 ## Build eBPF
 
