@@ -20,8 +20,8 @@ pub(crate) unsafe fn ipv4_tcp_udp(ctx: &TcContext) -> Result<i32, c_long> {
 
     let iph = ctx.load::<iphdr>(ETH_HDR_LEN)?;
 
-    event.saddr = ntohl(iph.saddr);
-    event.daddr = ntohl(iph.daddr);
+    event.saddr = ntohl(iph.__bindgen_anon_1.__bindgen_anon_1.saddr);
+    event.daddr = ntohl(iph.__bindgen_anon_1.__bindgen_anon_1.daddr);
     (event.sport, event.dport) = get_port(ctx)?;
 
     event.family = eth_protocol(ctx)?;

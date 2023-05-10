@@ -20,8 +20,8 @@ pub(crate) unsafe fn ipv4_icmp(ctx: &TcContext) -> Result<i32, c_long> {
 
     let iph = ctx.load::<iphdr>(ETH_HDR_LEN)?;
 
-    event.saddr = ntohl(iph.saddr);
-    event.daddr = ntohl(iph.daddr);
+    event.saddr = ntohl(iph.__bindgen_anon_1.__bindgen_anon_1.saddr);
+    event.daddr = ntohl(iph.__bindgen_anon_1.__bindgen_anon_1.daddr);
 
     event.family = eth_protocol(ctx)?;
     event.protocol = ip_protocol(ctx)?;

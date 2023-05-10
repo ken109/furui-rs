@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="local-ubuntu-root" confirmBeforeDeletion="false">
-    <option name="confirmBeforeDeletion" value="false" />
+  <component name="PublishConfigData" autoUpload="Always" serverName="lima" autoUploadExternalChanges="true">
     <serverData>
-      <paths name="local-ubuntu-root">
+      <paths name="lima">
         <serverdata>
           <mappings>
             <mapping deploy="/Univ/furui-rs" local="$PROJECT_DIR$" web="/" />
           </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/target" />
+          </excludedPaths>
         </serverdata>
       </paths>
     </serverData>

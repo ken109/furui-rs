@@ -20,8 +20,10 @@ pub(crate) unsafe fn ipv6_tcp_udp(ctx: &TcContext) -> Result<i32, c_long> {
 
     let iph = ctx.load::<ipv6hdr>(ETH_HDR_LEN)?;
 
-    event.saddr = bpf_probe_read_kernel(&iph.saddr.in6_u.u6_addr8)?;
-    event.daddr = bpf_probe_read_kernel(&iph.daddr.in6_u.u6_addr8)?;
+    event.saddr =
+        bpf_probe_read_kernel(&iph.__bindgen_anon_1.__bindgen_anon_1.saddr.in6_u.u6_addr8)?;
+    event.daddr =
+        bpf_probe_read_kernel(&iph.__bindgen_anon_1.__bindgen_anon_1.daddr.in6_u.u6_addr8)?;
     (event.sport, event.dport) = get_port(ctx)?;
 
     event.family = eth_protocol(ctx)?;

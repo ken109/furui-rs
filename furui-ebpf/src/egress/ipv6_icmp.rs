@@ -23,8 +23,10 @@ pub(crate) unsafe fn ipv6_icmp(ctx: &TcContext) -> Result<i32, c_long> {
 
     let iph = ctx.load::<ipv6hdr>(ETH_HDR_LEN)?;
 
-    event.saddr = bpf_probe_read_kernel(&iph.saddr.in6_u.u6_addr8)?;
-    event.daddr = bpf_probe_read_kernel(&iph.daddr.in6_u.u6_addr8)?;
+    event.saddr =
+        bpf_probe_read_kernel(&iph.__bindgen_anon_1.__bindgen_anon_1.saddr.in6_u.u6_addr8)?;
+    event.daddr =
+        bpf_probe_read_kernel(&iph.__bindgen_anon_1.__bindgen_anon_1.daddr.in6_u.u6_addr8)?;
 
     event.family = eth_protocol(ctx)?;
     event.protocol = ip_protocol(ctx)?;
