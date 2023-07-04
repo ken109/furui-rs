@@ -30,5 +30,5 @@ cargo build
 ## Run
 
 ```bash
-cargo xtask run
+cargo xtask run -- example/nginx.yaml --log-level=info
 ```
