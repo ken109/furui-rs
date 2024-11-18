@@ -28,11 +28,22 @@ jobs:
         with:
           prefix-key: ${{ matrix.arch }}
 
+      - name: Add cargo binary path
+        run: |
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
       - name: Install bpf-linker
         uses: actions-rs/cargo@v1
         with:
           command: install
           args: bpf-linker
+
+      - name: Generate vmlinux.rs
+        run: |
+          cargo install aya-tool --git https://github.com/aya-rs/aya.git
+          cargo install bindgen-cli
+
+          aya-tool generate task_struct sockaddr_in sockaddr_in6 inet_sock ipv6hdr tcphdr udphdr icmphdr icmp6hdr > furui-ebpf/src/vmlinux.rs
 
       - name: Build target
         uses: actions-rs/cargo@v1
