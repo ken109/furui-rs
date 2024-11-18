@@ -1,16 +1,16 @@
-use aya_bpf::cty::c_long;
-use aya_bpf::maps::PerfEventArray;
-use aya_bpf::{
+use aya_ebpf::cty::c_long;
+use aya_ebpf::maps::PerfEventArray;
+use aya_ebpf::{
     macros::{map, tracepoint},
     programs::TracePointContext,
-    BpfContext,
+    EbpfContext,
 };
 use aya_log_ebpf::warn;
 
 use crate::helpers::is_container_process;
 
 #[map]
-static mut CLOSE_EVENTS: PerfEventArray<u32> = PerfEventArray::<u32>::with_max_entries(1024, 0);
+static mut CLOSE_EVENTS: PerfEventArray<u32> = PerfEventArray::<u32>::new(0);
 
 #[tracepoint]
 pub fn close(ctx: TracePointContext) -> u32 {

@@ -1,10 +1,10 @@
-use aya_bpf::helpers::bpf_probe_read_kernel;
-use aya_bpf::{
+use aya_ebpf::helpers::bpf_probe_read_kernel;
+use aya_ebpf::{
     cty::c_long,
     macros::{kprobe, map},
     maps::PerfEventArray,
     programs::ProbeContext,
-    BpfContext,
+    EbpfContext,
 };
 use aya_log_ebpf::warn;
 
@@ -16,7 +16,7 @@ use crate::PROC_PORTS;
 
 #[map]
 static mut BIND_EVENTS: PerfEventArray<BindEvent> =
-    PerfEventArray::<BindEvent>::with_max_entries(1024, 0);
+    PerfEventArray::<BindEvent>::new(0);
 
 #[kprobe]
 pub fn bind_v4(ctx: ProbeContext) -> u32 {

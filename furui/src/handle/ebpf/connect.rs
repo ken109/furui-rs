@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use aya::Bpf;
+use aya::Ebpf;
 use tokio::sync::Mutex;
 use tracing::info;
 
@@ -9,7 +9,7 @@ use furui_common::{Connect6Event, ConnectEvent};
 use crate::handle::ebpf::{handle_perf_array, PidProcesses};
 
 pub async fn connect(
-    bpf: Arc<Mutex<Bpf>>,
+    bpf: Arc<Mutex<Ebpf>>,
     pid_processes: Arc<Mutex<PidProcesses>>,
 ) -> anyhow::Result<()> {
     let args = Arc::new(Mutex::new(pid_processes));

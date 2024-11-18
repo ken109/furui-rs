@@ -1,4 +1,4 @@
-use aya_bpf_cty::{c_char, c_ushort};
+use aya_ebpf::cty::{c_char, c_ushort};
 
 #[cfg(feature = "user")]
 use crate::event::common;

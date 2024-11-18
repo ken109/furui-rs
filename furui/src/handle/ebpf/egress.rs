@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use aya::Bpf;
+use aya::Ebpf;
 use tokio::sync::Mutex;
 use tracing::info;
 
@@ -8,7 +8,7 @@ use furui_common::{Egress6Event, Egress6IcmpEvent, EgressEvent, EgressIcmpEvent}
 
 use crate::handle::ebpf::handle_perf_array;
 
-pub async fn egress(bpf: Arc<Mutex<Bpf>>) -> anyhow::Result<()> {
+pub async fn egress(bpf: Arc<Mutex<Ebpf>>) -> anyhow::Result<()> {
     let args = Arc::new(Mutex::new(()));
 
     handle_perf_array(

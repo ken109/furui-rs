@@ -1,9 +1,9 @@
-use aya_bpf::bindings::{TC_ACT_OK, TC_ACT_SHOT};
-use aya_bpf::cty::c_long;
-use aya_bpf::helpers::bpf_probe_read_kernel;
-use aya_bpf::macros::map;
-use aya_bpf::maps::PerfEventArray;
-use aya_bpf::programs::TcContext;
+use aya_ebpf::bindings::{TC_ACT_OK, TC_ACT_SHOT};
+use aya_ebpf::cty::c_long;
+use aya_ebpf::helpers::bpf_probe_read_kernel;
+use aya_ebpf::macros::map;
+use aya_ebpf::maps::PerfEventArray;
+use aya_ebpf::programs::TcContext;
 
 use furui_common::{ContainerIP, IcmpPolicyKey, IcmpVersion, IngressIcmpEvent, TcAction};
 
@@ -13,7 +13,7 @@ use crate::{CONTAINER_ID_FROM_IPS, ICMP_POLICY_LIST};
 
 #[map]
 static mut INGRESS_ICMP_EVENTS: PerfEventArray<IngressIcmpEvent> =
-    PerfEventArray::<IngressIcmpEvent>::with_max_entries(1024, 0);
+    PerfEventArray::<IngressIcmpEvent>::new(0);
 
 pub(crate) unsafe fn ipv4_icmp(ctx: &TcContext) -> Result<i32, c_long> {
     let mut event: IngressIcmpEvent = core::mem::zeroed();

@@ -1,6 +1,6 @@
 #![cfg_attr(not(feature = "user"), no_std)]
 
-use aya_bpf_cty::c_ushort;
+use aya_ebpf::cty::c_ushort;
 
 pub use event::*;
 #[cfg(feature = "user")]

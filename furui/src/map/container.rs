@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 use std::sync::Arc;
 
 use aya::maps::HashMap;
-use aya::Bpf;
+use aya::Ebpf;
 use tokio::sync::Mutex;
 
 use furui_common::{ContainerID, ContainerIP};
@@ -10,11 +10,11 @@ use furui_common::{ContainerID, ContainerIP};
 use crate::domain;
 
 pub struct ContainerMap {
-    bpf: Arc<Mutex<Bpf>>,
+    bpf: Arc<Mutex<Ebpf>>,
 }
 
 impl ContainerMap {
-    pub fn new(bpf: Arc<Mutex<Bpf>>) -> ContainerMap {
+    pub fn new(bpf: Arc<Mutex<Ebpf>>) -> ContainerMap {
         ContainerMap { bpf }
     }
 

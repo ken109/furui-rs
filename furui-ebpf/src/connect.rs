@@ -1,10 +1,10 @@
-use aya_bpf::cty::c_long;
-use aya_bpf::helpers::bpf_probe_read_kernel;
-use aya_bpf::maps::PerfEventArray;
-use aya_bpf::{
+use aya_ebpf::cty::c_long;
+use aya_ebpf::helpers::bpf_probe_read_kernel;
+use aya_ebpf::maps::PerfEventArray;
+use aya_ebpf::{
     macros::{kprobe, map},
     programs::ProbeContext,
-    BpfContext,
+    EbpfContext,
 };
 use aya_log_ebpf::warn;
 
@@ -16,11 +16,11 @@ use crate::PROC_PORTS;
 
 #[map]
 static mut CONNECT_EVENTS: PerfEventArray<ConnectEvent> =
-    PerfEventArray::<ConnectEvent>::with_max_entries(1024, 0);
+    PerfEventArray::<ConnectEvent>::new(0);
 
 #[map]
 static mut CONNECT6_EVENTS: PerfEventArray<Connect6Event> =
-    PerfEventArray::<Connect6Event>::with_max_entries(1024, 0);
+    PerfEventArray::<Connect6Event>::new(0);
 
 #[kprobe]
 pub fn tcp_connect(ctx: ProbeContext) -> u32 {

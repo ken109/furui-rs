@@ -1,7 +1,7 @@
 use std::ops::Deref;
 use std::sync::Arc;
 
-use aya::Bpf;
+use aya::Ebpf;
 use tokio::sync::Mutex;
 use tracing::info;
 
@@ -9,7 +9,7 @@ use crate::handle::ebpf::{handle_perf_array, PidProcesses};
 use crate::Maps;
 
 pub async fn close(
-    bpf: Arc<Mutex<Bpf>>,
+    bpf: Arc<Mutex<Ebpf>>,
     maps: Arc<Maps>,
     pid_processes: Arc<Mutex<PidProcesses>>,
 ) -> anyhow::Result<()> {

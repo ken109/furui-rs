@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use anyhow::anyhow;
 use aya::maps::HashMap;
-use aya::Bpf;
+use aya::Ebpf;
 use tokio::sync::Mutex;
 
 use furui_common::{IcmpPolicyKey, IcmpPolicyValue, PolicyKey, PolicyValue};
@@ -12,11 +12,11 @@ use furui_common::{IcmpPolicyKey, IcmpPolicyValue, PolicyKey, PolicyValue};
 use crate::domain;
 
 pub struct PolicyMap {
-    bpf: Arc<Mutex<Bpf>>,
+    bpf: Arc<Mutex<Ebpf>>,
 }
 
 impl PolicyMap {
-    pub fn new(bpf: Arc<Mutex<Bpf>>) -> PolicyMap {
+    pub fn new(bpf: Arc<Mutex<Ebpf>>) -> PolicyMap {
         PolicyMap { bpf }
     }
 

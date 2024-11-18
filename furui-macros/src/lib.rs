@@ -11,19 +11,13 @@ use syn::{parse_macro_input, DeriveInput};
 #[proc_macro_derive(SearchPolicyKey, attributes(search_key))]
 pub fn search_policy_key(input: TokenStream) -> TokenStream {
     let input: DeriveInput = parse_macro_input!(input as DeriveInput);
-    match generate_search_policy_key(&input, false) {
-        Ok(generated) => generated,
-        Err(err) => err.to_compile_error().into(),
-    }
+    generate_search_policy_key(&input, false).unwrap_or_else(|err| err.to_compile_error().into())
 }
 
 #[proc_macro_derive(SearchIcmpPolicyKey, attributes(search_key))]
 pub fn search_icmp_policy_key(input: TokenStream) -> TokenStream {
     let input: DeriveInput = parse_macro_input!(input as DeriveInput);
-    match generate_search_policy_key(&input, true) {
-        Ok(generated) => generated,
-        Err(err) => err.to_compile_error().into(),
-    }
+    generate_search_policy_key(&input, true).unwrap_or_else(|err| err.to_compile_error().into())
 }
 
 fn generate_search_policy_key(

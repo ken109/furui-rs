@@ -1,8 +1,8 @@
 #![no_std]
 #![no_main]
 
-use aya_bpf::macros::map;
-use aya_bpf::maps::HashMap;
+use aya_ebpf::macros::map;
+use aya_ebpf::maps::HashMap;
 
 use furui_common::{
     ContainerID, ContainerIP, IcmpPolicyKey, IcmpPolicyValue, PolicyKey, PolicyValue, PortKey,

@@ -17,7 +17,7 @@ impl Policies {
     pub async fn set_container_id(&mut self, containers: Arc<Mutex<Containers>>) {
         let ids = containers.lock().await.ids();
 
-        for mut policy in &mut self.policies {
+        for policy in &mut self.policies {
             if policy.container.name.len() == 0 {
                 continue;
             }

@@ -1,5 +1,5 @@
-use aya_bpf::cty::{c_char, c_long};
-use aya_bpf::helpers::{bpf_get_current_task, bpf_probe_read_kernel};
+use aya_ebpf::cty::{c_char, c_long};
+use aya_ebpf::helpers::{bpf_get_current_task, bpf_probe_read_kernel};
 
 use furui_common::CONTAINER_ID_LEN;
 pub(crate) use net::*;

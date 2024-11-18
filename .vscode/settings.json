@@ -1,6 +1,0 @@
-{
-  "rust-analyzer.linkedProjects": [
-    "Cargo.toml",
-    "furui-ebpf/Cargo.toml"
-  ]
-}

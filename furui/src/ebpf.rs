@@ -3,37 +3,32 @@ use std::process::Command;
 use std::sync::Arc;
 
 use aya::programs::{tc, KProbe, SchedClassifier, TcAttachType, TracePoint};
-use aya::{include_bytes_aligned, Bpf};
-use aya_log::BpfLogger;
+use aya::{include_bytes_aligned, Ebpf};
+use aya_log::EbpfLogger;
 use tokio::sync::Mutex;
 use tracing::{debug, info};
 
-pub fn load_bpf() -> anyhow::Result<Arc<Mutex<Bpf>>> {
-    #[cfg(debug_assertions)]
-    let bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/debug/furui"
-    ))?;
-    #[cfg(not(debug_assertions))]
-    let bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/release/furui"
-    ))?;
+pub fn load_bpf() -> anyhow::Result<Arc<Mutex<Ebpf>>> {
+    let bpf = Ebpf::load(include_bytes_aligned!(concat!(
+        env!("OUT_DIR"), "/furui"
+    )))?;
 
     Ok(Arc::new(Mutex::new(bpf)))
 }
 
 pub struct Loader {
-    bpf: Arc<Mutex<Bpf>>,
+    bpf: Arc<Mutex<Ebpf>>,
 }
 
 impl Loader {
-    pub fn new(bpf: Arc<Mutex<Bpf>>) -> Arc<Loader> {
+    pub fn new(bpf: Arc<Mutex<Ebpf>>) -> Arc<Loader> {
         Arc::new(Loader { bpf })
     }
 
     pub async fn attach_programs(&self) -> anyhow::Result<()> {
         let mut bpf = self.bpf.lock().await;
 
-        let _ = BpfLogger::init(&mut bpf).map_err(|e| debug!("failed to init BpfLogger: {:?}", e));
+        let _ = EbpfLogger::init(&mut bpf).map_err(|e| debug!("failed to init EbpfLogger: {:?}", e));
 
         let program: &mut KProbe = bpf.program_mut("bind_v4").unwrap().try_into()?;
         program.load()?;

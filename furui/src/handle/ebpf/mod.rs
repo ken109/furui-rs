@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use aya::maps::perf::AsyncPerfEventArray;
 use aya::util::online_cpus;
-use aya::Bpf;
+use aya::Ebpf;
 use bytes::BytesMut;
 use tokio::sync::Mutex;
 use tokio::task;
@@ -57,7 +57,7 @@ impl PidProcesses {
 }
 
 pub async unsafe fn perf_events(
-    bpf: Arc<Mutex<Bpf>>,
+    bpf: Arc<Mutex<Ebpf>>,
     maps: Arc<Maps>,
     processes: &Vec<Process>,
 ) -> anyhow::Result<()> {
@@ -83,7 +83,7 @@ pub async unsafe fn perf_events(
 }
 
 async fn handle_perf_array<E, A, F, Fut>(
-    bpf: Arc<Mutex<Bpf>>,
+    bpf: Arc<Mutex<Ebpf>>,
     map_name: &str,
     args: Arc<Mutex<A>>,
     callback: F,
@@ -100,7 +100,7 @@ where
         bpf.lock().await.take_map(map_name).unwrap(),
     )?));
 
-    for cpu_id in online_cpus()? {
+    for cpu_id in online_cpus().unwrap() {
         let current_perf_array = perf_array.clone();
         let current_args = args.clone();
         let current_callback = shared_callback.clone();

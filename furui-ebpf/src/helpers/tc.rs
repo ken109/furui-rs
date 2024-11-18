@@ -1,6 +1,6 @@
-use aya_bpf::bindings::TC_ACT_OK;
-use aya_bpf::cty::c_long;
-use aya_bpf::programs::TcContext;
+use aya_ebpf::bindings::TC_ACT_OK;
+use aya_ebpf::cty::c_long;
+use aya_ebpf::programs::TcContext;
 
 use furui_common::{EthProtocol, IpProtocol};
 

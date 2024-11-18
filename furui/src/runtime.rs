@@ -9,10 +9,11 @@ use bollard::container::ListContainersOptions;
 use bollard::system::EventsOptions;
 use futures::stream::BoxStream;
 use futures::StreamExt;
+use hyper_util::rt::TokioIo;
 use serde_yaml::Value;
 use tokio::net::UnixStream;
 use tokio::sync::Mutex;
-use tonic::transport::{Channel, Endpoint, Uri};
+use tonic::transport::{Channel, Endpoint};
 use tower::service_fn;
 
 use furui_common::CONTAINER_ID_LEN;
@@ -227,7 +228,13 @@ impl RuntimeKubernetesCri {
         let path = "/run/containerd/containerd.sock";
         let channel = Endpoint::try_from("http://[::]")
             .unwrap()
-            .connect_with_connector(service_fn(move |_: Uri| UnixStream::connect(path)))
+            .connect_with_connector(service_fn(move |_| {
+                async move {
+                    // Connect to a Uds socket
+                    let io = TokioIo::new(UnixStream::connect(path).await?);
+                    Ok::<_, std::io::Error>(io)
+                }
+            }))
             .await
             .expect("Could not create client.");
 

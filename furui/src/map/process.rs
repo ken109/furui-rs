@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 use std::sync::Arc;
 
 use aya::maps::HashMap;
-use aya::Bpf;
+use aya::Ebpf;
 use tokio::sync::Mutex;
 
 use furui_common::{PortKey, PortVal};
@@ -10,11 +10,11 @@ use furui_common::{PortKey, PortVal};
 use crate::domain::Process;
 
 pub struct ProcessMap {
-    bpf: Arc<Mutex<Bpf>>,
+    bpf: Arc<Mutex<Ebpf>>,
 }
 
 impl ProcessMap {
-    pub fn new(bpf: Arc<Mutex<Bpf>>) -> ProcessMap {
+    pub fn new(bpf: Arc<Mutex<Ebpf>>) -> ProcessMap {
         ProcessMap { bpf }
     }
 

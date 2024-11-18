@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use aya::Bpf;
+use aya::Ebpf;
 use tokio::sync::Mutex;
 
 pub use container::ContainerMap;
@@ -18,7 +18,7 @@ pub struct Maps {
 }
 
 impl Maps {
-    pub fn new(bpf: Arc<Mutex<Bpf>>) -> Arc<Maps> {
+    pub fn new(bpf: Arc<Mutex<Ebpf>>) -> Arc<Maps> {
         Arc::new(Maps {
             container: ContainerMap::new(bpf.clone()),
             policy: PolicyMap::new(bpf.clone()),

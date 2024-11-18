@@ -10,7 +10,7 @@ mod ingress;
 
 #[cfg(feature = "user")]
 mod common {
-    use aya_bpf_cty::c_char;
+    use aya_ebpf::cty::c_char;
 
     pub(crate) fn u8_array_to_str<const N: usize>(array: [u8; N]) -> String {
         array

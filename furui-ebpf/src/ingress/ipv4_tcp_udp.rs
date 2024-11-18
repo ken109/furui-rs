@@ -1,9 +1,9 @@
-use aya_bpf::bindings::{TC_ACT_OK, TC_ACT_SHOT};
-use aya_bpf::cty::c_long;
-use aya_bpf::helpers::bpf_probe_read_kernel;
-use aya_bpf::macros::map;
-use aya_bpf::maps::PerfEventArray;
-use aya_bpf::programs::TcContext;
+use aya_ebpf::bindings::{TC_ACT_OK, TC_ACT_SHOT};
+use aya_ebpf::cty::c_long;
+use aya_ebpf::helpers::bpf_probe_read_kernel;
+use aya_ebpf::macros::map;
+use aya_ebpf::maps::PerfEventArray;
+use aya_ebpf::programs::TcContext;
 
 use furui_common::{ContainerIP, IngressEvent, PolicyKey, PortKey, TcAction};
 
@@ -13,7 +13,7 @@ use crate::{CONTAINER_ID_FROM_IPS, POLICY_LIST, PROC_PORTS};
 
 #[map]
 static mut INGRESS_EVENTS: PerfEventArray<IngressEvent> =
-    PerfEventArray::<IngressEvent>::with_max_entries(1024, 0);
+    PerfEventArray::<IngressEvent>::new(0);
 
 pub(crate) unsafe fn ipv4_tcp_udp(ctx: &TcContext) -> Result<i32, c_long> {
     let mut event: IngressEvent = core::mem::zeroed();
