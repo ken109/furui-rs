@@ -17,26 +17,21 @@ jobs:
     env:
       CARGO_CFG_BPF_TARGET_ARCH: ${{ matrix.arch }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          components: rust-src
+      - name: Install rustup nightly
+        run: |
+          rustup toolchain install nightly --component rust-src
+          rustup target add ${{ matrix.arch }}-unknown-linux-musl
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - uses: Swatinem/rust-cache@v2
         with:
           prefix-key: ${{ matrix.arch }}
 
-      - name: Add cargo binary path
-        run: |
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-
       - name: Install bpf-linker
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: bpf-linker
+        run: |
+          cargo install bpf-linker
 
       - name: Generate vmlinux.rs
         run: |
@@ -46,11 +41,8 @@ jobs:
           aya-tool generate task_struct sockaddr_in sockaddr_in6 inet_sock ipv6hdr tcphdr udphdr icmphdr icmp6hdr > furui-ebpf/src/vmlinux.rs
 
       - name: Build target
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: build
-          args: --release --target ${{ matrix.arch }}-unknown-linux-musl
+        run: |
+          cargo build --release --target ${{ matrix.arch }}-unknown-linux-musl
 
       - uses: actions/upload-artifact@v3
         with:
