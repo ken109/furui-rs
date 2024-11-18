@@ -1,12 +1,13 @@
-use std::ops::Deref;
-use std::sync::Arc;
+use std::{ops::Deref, sync::Arc};
 
 use aya::Ebpf;
 use tokio::sync::Mutex;
 use tracing::info;
 
-use crate::handle::ebpf::{handle_perf_array, PidProcesses};
-use crate::Maps;
+use crate::{
+    handle::ebpf::{handle_perf_array, PidProcesses},
+    Maps,
+};
 
 pub async fn close(
     bpf: Arc<Mutex<Ebpf>>,

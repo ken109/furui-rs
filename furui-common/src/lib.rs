@@ -1,7 +1,6 @@
 #![cfg_attr(not(feature = "user"), no_std)]
 
 use aya_ebpf::cty::c_ushort;
-
 pub use event::*;
 #[cfg(feature = "user")]
 pub use helpers::*;

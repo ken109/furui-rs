@@ -1,15 +1,15 @@
 use std::sync::Arc;
 
+use furui_common::CONTAINER_ID_LEN;
 use futures::StreamExt;
-use tokio::sync::Mutex;
-use tokio::task;
+use tokio::{sync::Mutex, task};
 use tracing::{info, warn};
 
-use furui_common::CONTAINER_ID_LEN;
-
-use crate::domain::{Container, Policies};
-use crate::runtime::ContainerAction;
-use crate::{Containers, Loader, Maps, Runtime};
+use crate::{
+    domain::{Container, Policies},
+    runtime::ContainerAction,
+    Containers, Loader, Maps, Runtime,
+};
 
 pub fn container_events(
     loader: Arc<Loader>,

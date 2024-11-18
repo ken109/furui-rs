@@ -1,16 +1,11 @@
-use std::fs::File;
-use std::io::Read;
-use std::net::IpAddr;
-use std::path::PathBuf;
-use std::sync::Arc;
+use std::{fs::File, io::Read, net::IpAddr, path::PathBuf, sync::Arc};
 
 use dns_lookup::lookup_host;
+use furui_common::IpProtocol;
 use serde_derive::Deserialize;
 use serde_yaml;
 use tokio::sync::Mutex;
 use tracing::warn;
-
-use furui_common::IpProtocol;
 
 use crate::domain::{self, Policies};
 

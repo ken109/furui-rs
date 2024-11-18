@@ -1,9 +1,9 @@
 extern crate proc_macro;
 
-use proc_macro::TokenStream;
 use std::collections::HashMap;
 
 use itertools::Itertools;
+use proc_macro::TokenStream;
 use proc_macro2::{Delimiter, TokenTree};
 use quote::quote;
 use syn::{parse_macro_input, DeriveInput};

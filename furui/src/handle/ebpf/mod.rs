@@ -1,24 +1,16 @@
-use std::collections::HashMap;
-use std::convert::TryFrom;
-use std::future::Future;
-use std::sync::Arc;
+use std::{collections::HashMap, convert::TryFrom, future::Future, sync::Arc};
 
-use aya::maps::perf::AsyncPerfEventArray;
-use aya::util::online_cpus;
-use aya::Ebpf;
-use bytes::BytesMut;
-use tokio::sync::Mutex;
-use tokio::task;
-
+use aya::{maps::perf::AsyncPerfEventArray, util::online_cpus, Ebpf};
 use bind::*;
+use bytes::BytesMut;
 use close::*;
 use connect::*;
 use egress::*;
 use furui_common::IpProtocol;
 use ingress::*;
+use tokio::{sync::Mutex, task};
 
-use crate::domain::Process;
-use crate::Maps;
+use crate::{domain::Process, Maps};
 
 mod bind;
 mod close;

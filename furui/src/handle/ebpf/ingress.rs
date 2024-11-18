@@ -1,10 +1,9 @@
 use std::sync::Arc;
 
 use aya::Ebpf;
+use furui_common::{Ingress6Event, Ingress6IcmpEvent, IngressEvent, IngressIcmpEvent};
 use tokio::sync::Mutex;
 use tracing::info;
-
-use furui_common::{Ingress6Event, Ingress6IcmpEvent, IngressEvent, IngressIcmpEvent};
 
 use crate::handle::ebpf::handle_perf_array;
 

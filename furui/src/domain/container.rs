@@ -1,11 +1,8 @@
-use std::collections::HashMap;
-use std::net::IpAddr;
-use std::sync::Arc;
+use std::{collections::HashMap, net::IpAddr, sync::Arc};
 
 use aya_ebpf::cty::c_char;
-use tokio::sync::Mutex;
-
 use furui_common::CONTAINER_ID_LEN;
+use tokio::sync::Mutex;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Container {

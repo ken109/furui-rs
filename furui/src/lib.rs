@@ -8,11 +8,9 @@ use tracing_core::Level;
 use tracing_log::LogTracer;
 use tracing_subscriber::FmtSubscriber;
 
-use crate::domain::Containers;
-use crate::ebpf::Loader;
-use crate::map::Maps;
-use crate::parse_policies::ParsePolicies;
-use crate::runtime::Runtime;
+use crate::{
+    domain::Containers, ebpf::Loader, map::Maps, parse_policies::ParsePolicies, runtime::Runtime,
+};
 
 mod domain;
 mod ebpf;

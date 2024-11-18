@@ -1,13 +1,9 @@
-use std::convert::TryFrom;
-use std::net::IpAddr;
-use std::sync::Arc;
+use std::{convert::TryFrom, net::IpAddr, sync::Arc};
 
 use anyhow::anyhow;
-use aya::maps::HashMap;
-use aya::Ebpf;
-use tokio::sync::Mutex;
-
+use aya::{maps::HashMap, Ebpf};
 use furui_common::{IcmpPolicyKey, IcmpPolicyValue, PolicyKey, PolicyValue};
+use tokio::sync::Mutex;
 
 use crate::domain;
 

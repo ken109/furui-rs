@@ -1,11 +1,8 @@
-use std::convert::TryFrom;
-use std::sync::Arc;
+use std::{convert::TryFrom, sync::Arc};
 
-use aya::maps::HashMap;
-use aya::Ebpf;
-use tokio::sync::Mutex;
-
+use aya::{maps::HashMap, Ebpf};
 use furui_common::{ContainerID, ContainerIP};
+use tokio::sync::Mutex;
 
 use crate::domain;
 

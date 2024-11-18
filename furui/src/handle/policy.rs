@@ -1,14 +1,9 @@
-use std::ops::Deref;
-use std::path::PathBuf;
-use std::sync::Arc;
-use std::time::Duration;
+use std::{ops::Deref, path::PathBuf, sync::Arc, time::Duration};
 
-use tokio::sync::Mutex;
-use tokio::{task, time};
+use tokio::{sync::Mutex, task, time};
 use tracing::info;
 
-use crate::domain::Policies;
-use crate::{Containers, Maps, ParsePolicies};
+use crate::{domain::Policies, Containers, Maps, ParsePolicies};
 
 pub fn policy_events(
     policy_path: PathBuf,

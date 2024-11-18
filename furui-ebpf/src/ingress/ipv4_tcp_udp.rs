@@ -1,19 +1,21 @@
-use aya_ebpf::bindings::{TC_ACT_OK, TC_ACT_SHOT};
-use aya_ebpf::cty::c_long;
-use aya_ebpf::helpers::bpf_probe_read_kernel;
-use aya_ebpf::macros::map;
-use aya_ebpf::maps::PerfEventArray;
-use aya_ebpf::programs::TcContext;
-
+use aya_ebpf::{
+    bindings::{TC_ACT_OK, TC_ACT_SHOT},
+    cty::c_long,
+    helpers::bpf_probe_read_kernel,
+    macros::map,
+    maps::PerfEventArray,
+    programs::TcContext,
+};
 use furui_common::{ContainerIP, IngressEvent, PolicyKey, PortKey, TcAction};
 
-use crate::helpers::{eth_protocol, get_port, ip_protocol, ntohl, ETH_HDR_LEN};
-use crate::vmlinux::iphdr;
-use crate::{CONTAINER_ID_FROM_IPS, POLICY_LIST, PROC_PORTS};
+use crate::{
+    helpers::{eth_protocol, get_port, ip_protocol, ntohl, ETH_HDR_LEN},
+    vmlinux::iphdr,
+    CONTAINER_ID_FROM_IPS, POLICY_LIST, PROC_PORTS,
+};
 
 #[map]
-static mut INGRESS_EVENTS: PerfEventArray<IngressEvent> =
-    PerfEventArray::<IngressEvent>::new(0);
+static INGRESS_EVENTS: PerfEventArray<IngressEvent> = PerfEventArray::<IngressEvent>::new(0);
 
 pub(crate) unsafe fn ipv4_tcp_udp(ctx: &TcContext) -> Result<i32, c_long> {
     let mut event: IngressEvent = core::mem::zeroed();
@@ -80,8 +82,8 @@ unsafe fn finish(
 ) -> Result<i32, c_long> {
     event.action = action;
     INGRESS_EVENTS.output(ctx, event, 0);
-    return Ok(match action {
+    Ok(match action {
         TcAction::Pass => TC_ACT_OK,
         TcAction::Drop => TC_ACT_SHOT,
-    });
+    })
 }

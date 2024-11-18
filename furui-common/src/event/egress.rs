@@ -1,5 +1,4 @@
 use aya_ebpf::cty::c_char;
-
 use furui_macros::{SearchIcmpPolicyKey, SearchPolicyKey};
 
 #[cfg(feature = "user")]

@@ -1,21 +1,24 @@
-use aya_ebpf::bindings::{TC_ACT_OK, TC_ACT_SHOT};
-use aya_ebpf::cty::c_long;
-use aya_ebpf::helpers::bpf_probe_read_kernel;
-use aya_ebpf::macros::map;
-use aya_ebpf::maps::PerfEventArray;
-use aya_ebpf::programs::TcContext;
-
+use aya_ebpf::{
+    bindings::{TC_ACT_OK, TC_ACT_SHOT},
+    cty::c_long,
+    helpers::bpf_probe_read_kernel,
+    macros::map,
+    maps::PerfEventArray,
+    programs::TcContext,
+};
 use furui_common::{ContainerIP, IcmpPolicyKey, IcmpVersion, Ingress6IcmpEvent, TcAction};
 
-use crate::helpers::{
-    eth_protocol, ip_protocol, ETH_HDR_LEN, IPV6_HDR_LEN, NEIGHBOR_ADVERTISEMENT,
-    NEIGHBOR_SOLICITAION,
+use crate::{
+    helpers::{
+        eth_protocol, ip_protocol, ETH_HDR_LEN, IPV6_HDR_LEN, NEIGHBOR_ADVERTISEMENT,
+        NEIGHBOR_SOLICITAION,
+    },
+    vmlinux::{icmphdr, ipv6hdr},
+    CONTAINER_ID_FROM_IPS, ICMP_POLICY_LIST,
 };
-use crate::vmlinux::{icmphdr, ipv6hdr};
-use crate::{CONTAINER_ID_FROM_IPS, ICMP_POLICY_LIST};
 
 #[map]
-static mut INGRESS6_ICMP_EVENTS: PerfEventArray<Ingress6IcmpEvent> =
+static INGRESS6_ICMP_EVENTS: PerfEventArray<Ingress6IcmpEvent> =
     PerfEventArray::<Ingress6IcmpEvent>::new(0);
 
 pub(crate) unsafe fn ipv6_icmp(ctx: &TcContext) -> Result<i32, c_long> {
@@ -71,8 +74,8 @@ unsafe fn finish(
 ) -> Result<i32, c_long> {
     event.action = action;
     INGRESS6_ICMP_EVENTS.output(ctx, event, 0);
-    return Ok(match action {
+    Ok(match action {
         TcAction::Pass => TC_ACT_OK,
         TcAction::Drop => TC_ACT_SHOT,
-    });
+    })
 }

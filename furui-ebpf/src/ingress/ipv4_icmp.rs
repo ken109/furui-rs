@@ -1,18 +1,21 @@
-use aya_ebpf::bindings::{TC_ACT_OK, TC_ACT_SHOT};
-use aya_ebpf::cty::c_long;
-use aya_ebpf::helpers::bpf_probe_read_kernel;
-use aya_ebpf::macros::map;
-use aya_ebpf::maps::PerfEventArray;
-use aya_ebpf::programs::TcContext;
-
+use aya_ebpf::{
+    bindings::{TC_ACT_OK, TC_ACT_SHOT},
+    cty::c_long,
+    helpers::bpf_probe_read_kernel,
+    macros::map,
+    maps::PerfEventArray,
+    programs::TcContext,
+};
 use furui_common::{ContainerIP, IcmpPolicyKey, IcmpVersion, IngressIcmpEvent, TcAction};
 
-use crate::helpers::{eth_protocol, ip_protocol, ntohl, ETH_HDR_LEN, IP_HDR_LEN};
-use crate::vmlinux::{icmphdr, iphdr};
-use crate::{CONTAINER_ID_FROM_IPS, ICMP_POLICY_LIST};
+use crate::{
+    helpers::{eth_protocol, ip_protocol, ntohl, ETH_HDR_LEN, IP_HDR_LEN},
+    vmlinux::{icmphdr, iphdr},
+    CONTAINER_ID_FROM_IPS, ICMP_POLICY_LIST,
+};
 
 #[map]
-static mut INGRESS_ICMP_EVENTS: PerfEventArray<IngressIcmpEvent> =
+static INGRESS_ICMP_EVENTS: PerfEventArray<IngressIcmpEvent> =
     PerfEventArray::<IngressIcmpEvent>::new(0);
 
 pub(crate) unsafe fn ipv4_icmp(ctx: &TcContext) -> Result<i32, c_long> {
@@ -62,8 +65,8 @@ unsafe fn finish(
 ) -> Result<i32, c_long> {
     event.action = action;
     INGRESS_ICMP_EVENTS.output(ctx, event, 0);
-    return Ok(match action {
+    Ok(match action {
         TcAction::Pass => TC_ACT_OK,
         TcAction::Drop => TC_ACT_SHOT,
-    });
+    })
 }

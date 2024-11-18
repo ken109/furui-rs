@@ -1,10 +1,10 @@
 use clap::Parser;
-use tokio::select;
-use tokio::signal::unix::{signal, SignalKind};
+use furui::{self, Options};
+use tokio::{
+    select,
+    signal::unix::{signal, SignalKind},
+};
 use tracing::info;
-
-use furui;
-use furui::Options;
 
 #[tokio::main]
 async fn main() {

@@ -1,32 +1,26 @@
-use std::collections::HashMap;
-use std::convert::TryFrom;
-use std::net::IpAddr;
-use std::sync::Arc;
+use std::{collections::HashMap, convert::TryFrom, net::IpAddr, sync::Arc};
 
 use anyhow::anyhow;
-use bollard;
-use bollard::container::ListContainersOptions;
-use bollard::system::EventsOptions;
-use futures::stream::BoxStream;
-use futures::StreamExt;
-use hyper_util::rt::TokioIo;
-use serde_yaml::Value;
-use tokio::net::UnixStream;
-use tokio::sync::Mutex;
-use tonic::transport::{Channel, Endpoint};
-use tower::service_fn;
-
+use bollard::{self, container::ListContainersOptions, system::EventsOptions};
 use furui_common::CONTAINER_ID_LEN;
+use futures::{stream::BoxStream, StreamExt};
+use hyper_util::rt::TokioIo;
 use k8s_cri::{
     runtime_service_client::RuntimeServiceClient, ContainerFilter, ContainerState,
     ListContainersRequest,
 };
+use serde_yaml::Value;
+use tokio::{net::UnixStream, sync::Mutex};
+use tonic::transport::{Channel, Endpoint};
+use tower::service_fn;
 
-use crate::domain::{Container, Containers};
-use crate::runtime::k8s_cri::{
-    ContainerStateValue, ContainerStatusRequest, ExecSyncRequest, GetEventsRequest,
+use crate::{
+    domain::{Container, Containers},
+    runtime::k8s_cri::{
+        ContainerStateValue, ContainerStatusRequest, ExecSyncRequest, GetEventsRequest,
+    },
+    ContainerRuntime, Options,
 };
-use crate::{ContainerRuntime, Options};
 
 pub mod k8s_cri {
     use tonic;

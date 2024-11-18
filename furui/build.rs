@@ -22,8 +22,9 @@ use cargo_metadata::{
 /// [bindeps]: https://doc.rust-lang.org/nightly/cargo/reference/unstable.html?highlight=feature#artifact-dependencies
 fn main() {
     env::set_var("PROTOC", protobuf_src::protoc());
-    tonic_build::compile_protos("proto/v1.proto").unwrap_or_else(|err| panic!("failed to compile protos: {err}"));
-    
+    tonic_build::compile_protos("proto/v1.proto")
+        .unwrap_or_else(|err| panic!("failed to compile protos: {err}"));
+
     let Metadata { packages, .. } = MetadataCommand::new().no_deps().exec().unwrap();
     let ebpf_package = packages
         .into_iter()

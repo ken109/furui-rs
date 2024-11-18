@@ -1,7 +1,7 @@
-use bollard::container::{
-    Config, CreateContainerOptions, RemoveContainerOptions, StartContainerOptions,
+use bollard::{
+    container::{Config, CreateContainerOptions, RemoveContainerOptions, StartContainerOptions},
+    Docker,
 };
-use bollard::Docker;
 
 #[derive(Default)]
 pub struct Container {

@@ -1,26 +1,25 @@
-use aya_ebpf::cty::c_long;
-use aya_ebpf::helpers::bpf_probe_read_kernel;
-use aya_ebpf::maps::PerfEventArray;
 use aya_ebpf::{
+    cty::c_long,
+    helpers::bpf_probe_read_kernel,
     macros::{kprobe, map},
+    maps::PerfEventArray,
     programs::ProbeContext,
     EbpfContext,
 };
 use aya_log_ebpf::warn;
-
 use furui_common::{Connect6Event, ConnectEvent, EthProtocol, IpProtocol, PortKey, PortVal};
 
-use crate::helpers::{get_container_id, is_container_process, ntohl, ntohs};
-use crate::vmlinux::{flowi4, flowi6, inet_sock, sock};
-use crate::PROC_PORTS;
+use crate::{
+    helpers::{get_container_id, is_container_process, ntohl, ntohs},
+    vmlinux::{flowi4, flowi6, inet_sock, sock},
+    PROC_PORTS,
+};
 
 #[map]
-static mut CONNECT_EVENTS: PerfEventArray<ConnectEvent> =
-    PerfEventArray::<ConnectEvent>::new(0);
+static CONNECT_EVENTS: PerfEventArray<ConnectEvent> = PerfEventArray::<ConnectEvent>::new(0);
 
 #[map]
-static mut CONNECT6_EVENTS: PerfEventArray<Connect6Event> =
-    PerfEventArray::<Connect6Event>::new(0);
+static CONNECT6_EVENTS: PerfEventArray<Connect6Event> = PerfEventArray::<Connect6Event>::new(0);
 
 #[kprobe]
 pub fn tcp_connect(ctx: ProbeContext) -> u32 {

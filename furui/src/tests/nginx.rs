@@ -1,7 +1,4 @@
-use std::path::PathBuf;
-
-use furui;
-use furui::{ContainerRuntime, LogFormat, LogLevel, Options};
+use furui::{self, ContainerRuntime, LogFormat, LogLevel, Options};
 
 use crate::common::{Container, TestCase, TestCommand};
 

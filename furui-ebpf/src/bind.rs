@@ -1,22 +1,22 @@
-use aya_ebpf::helpers::bpf_probe_read_kernel;
 use aya_ebpf::{
     cty::c_long,
+    helpers::bpf_probe_read_kernel,
     macros::{kprobe, map},
     maps::PerfEventArray,
     programs::ProbeContext,
     EbpfContext,
 };
 use aya_log_ebpf::warn;
-
 use furui_common::{BindEvent, EthProtocol, IpProtocol, PortKey, PortVal};
 
-use crate::helpers::{get_container_id, is_container_process, ntohs};
-use crate::vmlinux::{sockaddr_in, sockaddr_in6, socket};
-use crate::PROC_PORTS;
+use crate::{
+    helpers::{get_container_id, is_container_process, ntohs},
+    vmlinux::{sockaddr_in, sockaddr_in6, socket},
+    PROC_PORTS,
+};
 
 #[map]
-static mut BIND_EVENTS: PerfEventArray<BindEvent> =
-    PerfEventArray::<BindEvent>::new(0);
+static BIND_EVENTS: PerfEventArray<BindEvent> = PerfEventArray::<BindEvent>::new(0);
 
 #[kprobe]
 pub fn bind_v4(ctx: ProbeContext) -> u32 {

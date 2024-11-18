@@ -1,15 +1,14 @@
-use aya_ebpf::bindings::TC_ACT_OK;
-use aya_ebpf::cty::c_long;
-use aya_ebpf::{macros::classifier, programs::TcContext};
+use aya_ebpf::{bindings::TC_ACT_OK, cty::c_long, macros::classifier, programs::TcContext};
 use aya_log_ebpf::warn;
-
 use furui_common::{EthProtocol, IpProtocol};
 
-use crate::egress::ipv4_icmp::ipv4_icmp;
-use crate::egress::ipv4_tcp_udp::ipv4_tcp_udp;
-use crate::egress::ipv6_icmp::ipv6_icmp;
-use crate::egress::ipv6_tcp_udp::ipv6_tcp_udp;
-use crate::helpers::{eth_protocol, ip_protocol};
+use crate::{
+    egress::{
+        ipv4_icmp::ipv4_icmp, ipv4_tcp_udp::ipv4_tcp_udp, ipv6_icmp::ipv6_icmp,
+        ipv6_tcp_udp::ipv6_tcp_udp,
+    },
+    helpers::{eth_protocol, ip_protocol},
+};
 
 mod ipv4_icmp;
 mod ipv4_tcp_udp;

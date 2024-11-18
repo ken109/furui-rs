@@ -1,11 +1,10 @@
 use std::sync::Arc;
 
 use aya::Ebpf;
-use tokio::sync::Mutex;
-
 pub use container::ContainerMap;
 pub use policy::PolicyMap;
 pub use process::ProcessMap;
+use tokio::sync::Mutex;
 
 mod container;
 mod policy;

@@ -1,17 +1,16 @@
-use std::convert::TryInto;
-use std::process::Command;
-use std::sync::Arc;
+use std::{convert::TryInto, process::Command, sync::Arc};
 
-use aya::programs::{tc, KProbe, SchedClassifier, TcAttachType, TracePoint};
-use aya::{include_bytes_aligned, Ebpf};
+use aya::{
+    include_bytes_aligned,
+    programs::{tc, KProbe, SchedClassifier, TcAttachType, TracePoint},
+    Ebpf,
+};
 use aya_log::EbpfLogger;
 use tokio::sync::Mutex;
 use tracing::{debug, info};
 
 pub fn load_bpf() -> anyhow::Result<Arc<Mutex<Ebpf>>> {
-    let bpf = Ebpf::load(include_bytes_aligned!(concat!(
-        env!("OUT_DIR"), "/furui"
-    )))?;
+    let bpf = Ebpf::load(include_bytes_aligned!(concat!(env!("OUT_DIR"), "/furui")))?;
 
     Ok(Arc::new(Mutex::new(bpf)))
 }
@@ -28,7 +27,8 @@ impl Loader {
     pub async fn attach_programs(&self) -> anyhow::Result<()> {
         let mut bpf = self.bpf.lock().await;
 
-        let _ = EbpfLogger::init(&mut bpf).map_err(|e| debug!("failed to init EbpfLogger: {:?}", e));
+        let _ =
+            EbpfLogger::init(&mut bpf).map_err(|e| debug!("failed to init EbpfLogger: {:?}", e));
 
         let program: &mut KProbe = bpf.program_mut("bind_v4").unwrap().try_into()?;
         program.load()?;

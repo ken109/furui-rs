@@ -1,10 +1,9 @@
 use std::sync::Arc;
 
 use aya::Ebpf;
+use furui_common::{Connect6Event, ConnectEvent};
 use tokio::sync::Mutex;
 use tracing::info;
-
-use furui_common::{Connect6Event, ConnectEvent};
 
 use crate::handle::ebpf::{handle_perf_array, PidProcesses};
 
