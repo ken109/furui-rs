@@ -5,7 +5,7 @@ use aya_ebpf::cty::c_char;
 
 use crate::{IcmpVersion, IpProtocol, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(C)]
 pub struct PolicyKey {
     pub container_id: [c_char; CONTAINER_ID_LEN],
@@ -17,7 +17,7 @@ pub struct PolicyKey {
     pub protocol: IpProtocol,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(C)]
 pub struct PolicyValue {
     pub comm: [u8; TASK_COMM_LEN],
@@ -28,7 +28,7 @@ pub struct PolicyValue {
     pub protocol: IpProtocol,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(C)]
 pub struct IcmpPolicyKey {
     pub container_id: [c_char; CONTAINER_ID_LEN],
@@ -39,7 +39,7 @@ pub struct IcmpPolicyKey {
     pub remote_ipv6: [u8; IPV6_LEN],
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(C)]
 pub struct IcmpPolicyValue {
     pub version: IcmpVersion,
@@ -49,7 +49,7 @@ pub struct IcmpPolicyValue {
     pub remote_ipv6: [u8; IPV6_LEN],
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(C)]
 pub struct PortKey {
     pub container_id: [c_char; CONTAINER_ID_LEN],
@@ -57,13 +57,13 @@ pub struct PortKey {
     pub proto: IpProtocol,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(C)]
 pub struct PortVal {
     pub comm: [u8; TASK_COMM_LEN],
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(C)]
 pub struct ContainerIP {
     pub ip: u32,
@@ -86,7 +86,7 @@ impl ContainerIP {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(C)]
 pub struct ContainerID {
     pub container_id: [c_char; CONTAINER_ID_LEN],

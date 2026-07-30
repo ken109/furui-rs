@@ -39,6 +39,13 @@ tower = "0.5"
 hyper-util = "0.1"
 
 
+[dev-dependencies]
+# Integration tests see only furui's public API, so anything they use has to be
+# declared again here.
+bollard = "0.21"
+libc = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "time"] }
+
 [build-dependencies]
 anyhow = { workspace = true, default-features = true }
 aya-build = { workspace = true }

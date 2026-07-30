@@ -29,11 +29,10 @@ log = { version = "0.4", default-features = false }
 tokio = { version = "1", default-features = false }
 which = { version = "8.0", default-features = false }
 
-[profile.dev]
-panic = "abort"
-
-[profile.release]
-panic = "abort"
+# NOTE: no workspace-wide `panic = "abort"`. The `bpf*-unknown-none` targets
+# already specify abort in their target spec, so furui-ebpf does not need it,
+# while setting it here made the host crates unwind across abort-compiled
+# frames: every failing test died with SIGSEGV instead of reporting.
 
 [profile.release.package.furui-ebpf]
 debug = 2

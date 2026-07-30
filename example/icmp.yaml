@@ -3,13 +3,13 @@ policies:
       name: "nginx_test"
     communications:
       - icmp:
-          - version: 4
+          - version: "v4"
             type: 8
             remote_host: "httpd_test"
-          - version: 4
+          - version: "v4"
             type: 0
 
-          - version: 6
+          - version: "v6"
             type: 128
-          - version: 6
+          - version: "v6"
             type: 129

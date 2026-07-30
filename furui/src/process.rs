@@ -38,17 +38,8 @@ pub async fn get_all(containers: Arc<Mutex<Containers>>) -> Vec<Process> {
             net_file_buf.next();
 
             while let Some(Ok(line)) = net_file_buf.next() {
-                let row = line.split_whitespace().collect::<Vec<&str>>();
-
-                let port =
-                    match u16::from_str_radix(row[1].split(":").collect::<Vec<&str>>()[1], 16) {
-                        Ok(port) => port,
-                        Err(_) => continue,
-                    };
-
-                let inode: u64 = match row[9].parse() {
-                    Ok(port) => port,
-                    Err(_) => continue,
+                let Some((port, inode)) = parse_net_row(&line) else {
+                    continue;
                 };
 
                 let (executable, pid) = match search_process_from_inode(container.pid, inode) {
@@ -68,6 +59,30 @@ pub async fn get_all(containers: Arc<Mutex<Containers>>) -> Vec<Process> {
     }
 
     processes
+}
+
+/// Reads the local port and socket inode out of one `/proc/net/{tcp,udp}` row.
+///
+/// Rows look like
+///
+/// ```text
+///   sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
+///    0: 0100007F:1F90 00000000:0000 0A 00000000:00000000 00:00000000  00000000     0        0 24052
+/// ```
+///
+/// Returns `None` for the header and for anything else that does not parse,
+/// rather than indexing into a short row.
+fn parse_net_row(line: &str) -> Option<(u16, u64)> {
+    let mut columns = line.split_whitespace();
+
+    let local_address = columns.nth(1)?;
+    let port = u16::from_str_radix(local_address.rsplit_once(':')?.1, 16).ok()?;
+
+    // `sl` and `local_address` are already consumed, so the inode is the eighth
+    // column from here.
+    let inode = columns.nth(7)?.parse().ok()?;
+
+    Some((port, inode))
 }
 
 fn search_process_from_inode(pid: u32, inode: u64) -> Option<(String, u32)> {
@@ -188,4 +203,40 @@ fn get_process_name(pid: u32) -> String {
     file.read_to_string(&mut name).unwrap();
 
     name.trim().to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const HEADER: &str = "  sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode";
+
+    #[test]
+    fn reads_the_port_and_inode() {
+        let row = "   0: 0100007F:1F90 00000000:0000 0A 00000000:00000000 00:00000000  00000000     0        0 24052 1 0000000000000000 100 0 0 10 0";
+        assert_eq!(parse_net_row(row), Some((0x1F90, 24052)));
+    }
+
+    #[test]
+    fn reads_an_ipv6_row() {
+        let row = "   1: 00000000000000000000000000000000:0050 00000000000000000000000000000000:0000 0A 00000000:00000000 00:00000000  00000000     0        0 31337 1 0000000000000000 100 0 0 10 0";
+        assert_eq!(parse_net_row(row), Some((80, 31337)));
+    }
+
+    #[test]
+    fn skips_the_header() {
+        assert_eq!(parse_net_row(HEADER), None);
+    }
+
+    #[test]
+    fn skips_short_or_malformed_rows() {
+        // Used to panic on `row[1]` / `row[9]`.
+        assert_eq!(parse_net_row(""), None);
+        assert_eq!(parse_net_row("   0:"), None);
+        assert_eq!(parse_net_row("   0: 0100007F:1F90"), None);
+        assert_eq!(
+            parse_net_row("   0: no-colon-here 0 0 0 0 0 0 0 0 24052"),
+            None
+        );
+    }
 }
