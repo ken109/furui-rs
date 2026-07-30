@@ -32,3 +32,46 @@ fn string_to_c_char_bytes<const N: usize>(src: String) -> [c_char; N] {
 
     result
 }
+
+#[cfg(test)]
+mod tests {
+    use furui_common::TASK_COMM_LEN;
+
+    use super::*;
+
+    #[test]
+    fn pads_a_short_string_with_zeroes() {
+        let bytes: [u8; TASK_COMM_LEN] = string_to_u8_bytes("nginx".to_string());
+
+        assert_eq!(&bytes[..5], b"nginx");
+        assert!(bytes[5..].iter().all(|&b| b == 0));
+    }
+
+    #[test]
+    fn truncates_a_string_that_does_not_fit() {
+        // The kernel's own limit; a longer comm simply cannot be represented.
+        let bytes: [u8; 4] = string_to_u8_bytes("nginx".to_string());
+
+        assert_eq!(&bytes, b"ngin");
+    }
+
+    #[test]
+    fn an_empty_string_is_all_zeroes() {
+        let bytes: [u8; TASK_COMM_LEN] = string_to_u8_bytes(String::new());
+
+        assert_eq!(bytes, [0; TASK_COMM_LEN]);
+    }
+
+    #[test]
+    fn c_char_conversion_matches_the_byte_conversion() {
+        let bytes: [u8; 12] = string_to_u8_bytes("abcdef123456".to_string());
+        let chars: [c_char; 12] = string_to_c_char_bytes("abcdef123456".to_string());
+
+        for (byte, ch) in bytes.iter().zip(chars.iter()) {
+            // `c_char` is unsigned on aarch64, signed on x86_64.
+            #[allow(clippy::unnecessary_cast)]
+            let ch = *ch as u8;
+            assert_eq!(*byte, ch);
+        }
+    }
+}

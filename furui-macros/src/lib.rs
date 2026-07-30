@@ -1,7 +1,5 @@
 extern crate proc_macro;
 
-use std::collections::HashMap;
-
 use itertools::Itertools;
 use proc_macro::TokenStream;
 use proc_macro2::TokenTree;
@@ -39,7 +37,11 @@ fn generate_search_policy_key(
         }
     };
 
-    let mut field_defaults = HashMap::new();
+    // Declaration order, not a `HashMap`: the emitted lookups are ordered by
+    // this, and `HashMap` iteration is randomised per process, so the generated
+    // code -- and with it the order rules are probed in -- used to differ
+    // between compilations of the same source.
+    let mut field_defaults: Vec<(&syn::Ident, TokenTree, proc_macro2::TokenStream)> = Vec::new();
     for field in &struct_data.fields {
         let field_name = field.ident.as_ref().ok_or_else(|| {
             syn::Error::new_spanned(&derive_input.ident, "tuple structs are not supported")
@@ -66,15 +68,19 @@ fn generate_search_policy_key(
                 return Err(syn::Error::new_spanned(attr, EXPECTED_FORM));
             }
 
-            field_defaults.insert(field_name, (target, default));
+            field_defaults.push((field_name, target, default));
         }
     }
 
+    // Every non-empty subset of the annotated fields, narrowest first: a rule
+    // that pins only the protocol is checked before one that also pins a port.
+    // Fields outside the subset are set to the "unspecified" value the policy
+    // map stores for a wildcard.
     let mut sections = Vec::new();
-    for i in 1..=field_defaults.len() {
-        for use_fields in field_defaults.keys().combinations(i) {
-            for (field_name, (target, value)) in field_defaults.clone() {
-                if use_fields.contains(&&field_name) {
+    for size in 1..=field_defaults.len() {
+        for subset in (0..field_defaults.len()).combinations(size) {
+            for (index, (field_name, target, value)) in field_defaults.iter().enumerate() {
+                if subset.contains(&index) {
                     sections.push(quote! {
                         policy_key.#target = self.#field_name;
                     });
