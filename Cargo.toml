@@ -6,6 +6,13 @@ members = ["furui", "furui-common", "furui-ebpf", "furui-macros", "xtask"]
 # by a bare `cargo build` / `cargo clippy` / `cargo test`.
 default-members = ["furui", "furui-common", "furui-macros", "xtask"]
 
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Kensuke Kubo <kensuke.kubo@ken109.dev>"]
+repository = "https://github.com/ken109/furui-rs"
+
 [workspace.lints.clippy]
 # `TCP`, `UDP` and `ICMP` are how these protocols are spelled in the RFCs, in
 # the policy YAML and in `furui-ebpf/src/README.md`. Renaming them to `Tcp` and

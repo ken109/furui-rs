@@ -1,7 +1,11 @@
 [package]
 name = "furui"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Per-process egress and ingress control for containers, enforced with eBPF."
 
 [dependencies]
 furui-common = { path = "../furui-common", default-features = false, features = ["user"] }

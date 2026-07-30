@@ -47,6 +47,7 @@ $ sudo furui example/nginx.yaml --log-level=info
 - [Policy reference](#policy-reference)
 - [Development](#development)
 - [Project layout](#project-layout)
+- [License](#license)
 
 ## How it works
 
@@ -313,3 +314,13 @@ sudo bpftool prog dump xlated name ingress | wc -l
 | `furui-common` | Types shared across that boundary — map keys and values, and the event structs written to perf buffers. |
 | `furui-macros` | Derives that generate the policy lookups from the event definitions. |
 | `xtask`        | Repository automation (`cargo xtask codegen`, `cargo xtask run`). |
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+The programs in `furui-ebpf` call GPL-only BPF helpers such as
+`bpf_probe_read_kernel`, so they are loaded declaring `GPL` to the kernel, which
+is aya's default when an object carries no `license` section. MIT is
+GPL-compatible, so the source of this repository being MIT and the loaded
+programs declaring a GPL-compatible license are consistent.
