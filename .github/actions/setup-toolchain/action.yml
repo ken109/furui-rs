@@ -40,8 +40,13 @@ runs:
         # furui-ebpf pins nightly via rust-toolchain.toml and needs rust-src for
         # `-Z build-std=core`; rustfmt.toml sets `unstable_features`, so `fmt`
         # needs nightly too.
-        rustup toolchain install nightly --profile minimal --component rust-src rustfmt clippy
-        rustup toolchain install stable --profile minimal --component rustfmt clippy
+        #
+        # NOTE: `--component` takes one name; further names are read as
+        # toolchains, so the flag has to be repeated.
+        rustup toolchain install nightly --profile minimal \
+          --component rust-src --component rustfmt --component clippy
+        rustup toolchain install stable --profile minimal \
+          --component rustfmt --component clippy
         rustup default stable
 
     - uses: Swatinem/rust-cache@v2

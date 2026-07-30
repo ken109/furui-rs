@@ -20,6 +20,14 @@ jobs:
       # rustfmt.toml enables unstable options, so this has to be nightly.
       # No compilation involved, hence no eBPF toolchain.
       - run: rustup toolchain install nightly --profile minimal --component rustfmt
+
+      # rustfmt walks the module tree, and `furui-ebpf`'s `mod vmlinux` points
+      # at generated bindings that are not committed. rustfmt.toml already
+      # ignores their contents, so an empty file is enough to resolve the
+      # module -- generating them for real would mean installing the whole eBPF
+      # toolchain just to check formatting.
+      - run: test -f furui-ebpf/src/vmlinux.rs || touch furui-ebpf/src/vmlinux.rs
+
       - run: cargo +nightly fmt --all -- --check
 
   check:
