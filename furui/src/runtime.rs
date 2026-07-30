@@ -1,7 +1,10 @@
 use std::{collections::HashMap, convert::TryFrom, net::IpAddr, sync::Arc};
 
 use anyhow::anyhow;
-use bollard::{self, container::ListContainersOptions, system::EventsOptions};
+use bollard::{
+    self,
+    query_parameters::{EventsOptionsBuilder, ListContainersOptionsBuilder},
+};
 use furui_common::CONTAINER_ID_LEN;
 use futures::{stream::BoxStream, StreamExt};
 use hyper_util::rt::TokioIo;
@@ -119,7 +122,7 @@ impl Runtime {
         Ok(())
     }
 
-    pub async fn container_events(&self) -> BoxStream<ContainerEvent> {
+    pub async fn container_events(&self) -> BoxStream<'_, ContainerEvent> {
         match &self.engine_type {
             ContainerRuntime::Docker => self.docker.as_ref().unwrap().container_events(),
             ContainerRuntime::KubernetesCri => {
@@ -149,14 +152,12 @@ impl RuntimeDocker {
     }
 
     async fn container_ids(&self) -> anyhow::Result<Vec<String>> {
-        let mut list_container_filters = HashMap::new();
-        list_container_filters.insert("status", vec!["running"]);
-        let options = Some(ListContainersOptions {
-            all: true,
-            filters: list_container_filters,
-            ..Default::default()
-        });
-        let containers = self.docker.list_containers(options).await?;
+        let filters = HashMap::from([("status", vec!["running"])]);
+        let options = ListContainersOptionsBuilder::new()
+            .all(true)
+            .filters(&filters)
+            .build();
+        let containers = self.docker.list_containers(Some(options)).await?;
         Ok(containers.iter().map(|c| c.id.clone().unwrap()).collect())
     }
 
@@ -186,30 +187,25 @@ impl RuntimeDocker {
         Ok(())
     }
 
-    fn container_events(&self) -> BoxStream<ContainerEvent> {
-        let mut filters = HashMap::new();
-        filters.insert("type", vec!["container"]);
-        filters.insert("event", vec!["start", "unpause", "pause", "die"]);
+    fn container_events(&self) -> BoxStream<'_, ContainerEvent> {
+        let filters = HashMap::from([
+            ("type", vec!["container"]),
+            ("event", vec!["start", "unpause", "pause", "die"]),
+        ]);
+        let options = EventsOptionsBuilder::new().filters(&filters).build();
 
-        Box::pin(
-            self.docker
-                .events(Some(EventsOptions {
-                    filters,
-                    ..Default::default()
-                }))
-                .map(|event| {
-                    let event = event.unwrap();
-                    let id = event.actor.unwrap().id.unwrap();
-                    let action = match event.action.unwrap().as_str() {
-                        "start" => ContainerAction::Start,
-                        "unpause" => ContainerAction::Unpause,
-                        "pause" => ContainerAction::Pause,
-                        "die" => ContainerAction::Die,
-                        _ => ContainerAction::Unknown,
-                    };
-                    ContainerEvent { id, action }
-                }),
-        )
+        Box::pin(self.docker.events(Some(options)).map(|event| {
+            let event = event.unwrap();
+            let id = event.actor.unwrap().id.unwrap();
+            let action = match event.action.unwrap().as_str() {
+                "start" => ContainerAction::Start,
+                "unpause" => ContainerAction::Unpause,
+                "pause" => ContainerAction::Pause,
+                "die" => ContainerAction::Die,
+                _ => ContainerAction::Unknown,
+            };
+            ContainerEvent { id, action }
+        }))
     }
 }
 
@@ -342,7 +338,7 @@ impl RuntimeKubernetesCri {
         Ok(ip_addresses)
     }
 
-    async fn container_events(&self) -> BoxStream<ContainerEvent> {
+    async fn container_events(&self) -> BoxStream<'_, ContainerEvent> {
         let request = tonic::Request::new(GetEventsRequest {});
         let response = self
             .cri

@@ -4,9 +4,14 @@ use std::collections::HashMap;
 
 use itertools::Itertools;
 use proc_macro::TokenStream;
-use proc_macro2::{Delimiter, TokenTree};
+use proc_macro2::TokenTree;
 use quote::quote;
 use syn::{parse_macro_input, DeriveInput};
+
+/// Helper attribute understood by both derives.
+const SEARCH_KEY: &str = "search_key";
+
+const EXPECTED_FORM: &str = "expected `#[search_key(<policy key field> = <default>)]`";
 
 #[proc_macro_derive(SearchPolicyKey, attributes(search_key))]
 pub fn search_policy_key(input: TokenStream) -> TokenStream {
@@ -36,36 +41,32 @@ fn generate_search_policy_key(
 
     let mut field_defaults = HashMap::new();
     for field in &struct_data.fields {
-        let filed_name = field.ident.as_ref().unwrap();
+        let field_name = field.ident.as_ref().ok_or_else(|| {
+            syn::Error::new_spanned(&derive_input.ident, "tuple structs are not supported")
+        })?;
 
         for attr in &field.attrs {
-            let mut tokens = attr.tokens.clone().into_iter();
-            match [tokens.next(), tokens.next()] {
-                [Some(TokenTree::Group(group)), None]
-                    if group.delimiter() == Delimiter::Parenthesis =>
-                {
-                    let mut group_stream = group.stream().into_iter();
-                    let target = group_stream.next().unwrap();
-                    group_stream.next();
-
-                    field_defaults.insert(
-                        filed_name,
-                        (
-                            target,
-                            group_stream
-                                .collect_vec()
-                                .into_iter()
-                                .collect::<proc_macro2::TokenStream>(),
-                        ),
-                    );
-                }
-                _ => {
-                    return Err(syn::Error::new_spanned(
-                        &derive_input.ident,
-                        "malformed derive",
-                    ))
-                }
+            // Fields may carry unrelated attributes; only `search_key` is ours.
+            if !attr.path().is_ident(SEARCH_KEY) {
+                continue;
             }
+
+            // `#[search_key(<policy key field> = <value when this field is unset>)]`
+            let mut tokens = attr.meta.require_list()?.tokens.clone().into_iter();
+
+            let target = tokens
+                .next()
+                .ok_or_else(|| syn::Error::new_spanned(attr, EXPECTED_FORM))?;
+            match tokens.next() {
+                Some(TokenTree::Punct(punct)) if punct.as_char() == '=' => {}
+                _ => return Err(syn::Error::new_spanned(attr, EXPECTED_FORM)),
+            }
+            let default = tokens.collect::<proc_macro2::TokenStream>();
+            if default.is_empty() {
+                return Err(syn::Error::new_spanned(attr, EXPECTED_FORM));
+            }
+
+            field_defaults.insert(field_name, (target, default));
         }
     }
 

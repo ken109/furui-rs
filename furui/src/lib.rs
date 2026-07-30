@@ -3,7 +3,6 @@ use std::path::PathBuf;
 use anyhow::anyhow;
 use clap::Parser;
 use thiserror::Error;
-use tracing::error;
 use tracing_core::Level;
 use tracing_log::LogTracer;
 use tracing_subscriber::FmtSubscriber;

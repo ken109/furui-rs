@@ -10,7 +10,6 @@ anyhow = { workspace = true, default-features = true }
 aya = { workspace = true }
 aya-log = { workspace = true }
 aya-ebpf = { workspace = true }
-env_logger = { workspace = true }
 libc = { workspace = true }
 log = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread", "net", "signal"] }
@@ -19,45 +18,39 @@ clap = { workspace = true, features = ["derive"] }
 
 tracing = "0.1"
 tracing-core = "0.1"
-tracing-log = "0.1"
+tracing-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["json"] }
-serde = "1.0"
-serde_derive = "1.0"
-serde_yaml = "0.9.13"
+serde = { version = "1.0", features = ["derive"] }
+# NOTE: `serde_yaml` is deprecated upstream; 0.9.34 is its final release. It
+# still parses our policy files correctly, so replacing it is a separate
+# decision rather than a version bump.
+serde_yaml = "0.9.34"
 serde_json = "1.0"
-bytes = "1.1"
-chrono = "0.4"
-dns-lookup = "1.0.8"
-bollard = "0.13.0"
-futures = "0.3.21"
-thiserror = "1"
-pnet_datalink = "0.31.0"
-md5 = "0.7.0"
-prost = "0.13"
-prost-types = "0.13"
-tonic = "0.12"
+dns-lookup = "3.0"
+bollard = "0.21"
+futures = "0.3"
+thiserror = "2"
+pnet_datalink = "0.35"
+# Not referenced directly: `tonic::include_proto!` expands to code that uses them.
+prost = "0.14"
+tonic = "0.14"
+tonic-prost = "0.14"
 tower = "0.5"
 hyper-util = "0.1"
 
 
 [build-dependencies]
-cargo_metadata = { workspace = true }
-# (https://github.com/rust-lang/cargo/issues/12375): this should be an artifact dependency, but
-# it's not possible to tell cargo to use `-Z build-std` to build it. We cargo-in-cargo in the build
-# script to build this, but we want to teach cargo about the dependecy so that cache invalidation
-# works properly.
-#
-# Note also that https://github.com/rust-lang/cargo/issues/10593 occurs when `target = ...` is added
-# to an artifact dependency; it seems possible to work around that by setting `resolver = "1"` in
-# Cargo.toml in the workspace root.
-#
-# Finally note that *any* usage of `artifact = ...` in *any* Cargo.toml in the workspace breaks
-# workflows with stable cargo; stable cargo outright refuses to load manifests that use unstable
-# features.
+anyhow = { workspace = true, default-features = true }
+aya-build = { workspace = true }
+
+# Declared so that cargo rebuilds us when `furui-ebpf`'s *library* target or any
+# of its dependencies change. `aya_build` additionally emits a
+# `rerun-if-changed` for the crate directory, which covers its *binary* target.
 furui-ebpf = { path = "../furui-ebpf" }
 
-protobuf-src = "*"
-tonic-build = "0.12"
+protobuf-src = "2.1"
+# tonic 0.14 split prost codegen out of `tonic-build` into `tonic-prost-build`.
+tonic-prost-build = "0.14"
 
 [[bin]]
 name = "furui"

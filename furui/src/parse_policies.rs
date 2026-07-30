@@ -2,7 +2,7 @@ use std::{fs::File, io::Read, net::IpAddr, path::PathBuf, sync::Arc};
 
 use dns_lookup::lookup_host;
 use furui_common::IpProtocol;
-use serde_derive::Deserialize;
+use serde::Deserialize;
 use serde_yaml;
 use tokio::sync::Mutex;
 use tracing::warn;
@@ -98,7 +98,7 @@ impl ParsePolicies {
         remote_host: &str,
     ) -> Vec<IpAddr> {
         match lookup_host(remote_host) {
-            Ok(ips) => ips,
+            Ok(ips) => ips.collect(),
             Err(err) => match containers.lock().await.get_container_by_name(remote_host) {
                 Some(container) => container.ip_addresses.unwrap(),
                 None => {

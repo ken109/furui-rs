@@ -50,7 +50,7 @@ pub(crate) unsafe fn ipv4_icmp(ctx: &TcContext) -> Result<i32, c_long> {
     policy_key.version = event.version;
 
     if event.search_key(&mut policy_key, |policy_key| {
-        ICMP_POLICY_LIST.get(&policy_key).is_some()
+        ICMP_POLICY_LIST.get(policy_key).is_some()
     }) {
         return finish(ctx, TcAction::Pass, &mut event);
     }

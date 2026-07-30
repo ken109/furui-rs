@@ -69,7 +69,7 @@ pub(crate) unsafe fn ipv6_tcp_udp(ctx: &TcContext) -> Result<i32, c_long> {
     event.comm = bpf_probe_read_kernel(&port_val.comm)?;
 
     if event.search_key(&mut policy_key, |policy_key| {
-        POLICY_LIST.get(&policy_key).is_some()
+        POLICY_LIST.get(policy_key).is_some()
     }) {
         return finish(ctx, TcAction::Pass, &mut event);
     }
