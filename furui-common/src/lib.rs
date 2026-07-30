@@ -1,10 +1,27 @@
 #![cfg_attr(not(feature = "user"), no_std)]
 
-use aya_ebpf::cty::c_ushort;
 pub use event::*;
 #[cfg(feature = "user")]
 pub use helpers::*;
 pub use map::*;
+
+use crate::cty::c_ushort;
+
+/// `c_char` and friends, from whichever source suits the build.
+///
+/// The eBPF side has to use aya's definitions, which differ from `core::ffi`'s
+/// on the BPF targets. The userspace side must *not* link `aya-ebpf` at all: a
+/// binary containing both `aya` and `aya-ebpf` segfaults whenever a panic
+/// message needs to allocate, which turns every failing test into a crash with
+/// no report. Both spellings are one byte, so the shared `#[repr(C)]` layouts
+/// agree either way.
+pub(crate) mod cty {
+    #[cfg(not(feature = "ebpf"))]
+    pub use core::ffi::{c_char, c_ushort};
+
+    #[cfg(feature = "ebpf")]
+    pub use aya_ebpf::cty::{c_char, c_ushort};
+}
 
 mod event;
 #[cfg(feature = "user")]

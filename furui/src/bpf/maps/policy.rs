@@ -202,10 +202,10 @@ mod tests {
         }
     }
 
-    fn c_id(id: &str) -> [aya_ebpf::cty::c_char; CONTAINER_ID_LEN] {
+    fn c_id(id: &str) -> [std::ffi::c_char; CONTAINER_ID_LEN] {
         let mut out = [0; CONTAINER_ID_LEN];
         for (slot, byte) in out.iter_mut().zip(id.bytes()) {
-            *slot = byte as aya_ebpf::cty::c_char;
+            *slot = byte as std::ffi::c_char;
         }
         out
     }

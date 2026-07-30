@@ -1,8 +1,6 @@
-use aya_ebpf::cty::c_char;
-
 #[cfg(feature = "user")]
 use crate::event::common;
-use crate::{EthProtocol, IpProtocol, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN};
+use crate::{cty::c_char, EthProtocol, IpProtocol, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN};
 
 #[derive(Copy, Clone)]
 #[repr(C)]

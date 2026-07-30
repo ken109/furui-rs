@@ -11,14 +11,13 @@
 //! field-declaration order, and `../../../furui-ebpf/src/README.md` documents
 //! one order for both.
 
-use aya_ebpf::cty::c_char;
 use furui_macros::{SearchIcmpPolicyKey, SearchPolicyKey};
 
 #[cfg(feature = "user")]
 use crate::event::common;
 use crate::{
-    EthProtocol, IcmpPolicyKey, IcmpVersion, IpProtocol, PolicyKey, TcAction, CONTAINER_ID_LEN,
-    IPV6_LEN, TASK_COMM_LEN,
+    cty::c_char, EthProtocol, IcmpPolicyKey, IcmpVersion, IpProtocol, PolicyKey, TcAction,
+    CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN,
 };
 
 /// Defines the four event types for one direction.

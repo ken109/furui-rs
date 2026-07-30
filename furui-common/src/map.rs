@@ -1,9 +1,7 @@
 #[cfg(feature = "user")]
 use std::net::IpAddr;
 
-use aya_ebpf::cty::c_char;
-
-use crate::{IcmpVersion, IpProtocol, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN};
+use crate::{cty::c_char, IcmpVersion, IpProtocol, CONTAINER_ID_LEN, IPV6_LEN, TASK_COMM_LEN};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(C)]

@@ -544,7 +544,6 @@ dependencies = [
  "anyhow",
  "aya",
  "aya-build",
- "aya-ebpf",
  "aya-log",
  "bollard",
  "clap",

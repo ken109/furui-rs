@@ -1,6 +1,5 @@
-use std::{collections::HashMap, net::IpAddr, sync::Arc};
+use std::{collections::HashMap, ffi::c_char, net::IpAddr, sync::Arc};
 
-use aya_ebpf::cty::c_char;
 use furui_common::CONTAINER_ID_LEN;
 use tokio::sync::RwLock;
 

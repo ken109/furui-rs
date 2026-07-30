@@ -4,13 +4,16 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = []
-user = ["aya", "libc"]
+default = ["ebpf"]
+# The eBPF side needs aya's `cty`; the userspace side must not link `aya-ebpf`.
+# See the `cty` module in src/lib.rs.
+ebpf = ["dep:aya-ebpf"]
+user = ["dep:aya", "dep:libc"]
 
 [dependencies]
 furui-macros = { path = "../furui-macros" }
 aya = { workspace = true, optional = true }
-aya-ebpf = { workspace = true }
+aya-ebpf = { workspace = true, optional = true }
 libc = { workspace = true, optional = true }
 
 [lib]

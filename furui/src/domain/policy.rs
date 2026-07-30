@@ -1,6 +1,5 @@
-use std::{net::IpAddr, sync::Arc};
+use std::{ffi::c_char, net::IpAddr, sync::Arc};
 
-use aya_ebpf::cty::c_char;
 use furui_common::{IcmpVersion, IpProtocol, CONTAINER_ID_LEN, TASK_COMM_LEN};
 use tokio::sync::RwLock;
 

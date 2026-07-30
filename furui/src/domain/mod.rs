@@ -1,4 +1,5 @@
-use aya_ebpf::cty::c_char;
+use std::ffi::c_char;
+
 pub use container::*;
 pub use policy::*;
 pub use process::*;
