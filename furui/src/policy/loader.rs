@@ -207,6 +207,45 @@ mod tests {
         assert!(failures.is_empty(), "{failures:#?}");
     }
 
+    /// Every policy document in the README has to parse, or the documentation
+    /// is telling people to write something furui rejects.
+    #[test]
+    fn the_documented_examples_parse() {
+        let readme = std::fs::read_to_string(
+            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .parent()
+                .unwrap()
+                .join("README.md"),
+        )
+        .unwrap();
+
+        let mut blocks = 0;
+        let mut inside = false;
+        let mut current = String::new();
+
+        for line in readme.lines() {
+            if inside && line.trim_start().starts_with("```") {
+                inside = false;
+                if current.starts_with("policies:") {
+                    blocks += 1;
+                    serde_yaml::from_str::<ParsePolicies>(&current)
+                        .unwrap_or_else(|err| panic!("README block {blocks}: {err}\n{current}"));
+                }
+                current.clear();
+            } else if inside {
+                current.push_str(line);
+                current.push('\n');
+            } else if line.trim_start() == "```yaml" {
+                inside = true;
+            }
+        }
+
+        assert!(
+            blocks >= 2,
+            "expected policy examples in the README, found {blocks}"
+        );
+    }
+
     fn parse(yaml: &str) -> ParsePolicies {
         serde_yaml::from_str(yaml).unwrap()
     }
