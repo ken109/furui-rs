@@ -73,6 +73,31 @@ runs:
         cargo install bindgen-cli
         cargo install aya-tool --git https://github.com/aya-rs/aya.git
 
+    - name: Install bpftool
+      if: inputs.codegen == 'true'
+      shell: bash
+      run: |
+        set -euxo pipefail
+        # `aya-tool` shells out to `bpftool`, and Ubuntu's `/usr/sbin/bpftool`
+        # is a wrapper that execs `/usr/lib/linux-tools/$(uname -r)/bpftool`.
+        #
+        # Runners boot an `-azure` kernel, and `linux-tools-<version>-azure`
+        # ships cpupower, perf and usbip but *not* bpftool -- so installing the
+        # package matching `uname -r` succeeds and still leaves the wrapper
+        # unable to resolve. Only the `-generic` flavour carries bpftool.
+        #
+        # Install that and put it ahead of the wrapper on PATH. Dumping BTF
+        # does not need a kernel-matched bpftool: the format is portable, which
+        # is the point of shipping it.
+        sudo apt-get install -y --no-install-recommends linux-tools-generic
+
+        # The glob includes the filename, so directories without bpftool -- the
+        # azure one, if it is installed -- do not match.
+        bpftool=$(ls -d /usr/lib/linux-tools/*/bpftool 2>/dev/null | sort -V | tail -1)
+        test -n "$bpftool"
+        sudo ln -sf "$bpftool" /usr/local/bin/bpftool
+        bpftool version
+
     - name: Generate vmlinux bindings
       if: inputs.codegen == 'true'
       shell: bash
