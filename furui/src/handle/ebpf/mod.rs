@@ -35,21 +35,15 @@ impl PidProcesses {
         }
     }
 
-    unsafe fn add(&mut self, pid: u32, container_id: String, port: u16, protocol: IpProtocol) {
-        let mut key: Process = Default::default();
+    fn add(&mut self, pid: u32, container_id: String, port: u16, protocol: IpProtocol) {
+        let key = Process {
+            container_id,
+            port,
+            protocol,
+            ..Default::default()
+        };
 
-        key.container_id = container_id;
-        key.port = port;
-        key.protocol = protocol;
-
-        match self.map.get_mut(&pid) {
-            Some(processes) => {
-                processes.push(key);
-            }
-            None => {
-                self.map.insert(pid, vec![key]);
-            }
-        }
+        self.map.entry(pid).or_default().push(key);
     }
 }
 

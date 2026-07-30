@@ -13,3 +13,6 @@ syn = "3.0"
 quote = "1.0"
 proc-macro2 = "1"
 itertools = "0.15"
+
+[lints]
+workspace = true

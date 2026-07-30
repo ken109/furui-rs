@@ -3,7 +3,6 @@ use std::{fs::File, io::Read, net::IpAddr, path::PathBuf, sync::Arc};
 use dns_lookup::lookup_host;
 use furui_common::IpProtocol;
 use serde::Deserialize;
-use serde_yaml;
 use tokio::sync::Mutex;
 use tracing::warn;
 
@@ -43,18 +42,13 @@ pub struct Socket {
     pub remote_port: Option<u16>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
 #[serde(rename_all(deserialize = "lowercase"))]
 pub enum Protocol {
     TCP,
     UDP,
+    #[default]
     None,
-}
-
-impl Default for Protocol {
-    fn default() -> Self {
-        Protocol::None
-    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -67,18 +61,13 @@ pub struct ICMP {
     pub remote_host: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
 #[serde(rename_all(deserialize = "lowercase"))]
 pub enum IcmpVersion {
     V4,
     V6,
+    #[default]
     None,
-}
-
-impl Default for IcmpVersion {
-    fn default() -> Self {
-        IcmpVersion::None
-    }
 }
 
 impl ParsePolicies {
@@ -143,7 +132,7 @@ impl ParsePolicies {
                                 ParsePolicies::lookup_host(containers.clone(), remote_host).await
                             {
                                 communication.sockets.push(domain::Socket {
-                                    protocol: socket.protocol.clone(),
+                                    protocol: socket.protocol,
                                     local_port: socket.local_port,
                                     remote_ip: Some(addr),
                                     remote_port: socket.remote_port,

@@ -17,8 +17,8 @@ mod common {
             .iter()
             .map(|&s| s as char)
             .collect::<String>()
-            .split("\0")
-            .nth(0)
+            .split('\0')
+            .next()
             .unwrap_or("")
             .to_string()
     }
@@ -26,10 +26,16 @@ mod common {
     pub(crate) fn c_char_array_to_str<const N: usize>(array: [c_char; N]) -> String {
         array
             .iter()
-            .map(|&s| (s as u8) as char)
+            // `c_char` is unsigned on aarch64 and signed on x86_64, so this
+            // cast is a no-op on one target and load-bearing on the other.
+            .map(|&s| {
+                #[allow(clippy::unnecessary_cast)]
+                let byte = s as u8;
+                byte as char
+            })
             .collect::<String>()
-            .split("\0")
-            .nth(0)
+            .split('\0')
+            .next()
             .unwrap_or("")
             .to_string()
     }

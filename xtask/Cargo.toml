@@ -7,3 +7,6 @@ publish = false
 [dependencies]
 anyhow = { workspace = true, default-features = true }
 clap = { workspace = true, features = ["derive"] }
+
+[lints]
+workspace = true

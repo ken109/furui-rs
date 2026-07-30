@@ -21,17 +21,16 @@ pub async fn close(
         let (maps, pid_processes) = args.deref();
         let mut pid_processes = pid_processes.lock().await;
 
-        match pid_processes.map.get(&event) {
-            Some(processes) => unsafe {
+        if let Some(processes) = pid_processes.map.get(&event) {
+            unsafe {
                 for process in processes {
                     maps.process.remove(process.clone()).await.unwrap_or(());
                 }
+            }
 
-                pid_processes.map.remove(&event);
-                info!(event = "close", pid = event,);
-            },
-            None => {}
-        };
+            pid_processes.map.remove(&event);
+            info!(event = "close", pid = event);
+        }
     })
     .await?;
 

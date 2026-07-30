@@ -102,7 +102,7 @@ pub fn detach_programs() {
         let iface = interface.name.as_str();
 
         let _ = Command::new("tc")
-            .args(&vec!["qdisc", "del", "dev", iface, "clsact"])
+            .args(["qdisc", "del", "dev", iface, "clsact"])
             .output();
     }
 }

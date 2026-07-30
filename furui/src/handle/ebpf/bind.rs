@@ -21,9 +21,7 @@ pub async fn bind(
             let arg = args.lock().await;
             let mut pid_processes = arg.lock().await;
 
-            unsafe {
-                pid_processes.add(event.pid, event.container_id(), event.lport, event.protocol);
-            }
+            pid_processes.add(event.pid, event.container_id(), event.lport, event.protocol);
 
             info!(
                 event = "bind",

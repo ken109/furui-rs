@@ -55,6 +55,16 @@ pub struct Options {
     pub log_fmt: LogFormat,
 }
 
+/// Loads the eBPF programs, seeds the maps and spawns the event loops.
+///
+/// Returns once everything is attached; the spawned tasks keep running.
+///
+/// # Safety
+///
+/// Events are read out of perf buffers by reinterpreting the raw bytes the
+/// kernel side wrote. The caller must ensure the loaded eBPF object is the one
+/// built from `furui-ebpf` in this workspace, so that the event structs on both
+/// sides agree.
 pub async unsafe fn start(opt: Options) -> anyhow::Result<()> {
     if libc::geteuid() != 0 {
         return Err(anyhow!("You must be root."));

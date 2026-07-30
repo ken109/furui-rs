@@ -21,14 +21,12 @@ pub async fn connect(
             let args = args.lock().await;
             let mut pid_processes = args.lock().await;
 
-            unsafe {
-                pid_processes.add(
-                    event.pid,
-                    event.container_id(),
-                    event.src_port,
-                    event.protocol,
-                );
-            }
+            pid_processes.add(
+                event.pid,
+                event.container_id(),
+                event.src_port,
+                event.protocol,
+            );
 
             info!(
                 event = "connect",
@@ -54,14 +52,12 @@ pub async fn connect(
             let args = args.lock().await;
             let mut pid_processes = args.lock().await;
 
-            unsafe {
-                pid_processes.add(
-                    event.pid,
-                    event.container_id(),
-                    event.src_port,
-                    event.protocol,
-                );
-            }
+            pid_processes.add(
+                event.pid,
+                event.container_id(),
+                event.src_port,
+                event.protocol,
+            );
 
             info!(
                 event = "connect",

@@ -88,20 +88,15 @@ const IPPROTO_UDP: u8 = 17;
 const IPPROTO_ICMP: u8 = 1;
 const IPPROTO_ICMPV6: u8 = 58;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(C)]
 pub enum IpProtocol {
+    #[default]
     Default,
     TCP,
     UDP,
     ICMP,
     Other,
-}
-
-impl Default for IpProtocol {
-    fn default() -> Self {
-        IpProtocol::Default
-    }
 }
 
 impl IpProtocol {
@@ -153,18 +148,13 @@ impl TcAction {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(C)]
 pub enum IcmpVersion {
+    #[default]
     Default,
     V4,
     V6,
-}
-
-impl Default for IcmpVersion {
-    fn default() -> Self {
-        IcmpVersion::Default
-    }
 }
 
 impl IcmpVersion {

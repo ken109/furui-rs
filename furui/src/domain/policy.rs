@@ -15,7 +15,7 @@ impl Policies {
         let ids = containers.lock().await.ids();
 
         for policy in &mut self.policies {
-            if policy.container.name.len() == 0 {
+            if policy.container.name.is_empty() {
                 continue;
             }
 

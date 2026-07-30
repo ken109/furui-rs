@@ -6,6 +6,12 @@ members = ["furui", "furui-common", "furui-ebpf", "furui-macros", "xtask"]
 # by a bare `cargo build` / `cargo clippy` / `cargo test`.
 default-members = ["furui", "furui-common", "furui-macros", "xtask"]
 
+[workspace.lints.clippy]
+# `TCP`, `UDP` and `ICMP` are how these protocols are spelled in the RFCs, in
+# the policy YAML and in `furui-ebpf/src/README.md`. Renaming them to `Tcp` and
+# friends would make the code disagree with its own domain vocabulary.
+upper_case_acronyms = "allow"
+
 [workspace.dependencies]
 aya = { version = "0.14.0", default-features = false }
 aya-build = { version = "0.2.0", default-features = false }

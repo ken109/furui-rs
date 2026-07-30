@@ -25,9 +25,9 @@ use crate::{
     ContainerRuntime, Options,
 };
 
+// Generated from `proto/v1.proto` by the build script; not ours to lint.
+#[allow(clippy::enum_variant_names)]
 pub mod k8s_cri {
-    use tonic;
-
     tonic::include_proto!("runtime.v1");
 }
 
@@ -164,20 +164,18 @@ impl RuntimeDocker {
     async fn set_container_inspect(&self, container: &mut Container) -> anyhow::Result<()> {
         let inspect = self
             .docker
-            .inspect_container(&container.id.as_ref().unwrap(), None)
+            .inspect_container(container.id.as_ref().unwrap(), None)
             .await?;
 
         let mut addrs: Vec<IpAddr> = vec![];
         for (_, network) in inspect.network_settings.unwrap().networks.unwrap() {
-            match network.ip_address.unwrap().parse::<IpAddr>() {
-                Ok(addr) => addrs.push(addr),
-                Err(_) => {}
-            };
+            if let Ok(addr) = network.ip_address.unwrap().parse::<IpAddr>() {
+                addrs.push(addr);
+            }
 
-            match network.global_ipv6_address.unwrap().parse::<IpAddr>() {
-                Ok(addr) => addrs.push(addr),
-                Err(_) => {}
-            };
+            if let Ok(addr) = network.global_ipv6_address.unwrap().parse::<IpAddr>() {
+                addrs.push(addr);
+            }
         }
 
         container.ip_addresses = Some(addrs);

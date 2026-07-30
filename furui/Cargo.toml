@@ -55,3 +55,6 @@ tonic-prost-build = "0.14"
 [[bin]]
 name = "furui"
 path = "src/main.rs"
+
+[lints]
+workspace = true

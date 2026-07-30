@@ -43,9 +43,9 @@ impl PolicyMap {
 
                 value.comm = communication.process();
 
-                if communication.sockets.len() == 0
-                    && communication.icmp.len() == 0
-                    && communication.process.as_ref().unwrap().len() != 0
+                if communication.sockets.is_empty()
+                    && communication.icmp.is_empty()
+                    && !communication.process.as_ref().unwrap().is_empty()
                 {
                     policy_list.insert(key, value, 0)?;
                     continue;

@@ -72,7 +72,7 @@ fn generate_search_policy_key(
 
     let mut sections = Vec::new();
     for i in 1..=field_defaults.len() {
-        for use_fields in field_defaults.keys().into_iter().combinations(i) {
+        for use_fields in field_defaults.keys().combinations(i) {
             for (field_name, (target, value)) in field_defaults.clone() {
                 if use_fields.contains(&&field_name) {
                     sections.push(quote! {
