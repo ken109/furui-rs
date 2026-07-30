@@ -176,21 +176,19 @@ mod tests {
     use furui_common::{IcmpVersion, IpProtocol, CONTAINER_ID_LEN, TASK_COMM_LEN};
 
     use super::*;
-    use crate::domain::{Communication, Container, Policies, Policy, Socket, ICMP};
+    use crate::domain::{Communication, Policies, Policy, PolicyTarget, Socket, ICMP};
 
-    fn container(id: &str) -> Container {
-        Container {
+    fn target(id: &str) -> PolicyTarget {
+        PolicyTarget {
+            name: id.to_string(),
             id: Some(id.to_string()),
-            ip_addresses: None,
-            name: format!("/{id}"),
-            pid: 0,
         }
     }
 
     fn policies(communications: Vec<Communication>) -> Policies {
         Policies {
             policies: vec![Policy {
-                container: container("abcdef123456"),
+                container: target("abcdef123456"),
                 communications,
             }],
         }
@@ -376,7 +374,7 @@ mod tests {
         // `Policies::set_container_id` clears the id when the container is not
         // running, and the entry still has to be well-formed.
         let mut policies = policies(vec![comm(Some("nginx"), vec![], vec![])]);
-        policies.policies[0].container.id = None;
+        policies.policies[0].container = PolicyTarget::new("nginx_test".to_string());
 
         let entries = policy_entries(&policies).unwrap();
         assert_eq!(entries.sockets[0].0.container_id, [0; CONTAINER_ID_LEN]);

@@ -1,5 +1,6 @@
 use std::{convert::TryFrom, net::IpAddr};
 
+use anyhow::anyhow;
 use futures::{stream::BoxStream, StreamExt};
 use hyper_util::rt::TokioIo;
 use serde_yaml::Value;
@@ -61,7 +62,7 @@ impl RuntimeKubernetesCri {
         &self,
         container: &mut Container,
     ) -> anyhow::Result<()> {
-        let container_id = container.id.clone().unwrap();
+        let container_id = container.id.clone();
         let request = tonic::Request::new(ContainerStatusRequest {
             container_id: container_id.to_string(),
             verbose: true,
@@ -71,15 +72,18 @@ impl RuntimeKubernetesCri {
         let metadata = inspect.get_ref().status.clone().unwrap().metadata.unwrap();
         let raw_info = &inspect.get_ref().info.get("info").unwrap();
 
-        let info: Value = serde_json::from_str(raw_info).unwrap();
+        let info: Value = serde_json::from_str(raw_info)?;
 
         let mut addrs: Vec<IpAddr> = vec![];
         addrs.extend(self.get_ipv4_addresses(container_id.clone()).await?);
-        addrs.extend(self.get_ipv6_addresses(container_id).await?);
+        addrs.extend(self.get_ipv6_addresses(container_id.clone()).await?);
 
-        container.ip_addresses = Some(addrs);
+        container.ip_addresses = addrs;
         container.name = metadata.name;
-        container.pid = info["pid"].as_u64().unwrap() as u32;
+        container.pid = info["pid"]
+            .as_u64()
+            .ok_or_else(|| anyhow!("container {container_id} reported no pid"))?
+            as u32;
 
         Ok(())
     }

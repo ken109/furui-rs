@@ -22,7 +22,7 @@ impl ContainerMap {
         let mut bpf = self.bpf.lock().await;
         let mut map = HashMap::try_from(bpf.map_mut("CONTAINER_ID_FROM_IPS").unwrap())?;
         for container in containers.read().await.list() {
-            for ip in container.ip_addresses.as_ref().unwrap() {
+            for ip in &container.ip_addresses {
                 map.insert(ContainerIP::new(*ip), ContainerID::new(container.id()), 0)?;
             }
         }
@@ -35,7 +35,7 @@ impl ContainerMap {
         let mut map: HashMap<_, ContainerIP, ContainerID> =
             HashMap::try_from(bpf.map_mut("CONTAINER_ID_FROM_IPS").unwrap())?;
 
-        for ip in container.ip_addresses.unwrap() {
+        for ip in container.ip_addresses {
             map.remove(&ContainerIP::new(ip))?;
         }
 

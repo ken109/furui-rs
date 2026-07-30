@@ -23,12 +23,6 @@ pub async fn listening_processes(containers: Arc<RwLock<Containers>>) -> Vec<Pro
     let mut processes = vec![];
 
     for container in containers.read().await.list() {
-        // A container whose inspection has not landed yet has no id to
-        // attribute its processes to.
-        let Some(container_id) = container.id.clone() else {
-            continue;
-        };
-
         for (supported_protocol, proto) in &SUPPORTED_PROTOCOLS {
             let net_file_path = Path::new("/proc")
                 .join(format!("{}", container.pid))
@@ -54,7 +48,7 @@ pub async fn listening_processes(containers: Arc<RwLock<Containers>>) -> Vec<Pro
                 };
 
                 processes.push(Process {
-                    container_id: container_id.clone(),
+                    container_id: container.id.clone(),
                     executable,
                     protocol: *proto,
                     port,

@@ -4,10 +4,15 @@ use aya_ebpf::cty::c_char;
 use furui_common::CONTAINER_ID_LEN;
 use tokio::sync::RwLock;
 
+/// A container that is running right now.
+///
+/// Every field is known: a `Container` only exists once the runtime has told us
+/// about it. A policy naming a container that is *not* running is a
+/// [`super::PolicyTarget`], which is where "we do not know its id yet" belongs.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Container {
-    pub id: Option<String>,
-    pub ip_addresses: Option<Vec<IpAddr>>,
+    pub id: String,
+    pub ip_addresses: Vec<IpAddr>,
     pub name: String,
     pub pid: u32,
 }
@@ -17,22 +22,20 @@ impl Container {
     ///
     /// The id is truncated to [`CONTAINER_ID_LEN`], which is what fits in the
     /// eBPF map keys and what the kernel side reads out of the UTS namespace.
-    /// Doing it here means the rest of the crate never sees an id that is too
-    /// long to match.
+    /// Doing it here means the rest of the crate never sees an id too long to
+    /// match.
     pub fn new(id: String) -> Container {
         Container {
-            id: Some(id.chars().take(CONTAINER_ID_LEN).collect()),
-            ip_addresses: None,
-            name: "".to_string(),
+            id: id.chars().take(CONTAINER_ID_LEN).collect(),
+            ip_addresses: vec![],
+            name: String::new(),
             pid: 0,
         }
     }
 
+    /// The id as the eBPF maps key on it.
     pub fn id(&self) -> [c_char; CONTAINER_ID_LEN] {
-        match self.id.as_ref() {
-            Some(id) => super::string_to_c_char_bytes((*id).clone()),
-            None => [0; CONTAINER_ID_LEN],
-        }
+        super::string_to_c_char_bytes(self.id.clone())
     }
 
     /// The name without docker's leading `/`, as policies spell it.
@@ -41,14 +44,14 @@ impl Container {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Containers {
     containers: Vec<Container>,
 }
 
 impl Containers {
     pub fn new() -> Arc<RwLock<Containers>> {
-        Arc::new(RwLock::new(Containers { containers: vec![] }))
+        Arc::new(RwLock::new(Containers::default()))
     }
 
     pub fn list(&self) -> Vec<Container> {
@@ -63,17 +66,10 @@ impl Containers {
     ///
     /// Ids are truncated to [`CONTAINER_ID_LEN`] on the way in, but docker and
     /// CRI hand out full-length ids, so callers may pass either.
-    pub fn get(&self, id: String) -> Option<Container> {
+    pub fn get(&self, id: &str) -> Option<Container> {
         self.containers
             .iter()
-            .find(|container| {
-                // An id-less container must not match: an empty prefix matches
-                // every id, which used to return an arbitrary container.
-                container
-                    .id
-                    .as_ref()
-                    .is_some_and(|container_id| id.starts_with(container_id.as_str()))
-            })
+            .find(|container| id.starts_with(container.id.as_str()))
             .cloned()
     }
 
@@ -88,19 +84,16 @@ impl Containers {
     pub fn ids(&self) -> HashMap<String, String> {
         self.containers
             .iter()
-            .filter_map(|container| {
-                Some((container.short_name().to_string(), container.id.clone()?))
-            })
+            .map(|container| (container.short_name().to_string(), container.id.clone()))
             .collect()
     }
 
-    pub fn remove(&mut self, id: String) {
-        if let Some(index) = self.containers.iter().position(|container| {
-            container
-                .id
-                .as_ref()
-                .is_some_and(|container_id| id.starts_with(container_id.as_str()))
-        }) {
+    pub fn remove(&mut self, id: &str) {
+        if let Some(index) = self
+            .containers
+            .iter()
+            .position(|container| id.starts_with(container.id.as_str()))
+        {
             self.containers.remove(index);
         }
     }
@@ -110,10 +103,10 @@ impl Containers {
 mod tests {
     use super::*;
 
-    fn container(id: Option<&str>, name: &str) -> Container {
+    fn container(id: &str, name: &str) -> Container {
         Container {
-            id: id.map(str::to_string),
-            ip_addresses: None,
+            id: id.to_string(),
+            ip_addresses: vec![],
             name: name.to_string(),
             pid: 0,
         }
@@ -124,53 +117,39 @@ mod tests {
     }
 
     #[test]
+    fn truncates_an_id_to_what_the_maps_key_on() {
+        assert_eq!(Container::new("a".repeat(64)).id.len(), CONTAINER_ID_LEN);
+    }
+
+    #[test]
     fn finds_a_container_by_its_exact_id() {
         let containers = containers(vec![
-            container(Some("aaaaaaaaaaaa"), "/web"),
-            container(Some("bbbbbbbbbbbb"), "/db"),
+            container("aaaaaaaaaaaa", "/web"),
+            container("bbbbbbbbbbbb", "/db"),
         ]);
 
-        assert_eq!(
-            containers.get("bbbbbbbbbbbb".to_string()).unwrap().name,
-            "/db"
-        );
+        assert_eq!(containers.get("bbbbbbbbbbbb").unwrap().name, "/db");
     }
 
     #[test]
     fn accepts_a_full_length_id_for_a_truncated_one() {
-        let containers = containers(vec![container(Some("aaaaaaaaaaaa"), "/web")]);
+        let containers = containers(vec![container("aaaaaaaaaaaa", "/web")]);
 
         assert!(containers
-            .get("aaaaaaaaaaaabbbbbbbbbbbbcccccccccccc".to_string())
+            .get("aaaaaaaaaaaabbbbbbbbbbbbcccccccccccc")
             .is_some());
     }
 
     #[test]
     fn an_unknown_id_finds_nothing() {
-        let containers = containers(vec![container(Some("aaaaaaaaaaaa"), "/web")]);
+        let containers = containers(vec![container("aaaaaaaaaaaa", "/web")]);
 
-        assert!(containers.get("cccccccccccc".to_string()).is_none());
-    }
-
-    #[test]
-    fn a_container_without_an_id_never_matches() {
-        // An absent id used to become an empty prefix, and every id starts with
-        // the empty string, so any lookup returned this container.
-        let containers = containers(vec![
-            container(None, "/pending"),
-            container(Some("aaaaaaaaaaaa"), "/web"),
-        ]);
-
-        assert_eq!(
-            containers.get("aaaaaaaaaaaa".to_string()).unwrap().name,
-            "/web"
-        );
-        assert!(containers.get("cccccccccccc".to_string()).is_none());
+        assert!(containers.get("cccccccccccc").is_none());
     }
 
     #[test]
     fn looks_a_container_up_by_the_name_a_policy_uses() {
-        let containers = containers(vec![container(Some("aaaaaaaaaaaa"), "/web")]);
+        let containers = containers(vec![container("aaaaaaaaaaaa", "/web")]);
 
         // Policies name containers without docker's leading slash.
         assert!(containers.get_container_by_name("web").is_some());
@@ -180,7 +159,7 @@ mod tests {
     #[test]
     fn an_empty_name_does_not_panic() {
         // `name.remove(0)` used to panic on a container with no name.
-        let containers = containers(vec![container(Some("aaaaaaaaaaaa"), "")]);
+        let containers = containers(vec![container("aaaaaaaaaaaa", "")]);
 
         assert!(containers.get_container_by_name("web").is_none());
         assert!(containers.get_container_by_name("").is_some());
@@ -189,8 +168,8 @@ mod tests {
     #[test]
     fn ids_maps_policy_names_to_ids() {
         let containers = containers(vec![
-            container(Some("aaaaaaaaaaaa"), "/web"),
-            container(Some("bbbbbbbbbbbb"), "/db"),
+            container("aaaaaaaaaaaa", "/web"),
+            container("bbbbbbbbbbbb", "/db"),
         ]);
 
         let ids = containers.ids();
@@ -199,26 +178,13 @@ mod tests {
     }
 
     #[test]
-    fn ids_skips_containers_that_have_no_id() {
-        // Used to `.unwrap()` and panic.
-        let containers = containers(vec![
-            container(None, "/pending"),
-            container(Some("aaaaaaaaaaaa"), "/web"),
-        ]);
-
-        let ids = containers.ids();
-        assert_eq!(ids.len(), 1);
-        assert!(!ids.contains_key("pending"));
-    }
-
-    #[test]
     fn removes_only_the_named_container() {
         let mut containers = containers(vec![
-            container(Some("aaaaaaaaaaaa"), "/web"),
-            container(Some("bbbbbbbbbbbb"), "/db"),
+            container("aaaaaaaaaaaa", "/web"),
+            container("bbbbbbbbbbbb", "/db"),
         ]);
 
-        containers.remove("aaaaaaaaaaaa".to_string());
+        containers.remove("aaaaaaaaaaaa");
 
         assert_eq!(containers.list().len(), 1);
         assert_eq!(containers.list()[0].name, "/db");
@@ -226,14 +192,10 @@ mod tests {
 
     #[test]
     fn removing_an_unknown_id_is_a_no_op() {
-        // Used to `.unwrap()` on an id-less container while scanning.
-        let mut containers = containers(vec![
-            container(None, "/pending"),
-            container(Some("aaaaaaaaaaaa"), "/web"),
-        ]);
+        let mut containers = containers(vec![container("aaaaaaaaaaaa", "/web")]);
 
-        containers.remove("cccccccccccc".to_string());
+        containers.remove("cccccccccccc");
 
-        assert_eq!(containers.list().len(), 2);
+        assert_eq!(containers.list().len(), 1);
     }
 }

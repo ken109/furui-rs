@@ -99,14 +99,16 @@ async fn remove_container(
     containers: Arc<RwLock<Containers>>,
     policies: Arc<RwLock<Policies>>,
 ) {
-    let container = containers.read().await.get(id.clone()).unwrap();
+    let Some(container) = containers.read().await.get(&id) else {
+        return;
+    };
 
     maps.container
         .remove_id_from_ips(container)
         .await
         .unwrap_or_else(|e| warn!("failed to remove container: {}", e));
 
-    containers.write().await.remove(id.clone());
+    containers.write().await.remove(&id);
 
     maps.policy
         .remove()

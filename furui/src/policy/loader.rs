@@ -58,7 +58,7 @@ impl ParsePolicies {
         match lookup_host(remote_host) {
             Ok(ips) => ips.collect(),
             Err(err) => match containers.read().await.get_container_by_name(remote_host) {
-                Some(container) => container.ip_addresses.unwrap_or_default(),
+                Some(container) => container.ip_addresses,
                 None => {
                     warn!("failed to look up host: {} err: {}", remote_host, err);
                     vec![]
@@ -157,12 +157,7 @@ impl ParsePolicies {
                     .collect();
 
                 domain::Policy {
-                    container: domain::Container {
-                        id: None,
-                        ip_addresses: None,
-                        name: parsed_policy.container.name.clone(),
-                        pid: 0,
-                    },
+                    container: domain::PolicyTarget::new(parsed_policy.container.name.clone()),
                     communications,
                 }
             })

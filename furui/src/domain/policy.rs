@@ -1,9 +1,10 @@
 use std::{net::IpAddr, sync::Arc};
 
-use furui_common::{IcmpVersion, IpProtocol, TASK_COMM_LEN};
+use aya_ebpf::cty::c_char;
+use furui_common::{IcmpVersion, IpProtocol, CONTAINER_ID_LEN, TASK_COMM_LEN};
 use tokio::sync::RwLock;
 
-use crate::domain::{container::Container, Containers};
+use crate::domain::Containers;
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Policies {
@@ -11,6 +12,11 @@ pub struct Policies {
 }
 
 impl Policies {
+    /// Re-resolves each policy's container name against what is running.
+    ///
+    /// Called whenever containers or policies change. A policy whose container
+    /// is not running keeps its rules but loses its id, so the keys it expands
+    /// to match nothing.
     pub async fn set_container_id(&mut self, containers: Arc<RwLock<Containers>>) {
         let ids = containers.read().await.ids();
 
@@ -19,22 +25,40 @@ impl Policies {
                 continue;
             }
 
-            match ids.get(&policy.container.name) {
-                Some(id) => {
-                    policy.container.id = Some(id.to_string());
-                }
-                None => {
-                    policy.container.id = None;
-                }
-            }
+            policy.container.id = ids.get(&policy.container.name).cloned();
         }
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Policy {
-    pub(crate) container: Container,
+    pub(crate) container: PolicyTarget,
     pub(crate) communications: Vec<Communication>,
+}
+
+/// The container a policy applies to.
+///
+/// Policies are written against a name and outlive any particular container, so
+/// unlike [`super::Container`] the id here is genuinely optional: it is `None`
+/// whenever nothing by that name is running.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PolicyTarget {
+    pub(crate) name: String,
+    pub(crate) id: Option<String>,
+}
+
+impl PolicyTarget {
+    pub fn new(name: String) -> PolicyTarget {
+        PolicyTarget { name, id: None }
+    }
+
+    /// The id as the eBPF maps key on it, all zeroes when unresolved.
+    pub fn id(&self) -> [c_char; CONTAINER_ID_LEN] {
+        match self.id.as_ref() {
+            Some(id) => super::string_to_c_char_bytes(id.clone()),
+            None => [0; CONTAINER_ID_LEN],
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

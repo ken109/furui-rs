@@ -39,10 +39,7 @@ impl RuntimeDocker {
         &self,
         container: &mut Container,
     ) -> anyhow::Result<()> {
-        let id = container
-            .id
-            .as_ref()
-            .ok_or_else(|| anyhow!("cannot inspect a container with no id"))?;
+        let id = &container.id;
         let inspect = self.docker.inspect_container(id, None).await?;
 
         // Every field here is optional in the API. A container that reports no
@@ -70,7 +67,7 @@ impl RuntimeDocker {
             .and_then(|state| state.pid)
             .ok_or_else(|| anyhow!("container {id} reported no pid"))?;
 
-        container.ip_addresses = Some(addrs);
+        container.ip_addresses = addrs;
         container.name = inspect.name.unwrap_or_default();
         container.pid = pid as u32;
 
