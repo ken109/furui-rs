@@ -2,7 +2,7 @@ use std::{collections::HashMap, net::IpAddr, sync::Arc};
 
 use aya_ebpf::cty::c_char;
 use furui_common::CONTAINER_ID_LEN;
-use tokio::sync::Mutex;
+use tokio::sync::RwLock;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Container {
@@ -13,9 +13,15 @@ pub struct Container {
 }
 
 impl Container {
+    /// Creates a container from a runtime-supplied id.
+    ///
+    /// The id is truncated to [`CONTAINER_ID_LEN`], which is what fits in the
+    /// eBPF map keys and what the kernel side reads out of the UTS namespace.
+    /// Doing it here means the rest of the crate never sees an id that is too
+    /// long to match.
     pub fn new(id: String) -> Container {
         Container {
-            id: Some(id),
+            id: Some(id.chars().take(CONTAINER_ID_LEN).collect()),
             ip_addresses: None,
             name: "".to_string(),
             pid: 0,
@@ -41,8 +47,8 @@ pub struct Containers {
 }
 
 impl Containers {
-    pub fn new() -> Arc<Mutex<Containers>> {
-        Arc::new(Mutex::new(Containers { containers: vec![] }))
+    pub fn new() -> Arc<RwLock<Containers>> {
+        Arc::new(RwLock::new(Containers { containers: vec![] }))
     }
 
     pub fn list(&self) -> Vec<Container> {

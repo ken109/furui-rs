@@ -1,6 +1,6 @@
 use std::{ops::Deref, path::PathBuf, sync::Arc, time::Duration};
 
-use tokio::{sync::Mutex, task, time};
+use tokio::{sync::RwLock, task, time};
 use tracing::info;
 
 use crate::{
@@ -12,8 +12,8 @@ use crate::{
 pub fn watch_file(
     policy_path: PathBuf,
     maps: Arc<Maps>,
-    policies: Arc<Mutex<Policies>>,
-    containers: Arc<Mutex<Containers>>,
+    policies: Arc<RwLock<Policies>>,
+    containers: Arc<RwLock<Containers>>,
 ) -> anyhow::Result<()> {
     task::spawn(async move {
         loop {
@@ -24,13 +24,13 @@ pub fn watch_file(
                     .to_policies(containers.clone())
                     .await
                     .unwrap(),
-                Err(_) => Arc::new(Mutex::new(Policies::default())),
+                Err(_) => Arc::new(RwLock::new(Policies::default())),
             };
 
-            if policies.lock().await.deref() != now_policies.lock().await.deref() {
+            if policies.read().await.deref() != now_policies.read().await.deref() {
                 let _ = maps.policy.remove().await;
 
-                policies.lock().await.policies = now_policies.lock().await.policies.clone();
+                policies.write().await.policies = now_policies.read().await.policies.clone();
 
                 let _ = maps.policy.save(policies.clone()).await;
 

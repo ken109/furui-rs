@@ -105,13 +105,15 @@ unsafe fn decode_event<E>(head: &[u8], tail: &[u8]) -> Option<E> {
 async fn handle_perf_array<E, A, F, Fut>(
     bpf: Arc<Mutex<Ebpf>>,
     map_name: &str,
-    args: Arc<Mutex<A>>,
+    args: A,
     callback: F,
 ) -> anyhow::Result<()>
 where
     E: Send + 'static,
-    A: Send + 'static,
-    F: Fn(E, Arc<Mutex<A>>) -> Fut + Send + Sync + 'static,
+    // Callers already share what they need behind an `Arc`; taking `A` by value
+    // avoids wrapping an `Arc<Mutex<_>>` in a second `Arc<Mutex<_>>`.
+    A: Clone + Send + 'static,
+    F: Fn(E, A) -> Fut + Send + Sync + 'static,
     Fut: Future<Output = ()> + Send,
 {
     let shared_callback = Arc::new(callback);

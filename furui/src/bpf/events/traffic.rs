@@ -24,13 +24,11 @@ macro_rules! traffic_reader {
         icmp: [$(($icmp_event:ty, $icmp_map:literal)),+ $(,)?],
     ) => {
         pub async fn $reader(bpf: Arc<Mutex<Ebpf>>) -> anyhow::Result<()> {
-            let args = Arc::new(Mutex::new(()));
-
             $(
                 handle_perf_array(
                     bpf.clone(),
                     $map,
-                    args.clone(),
+                    (),
                     |event: $event, _| async move {
                         info!(
                             event = $label,
@@ -53,7 +51,7 @@ macro_rules! traffic_reader {
                 handle_perf_array(
                     bpf.clone(),
                     $icmp_map,
-                    args.clone(),
+                    (),
                     |event: $icmp_event, _| async move {
                         info!(
                             event = $label,

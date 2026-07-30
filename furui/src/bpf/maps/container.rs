@@ -2,7 +2,7 @@ use std::{convert::TryFrom, sync::Arc};
 
 use aya::{maps::HashMap, Ebpf};
 use furui_common::{ContainerID, ContainerIP};
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, RwLock};
 
 use crate::domain;
 
@@ -17,11 +17,11 @@ impl ContainerMap {
 
     pub async fn save_id_with_ips(
         &self,
-        containers: Arc<Mutex<domain::Containers>>,
+        containers: Arc<RwLock<domain::Containers>>,
     ) -> anyhow::Result<()> {
         let mut bpf = self.bpf.lock().await;
         let mut map = HashMap::try_from(bpf.map_mut("CONTAINER_ID_FROM_IPS").unwrap())?;
-        for container in containers.lock().await.list() {
+        for container in containers.read().await.list() {
             for ip in container.ip_addresses.as_ref().unwrap() {
                 map.insert(ContainerIP::new(*ip), ContainerID::new(container.id()), 0)?;
             }

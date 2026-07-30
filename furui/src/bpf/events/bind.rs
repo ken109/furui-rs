@@ -11,15 +11,12 @@ pub async fn bind(
     bpf: Arc<Mutex<Ebpf>>,
     pid_processes: Arc<Mutex<PidProcesses>>,
 ) -> anyhow::Result<()> {
-    let args = Arc::new(Mutex::new(pid_processes));
-
     handle_perf_array(
         bpf,
         "BIND_EVENTS",
-        args,
-        |event: BindEvent, args| async move {
-            let arg = args.lock().await;
-            let mut pid_processes = arg.lock().await;
+        pid_processes,
+        |event: BindEvent, pid_processes| async move {
+            let mut pid_processes = pid_processes.lock().await;
 
             pid_processes.add(event.pid, event.container_id(), event.lport, event.protocol);
 

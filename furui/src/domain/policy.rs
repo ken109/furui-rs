@@ -1,7 +1,7 @@
 use std::{net::IpAddr, sync::Arc};
 
 use furui_common::{IcmpVersion, IpProtocol, TASK_COMM_LEN};
-use tokio::sync::Mutex;
+use tokio::sync::RwLock;
 
 use crate::domain::{container::Container, Containers};
 
@@ -11,8 +11,8 @@ pub struct Policies {
 }
 
 impl Policies {
-    pub async fn set_container_id(&mut self, containers: Arc<Mutex<Containers>>) {
-        let ids = containers.lock().await.ids();
+    pub async fn set_container_id(&mut self, containers: Arc<RwLock<Containers>>) {
+        let ids = containers.read().await.ids();
 
         for policy in &mut self.policies {
             if policy.container.name.is_empty() {

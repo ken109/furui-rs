@@ -1,8 +1,7 @@
 use std::sync::Arc;
 
-use furui_common::CONTAINER_ID_LEN;
 use futures::StreamExt;
-use tokio::{sync::Mutex, task};
+use tokio::{sync::RwLock, task};
 use tracing::{info, warn};
 
 use crate::{
@@ -15,15 +14,17 @@ pub fn watch_containers(
     loader: Arc<Loader>,
     container_engine: Arc<Runtime>,
     maps: Arc<Maps>,
-    containers: Arc<Mutex<Containers>>,
-    policies: Arc<Mutex<Policies>>,
+    containers: Arc<RwLock<Containers>>,
+    policies: Arc<RwLock<Policies>>,
 ) {
     task::spawn(async move {
         let cloned_container_engine = container_engine.clone();
         let mut container_events = cloned_container_engine.container_events().await;
 
         while let Some(event) = container_events.next().await {
-            let id = event.id.chars().take(CONTAINER_ID_LEN).collect::<String>();
+            // `Container::new` truncates to the length the maps key on;
+            // `Containers::get` accepts a longer id than it stored.
+            let id = event.id;
 
             match event.action {
                 ContainerAction::Start | ContainerAction::Unpause => {
@@ -51,8 +52,8 @@ async fn add_container(
     container_engine: Arc<Runtime>,
     maps: Arc<Maps>,
     id: String,
-    containers: Arc<Mutex<Containers>>,
-    policies: Arc<Mutex<Policies>>,
+    containers: Arc<RwLock<Containers>>,
+    policies: Arc<RwLock<Policies>>,
 ) {
     let mut container = Container::new(id.clone());
 
@@ -61,7 +62,7 @@ async fn add_container(
         .await
         .unwrap_or_else(|e| warn!("failed to add the container inspection: {}", e));
 
-    containers.lock().await.add(container);
+    containers.write().await.add(container);
 
     maps.container
         .save_id_with_ips(containers.clone())
@@ -74,7 +75,7 @@ async fn add_container(
         .unwrap_or_else(|e| warn!("failed to remove policies: {}", e));
 
     policies
-        .lock()
+        .write()
         .await
         .set_container_id(containers.clone())
         .await;
@@ -95,17 +96,17 @@ async fn add_container(
 async fn remove_container(
     maps: Arc<Maps>,
     id: String,
-    containers: Arc<Mutex<Containers>>,
-    policies: Arc<Mutex<Policies>>,
+    containers: Arc<RwLock<Containers>>,
+    policies: Arc<RwLock<Policies>>,
 ) {
-    let container = containers.lock().await.get(id.clone()).unwrap();
+    let container = containers.read().await.get(id.clone()).unwrap();
 
     maps.container
         .remove_id_from_ips(container)
         .await
         .unwrap_or_else(|e| warn!("failed to remove container: {}", e));
 
-    containers.lock().await.remove(id.clone());
+    containers.write().await.remove(id.clone());
 
     maps.policy
         .remove()
@@ -113,7 +114,7 @@ async fn remove_container(
         .unwrap_or_else(|e| warn!("failed to remove policies: {}", e));
 
     policies
-        .lock()
+        .write()
         .await
         .set_container_id(containers.clone())
         .await;

@@ -7,9 +7,8 @@
 
 use std::sync::Arc;
 
-use furui_common::CONTAINER_ID_LEN;
 use futures::stream::BoxStream;
-use tokio::sync::Mutex;
+use tokio::sync::RwLock;
 pub use watcher::watch_containers;
 
 use crate::{
@@ -43,68 +42,45 @@ pub enum ContainerAction {
     Unknown,
 }
 
-pub struct Runtime {
-    engine_type: ContainerRuntime,
-    docker: Option<RuntimeDocker>,
-    kubernetes_cri: Option<RuntimeKubernetesCri>,
+/// The runtime furui is watching.
+///
+/// One variant is live; the other backend is not constructed at all. Modelling
+/// this as an enum rather than a discriminant beside two `Option`s is what
+/// removes the `.as_ref().unwrap()` from every dispatch below.
+pub struct Runtime(Backend);
+
+enum Backend {
+    Docker(RuntimeDocker),
+    KubernetesCri(RuntimeKubernetesCri),
 }
 
 impl Runtime {
     pub async fn new(opt: &Options) -> anyhow::Result<Arc<Runtime>> {
-        match opt.container_engine {
-            ContainerRuntime::Docker => Ok(Arc::new(Runtime {
-                engine_type: opt.container_engine.clone(),
-                docker: Some(RuntimeDocker::new().await?),
-                kubernetes_cri: None,
-            })),
-            ContainerRuntime::KubernetesCri => Ok(Arc::new(Runtime {
-                engine_type: opt.container_engine.clone(),
-                docker: None,
-                kubernetes_cri: Some(RuntimeKubernetesCri::new().await?),
-            })),
-        }
+        Ok(Arc::new(Runtime(match opt.container_engine {
+            ContainerRuntime::Docker => Backend::Docker(RuntimeDocker::new().await?),
+            ContainerRuntime::KubernetesCri => {
+                Backend::KubernetesCri(RuntimeKubernetesCri::new().await?)
+            }
+        })))
     }
 
     async fn container_ids(&self) -> anyhow::Result<Vec<String>> {
-        match &self.engine_type {
-            ContainerRuntime::Docker => self.docker.as_ref().unwrap().container_ids().await,
-            ContainerRuntime::KubernetesCri => {
-                self.kubernetes_cri.as_ref().unwrap().container_ids().await
-            }
+        match &self.0 {
+            Backend::Docker(docker) => docker.container_ids().await,
+            Backend::KubernetesCri(cri) => cri.container_ids().await,
         }
     }
 
     pub async fn set_container_inspect(&self, container: &mut Container) -> anyhow::Result<()> {
-        container.id = Some(
-            container
-                .id
-                .as_ref()
-                .unwrap()
-                .chars()
-                .take(CONTAINER_ID_LEN)
-                .collect::<String>(),
-        );
-        match &self.engine_type {
-            ContainerRuntime::Docker => {
-                self.docker
-                    .as_ref()
-                    .unwrap()
-                    .set_container_inspect(container)
-                    .await
-            }
-            ContainerRuntime::KubernetesCri => {
-                self.kubernetes_cri
-                    .as_ref()
-                    .unwrap()
-                    .set_container_inspect(container)
-                    .await
-            }
+        match &self.0 {
+            Backend::Docker(docker) => docker.set_container_inspect(container).await,
+            Backend::KubernetesCri(cri) => cri.set_container_inspect(container).await,
         }
     }
 
     pub async fn add_running_containers_inspect(
         &self,
-        containers: Arc<Mutex<Containers>>,
+        containers: Arc<RwLock<Containers>>,
     ) -> anyhow::Result<()> {
         let container_ids = self.container_ids().await?;
 
@@ -113,22 +89,16 @@ impl Runtime {
 
             self.set_container_inspect(&mut container).await?;
 
-            containers.lock().await.add(container);
+            containers.write().await.add(container);
         }
 
         Ok(())
     }
 
     pub async fn container_events(&self) -> BoxStream<'_, ContainerEvent> {
-        match &self.engine_type {
-            ContainerRuntime::Docker => self.docker.as_ref().unwrap().container_events(),
-            ContainerRuntime::KubernetesCri => {
-                self.kubernetes_cri
-                    .as_ref()
-                    .unwrap()
-                    .container_events()
-                    .await
-            }
+        match &self.0 {
+            Backend::Docker(docker) => docker.container_events(),
+            Backend::KubernetesCri(cri) => cri.container_events().await,
         }
     }
 }

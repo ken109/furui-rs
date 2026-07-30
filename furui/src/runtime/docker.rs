@@ -3,6 +3,7 @@ use std::{collections::HashMap, net::IpAddr};
 use anyhow::anyhow;
 use bollard::query_parameters::{EventsOptionsBuilder, ListContainersOptionsBuilder};
 use futures::{stream::BoxStream, StreamExt};
+use tracing::warn;
 
 use crate::{
     domain::Container,
@@ -31,32 +32,47 @@ impl RuntimeDocker {
             .filters(&filters)
             .build();
         let containers = self.docker.list_containers(Some(options)).await?;
-        Ok(containers.iter().map(|c| c.id.clone().unwrap()).collect())
+        Ok(containers.into_iter().filter_map(|c| c.id).collect())
     }
 
     pub(super) async fn set_container_inspect(
         &self,
         container: &mut Container,
     ) -> anyhow::Result<()> {
-        let inspect = self
-            .docker
-            .inspect_container(container.id.as_ref().unwrap(), None)
-            .await?;
+        let id = container
+            .id
+            .as_ref()
+            .ok_or_else(|| anyhow!("cannot inspect a container with no id"))?;
+        let inspect = self.docker.inspect_container(id, None).await?;
+
+        // Every field here is optional in the API. A container that reports no
+        // networks or no pid is one furui cannot police, so say which one and
+        // let the caller decide, rather than panicking inside the event loop.
+        let networks = inspect
+            .network_settings
+            .and_then(|settings| settings.networks)
+            .unwrap_or_default();
 
         let mut addrs: Vec<IpAddr> = vec![];
-        for (_, network) in inspect.network_settings.unwrap().networks.unwrap() {
-            if let Ok(addr) = network.ip_address.unwrap().parse::<IpAddr>() {
-                addrs.push(addr);
-            }
-
-            if let Ok(addr) = network.global_ipv6_address.unwrap().parse::<IpAddr>() {
-                addrs.push(addr);
+        for (_, network) in networks {
+            for addr in [network.ip_address, network.global_ipv6_address]
+                .into_iter()
+                .flatten()
+            {
+                if let Ok(addr) = addr.parse::<IpAddr>() {
+                    addrs.push(addr);
+                }
             }
         }
 
+        let pid = inspect
+            .state
+            .and_then(|state| state.pid)
+            .ok_or_else(|| anyhow!("container {id} reported no pid"))?;
+
         container.ip_addresses = Some(addrs);
-        container.name = inspect.name.unwrap();
-        container.pid = inspect.state.unwrap().pid.unwrap() as u32;
+        container.name = inspect.name.unwrap_or_default();
+        container.pid = pid as u32;
 
         Ok(())
     }
@@ -68,17 +84,31 @@ impl RuntimeDocker {
         ]);
         let options = EventsOptionsBuilder::new().filters(&filters).build();
 
-        Box::pin(self.docker.events(Some(options)).map(|event| {
-            let event = event.unwrap();
-            let id = event.actor.unwrap().id.unwrap();
-            let action = match event.action.unwrap().as_str() {
-                "start" => ContainerAction::Start,
-                "unpause" => ContainerAction::Unpause,
-                "pause" => ContainerAction::Pause,
-                "die" => ContainerAction::Die,
-                _ => ContainerAction::Unknown,
-            };
-            ContainerEvent { id, action }
-        }))
+        // A malformed or unidentifiable event is dropped rather than taken as
+        // an excuse to tear the watcher down.
+        Box::pin(
+            self.docker
+                .events(Some(options))
+                .filter_map(|event| async move {
+                    let event = match event {
+                        Ok(event) => event,
+                        Err(err) => {
+                            warn!("failed to read a docker event: {err}");
+                            return None;
+                        }
+                    };
+
+                    let id = event.actor.and_then(|actor| actor.id)?;
+                    let action = match event.action.as_deref() {
+                        Some("start") => ContainerAction::Start,
+                        Some("unpause") => ContainerAction::Unpause,
+                        Some("pause") => ContainerAction::Pause,
+                        Some("die") => ContainerAction::Die,
+                        _ => ContainerAction::Unknown,
+                    };
+
+                    Some(ContainerEvent { id, action })
+                }),
+        )
     }
 }

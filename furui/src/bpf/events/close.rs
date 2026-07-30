@@ -1,4 +1,4 @@
-use std::{ops::Deref, sync::Arc};
+use std::sync::Arc;
 
 use aya::Ebpf;
 use tokio::sync::Mutex;
@@ -14,11 +14,10 @@ pub async fn close(
     maps: Arc<Maps>,
     pid_processes: Arc<Mutex<PidProcesses>>,
 ) -> anyhow::Result<()> {
-    let args = Arc::new(Mutex::new((maps, pid_processes)));
+    let args = (maps, pid_processes);
 
     handle_perf_array(bpf, "CLOSE_EVENTS", args, |event: u32, args| async move {
-        let args = args.lock().await;
-        let (maps, pid_processes) = args.deref();
+        let (maps, pid_processes) = &args;
         let mut pid_processes = pid_processes.lock().await;
 
         if let Some(processes) = pid_processes.map.get(&event) {

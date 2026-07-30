@@ -3,7 +3,7 @@ use std::{convert::TryFrom, net::IpAddr, sync::Arc};
 use anyhow::anyhow;
 use aya::{maps::HashMap, Ebpf};
 use furui_common::{IcmpPolicyKey, IcmpPolicyValue, PolicyKey, PolicyValue};
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, RwLock};
 
 use crate::domain;
 
@@ -132,8 +132,8 @@ impl PolicyMap {
         PolicyMap { bpf }
     }
 
-    pub async fn save(&self, policies: Arc<Mutex<domain::Policies>>) -> anyhow::Result<()> {
-        let entries = policy_entries(&*policies.lock().await)?;
+    pub async fn save(&self, policies: Arc<RwLock<domain::Policies>>) -> anyhow::Result<()> {
+        let entries = policy_entries(&*policies.read().await)?;
 
         let mut bpf = self.bpf.lock().await;
 

@@ -7,8 +7,8 @@ use std::{
 };
 
 use furui_common::IpProtocol;
-use tokio::sync::Mutex;
-use tracing::error;
+use tokio::sync::RwLock;
+use tracing::debug;
 
 use crate::domain::{Containers, Process};
 
@@ -19,10 +19,16 @@ static SUPPORTED_PROTOCOLS: [(&str, IpProtocol); 4] = [
     ("udp6", IpProtocol::UDP),
 ];
 
-pub async fn listening_processes(containers: Arc<Mutex<Containers>>) -> Vec<Process> {
+pub async fn listening_processes(containers: Arc<RwLock<Containers>>) -> Vec<Process> {
     let mut processes = vec![];
 
-    for container in containers.lock().await.list() {
+    for container in containers.read().await.list() {
+        // A container whose inspection has not landed yet has no id to
+        // attribute its processes to.
+        let Some(container_id) = container.id.clone() else {
+            continue;
+        };
+
         for (supported_protocol, proto) in &SUPPORTED_PROTOCOLS {
             let net_file_path = Path::new("/proc")
                 .join(format!("{}", container.pid))
@@ -48,7 +54,7 @@ pub async fn listening_processes(containers: Arc<Mutex<Containers>>) -> Vec<Proc
                 };
 
                 processes.push(Process {
-                    container_id: container.id.clone().unwrap(),
+                    container_id: container_id.clone(),
                     executable,
                     protocol: *proto,
                     port,
@@ -99,91 +105,95 @@ fn search_process_from_inode(pid: u32, inode: u64) -> Option<(String, u32)> {
     None
 }
 
+/// The parent pid from `/proc/<pid>/stat`, or 0 if it cannot be read.
+///
+/// Everything under `/proc` can vanish between the readdir and the read, so
+/// none of these helpers treat a missing or malformed file as exceptional --
+/// the process simply exited.
 fn get_ppid(pid: u32) -> u32 {
-    let path = Path::new("/proc").join(format!("{}", pid)).join("stat");
+    let path = Path::new("/proc").join(pid.to_string()).join("stat");
 
-    let file = match File::open(path) {
-        Ok(file) => file,
-        Err(_) => return 0,
+    let Ok(file) = File::open(path) else {
+        return 0;
+    };
+    let Some(Ok(line)) = BufReader::new(file).lines().next() else {
+        return 0;
     };
 
-    let mut file_buf = BufReader::new(file).lines();
-    u32::from_str(
-        file_buf
-            .next()
-            .unwrap()
-            .unwrap()
-            .split_whitespace()
-            .collect::<Vec<&str>>()[3],
-    )
-    .unwrap_or(0)
+    parse_ppid(&line).unwrap_or(0)
 }
 
+/// Extracts the `ppid` field from a `/proc/<pid>/stat` line.
+///
+/// The second field is the executable name in parentheses and may itself
+/// contain spaces and parentheses, so the fields before it cannot be split on
+/// whitespace. Everything after the *last* `)` is fixed-width: state, then
+/// ppid.
+fn parse_ppid(stat: &str) -> Option<u32> {
+    let after_comm = &stat[stat.rfind(')')? + 1..];
+    let mut fields = after_comm.split_whitespace();
+
+    fields.next()?; // state
+    u32::from_str(fields.next()?).ok()
+}
+
+/// Every descendant of `pid`, depth-first.
 fn get_child_pids(pid: u32) -> Vec<u32> {
-    let mut pid = pid;
+    let mut stack = vec![pid];
+    let mut descendants = vec![];
 
-    let mut search_stack: Vec<u32> = vec![];
-    let mut pids = vec![];
-
-    loop {
-        let path = Path::new("/proc")
-            .join(format!("{}", pid))
-            .join("task")
-            .join(format!("{}", pid))
-            .join("children");
-
-        let file = match File::open(path) {
-            Ok(file) => file,
-            Err(_) => return vec![],
-        };
-
-        let mut file_buf = BufReader::new(file).lines();
-
-        let child_pids = match file_buf.next() {
-            Some(line) => line
-                .unwrap()
-                .split_whitespace()
-                .map(|pid| pid.parse::<u32>().unwrap())
-                .collect::<Vec<u32>>(),
-            None => vec![],
-        };
-
-        for child_pid in child_pids {
-            search_stack.push(child_pid);
-        }
-
-        match search_stack.pop() {
-            Some(search_pid) => {
-                pid = search_pid;
-                pids.push(search_pid);
-            }
-            None => break,
+    while let Some(pid) = stack.pop() {
+        for child in read_children(pid) {
+            descendants.push(child);
+            stack.push(child);
         }
     }
 
-    pids
+    descendants
 }
 
+/// The direct children of `pid`.
+///
+/// An unreadable `children` file means the process is gone, which is the same
+/// as having no children -- it must not abandon the descendants already found.
+fn read_children(pid: u32) -> Vec<u32> {
+    let path = Path::new("/proc")
+        .join(pid.to_string())
+        .join("task")
+        .join(pid.to_string())
+        .join("children");
+
+    let Ok(file) = File::open(path) else {
+        return vec![];
+    };
+    let Some(Ok(line)) = BufReader::new(file).lines().next() else {
+        return vec![];
+    };
+
+    line.split_whitespace()
+        .filter_map(|pid| pid.parse().ok())
+        .collect()
+}
+
+/// Whether `pid` holds a socket with this inode.
 fn inode_exists(pid: u32, inode: u64) -> bool {
-    let dir_path = Path::new("/proc").join(format!("{}", pid)).join("fd");
+    let dir_path = Path::new("/proc").join(pid.to_string()).join("fd");
 
-    let mut dir_list = dir_path.read_dir().unwrap();
+    let Ok(dir_list) = dir_path.read_dir() else {
+        return false;
+    };
+    let socket = format!("socket:[{inode}]");
 
-    while let Some(Ok(file)) = dir_list.next() {
-        let content_path = match file.path().read_link() {
-            Ok(content_path) => content_path.to_str().unwrap().to_string(),
-            Err(e) => {
-                error!(
-                    "failed to read link: {}, err: {}",
-                    file.path().to_str().unwrap(),
-                    e
-                );
-                return false;
+    for file in dir_list.flatten() {
+        match file.path().read_link() {
+            // A descriptor closing mid-scan is routine; keep looking rather
+            // than reporting the whole process as not holding the socket.
+            Ok(target) => {
+                if target.to_string_lossy() == socket {
+                    return true;
+                }
             }
-        };
-
-        if content_path == format!("socket:[{}]", inode) {
-            return true;
+            Err(err) => debug!("failed to read link {}: {err}", file.path().display()),
         }
     }
 
@@ -191,16 +201,16 @@ fn inode_exists(pid: u32, inode: u64) -> bool {
 }
 
 fn get_process_name(pid: u32) -> String {
-    let path = Path::new("/proc").join(format!("{}", pid)).join("comm");
+    let path = Path::new("/proc").join(pid.to_string()).join("comm");
 
-    let mut file = match File::open(path) {
-        Ok(file) => file,
-        Err(_) => return "".to_string(),
+    let Ok(mut file) = File::open(path) else {
+        return String::new();
     };
 
     let mut name = String::new();
-
-    file.read_to_string(&mut name).unwrap();
+    if file.read_to_string(&mut name).is_err() {
+        return String::new();
+    }
 
     name.trim().to_string()
 }
@@ -226,6 +236,24 @@ mod tests {
     #[test]
     fn skips_the_header() {
         assert_eq!(parse_net_row(HEADER), None);
+    }
+
+    #[test]
+    fn reads_the_ppid_past_a_name_containing_spaces() {
+        // The comm field is parenthesised and may contain spaces and
+        // parentheses; splitting the whole line on whitespace used to pick the
+        // wrong field for anything but a single-word name.
+        assert_eq!(parse_ppid("42 (nginx) S 7 42 42 0 -1 4194304").unwrap(), 7);
+        assert_eq!(parse_ppid("42 (my app) S 7 42 42 0 -1 4194304").unwrap(), 7);
+        assert_eq!(parse_ppid("42 (a (b) c) S 7 42 42 0 -1").unwrap(), 7);
+    }
+
+    #[test]
+    fn a_malformed_stat_line_has_no_ppid() {
+        assert_eq!(parse_ppid(""), None);
+        assert_eq!(parse_ppid("42 (nginx)"), None);
+        assert_eq!(parse_ppid("42 (nginx) S"), None);
+        assert_eq!(parse_ppid("42 (nginx) S notanumber"), None);
     }
 
     #[test]

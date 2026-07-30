@@ -11,7 +11,7 @@ use std::{
 
 use dns_lookup::lookup_host;
 use furui_common::IpProtocol;
-use tokio::sync::Mutex;
+use tokio::sync::RwLock;
 use tracing::warn;
 
 use crate::{
@@ -52,12 +52,12 @@ impl ParsePolicies {
 
     /// Resolves a `remote_host` to addresses, by DNS or by container name.
     async fn lookup_host(
-        containers: Arc<Mutex<domain::Containers>>,
+        containers: Arc<RwLock<domain::Containers>>,
         remote_host: &str,
     ) -> Vec<IpAddr> {
         match lookup_host(remote_host) {
             Ok(ips) => ips.collect(),
-            Err(err) => match containers.lock().await.get_container_by_name(remote_host) {
+            Err(err) => match containers.read().await.get_container_by_name(remote_host) {
                 Some(container) => container.ip_addresses.unwrap_or_default(),
                 None => {
                     warn!("failed to look up host: {} err: {}", remote_host, err);
@@ -69,8 +69,8 @@ impl ParsePolicies {
 
     pub async fn to_policies(
         &self,
-        containers: Arc<Mutex<domain::Containers>>,
-    ) -> anyhow::Result<Arc<Mutex<Policies>>> {
+        containers: Arc<RwLock<domain::Containers>>,
+    ) -> anyhow::Result<Arc<RwLock<Policies>>> {
         // Resolve first so that the conversion itself stays pure. Each host is
         // looked up once, however many rules mention it.
         let mut resolved = HashMap::new();
@@ -82,7 +82,7 @@ impl ParsePolicies {
         let mut policies = self.build(&resolved);
         policies.set_container_id(containers.clone()).await;
 
-        Ok(Arc::new(Mutex::new(policies)))
+        Ok(Arc::new(RwLock::new(policies)))
     }
 
     /// Converts the parsed document into domain policies.
