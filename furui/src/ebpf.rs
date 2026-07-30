@@ -6,8 +6,12 @@ use aya::{
     Ebpf,
 };
 use aya_log::EbpfLogger;
-use tokio::sync::Mutex;
-use tracing::{debug, info};
+use tokio::{
+    io::{unix::AsyncFd, Interest},
+    sync::Mutex,
+    task,
+};
+use tracing::{debug, info, warn};
 
 pub fn load_bpf() -> anyhow::Result<Arc<Mutex<Ebpf>>> {
     let bpf = Ebpf::load(include_bytes_aligned!(concat!(env!("OUT_DIR"), "/furui")))?;
@@ -27,8 +31,33 @@ impl Loader {
     pub async fn attach_programs(&self) -> anyhow::Result<()> {
         let mut bpf = self.bpf.lock().await;
 
-        let _ =
-            EbpfLogger::init(&mut bpf).map_err(|e| debug!("failed to init EbpfLogger: {:?}", e));
+        // `EbpfLogger` takes ownership of the `AYA_LOGS` ring buffer, so it has
+        // to outlive the programs we are about to load -- they reference that
+        // map, and dropping the logger would close its fd and make every
+        // subsequent `BPF_PROG_LOAD` fail with "not pointing to valid bpf_map".
+        // It also does no work on its own; something has to drain it or the
+        // kernel-side `warn!`s never surface.
+        match EbpfLogger::init(&mut bpf) {
+            Ok(logger) => match AsyncFd::with_interest(logger, Interest::READABLE) {
+                Ok(mut logger) => {
+                    task::spawn(async move {
+                        loop {
+                            let mut guard = match logger.readable_mut().await {
+                                Ok(guard) => guard,
+                                Err(err) => {
+                                    warn!("stopped reading eBPF logs: {err}");
+                                    return;
+                                }
+                            };
+                            guard.get_inner_mut().flush();
+                            guard.clear_ready();
+                        }
+                    });
+                }
+                Err(err) => warn!("failed to watch eBPF logs: {err}"),
+            },
+            Err(err) => debug!("failed to init EbpfLogger: {err:?}"),
+        }
 
         let program: &mut KProbe = bpf.program_mut("bind_v4").unwrap().try_into()?;
         program.load()?;
