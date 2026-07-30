@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fmt:
+    name: Format
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      # rustfmt.toml enables unstable options, so this has to be nightly.
+      # No compilation involved, hence no eBPF toolchain.
+      - run: rustup toolchain install nightly --profile minimal --component rustfmt
+      - run: cargo +nightly fmt --all -- --check
+
+  check:
+    name: Clippy and tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-toolchain
+
+      # `default-members` covers everything except furui-ebpf, which only
+      # builds for bpf*-unknown-none and is compiled by furui's build script.
+      - run: cargo clippy --all-targets --locked -- -D warnings
+
+      # Tests that need root, docker or a live kernel are `#[ignore]`d; this
+      # runs the rest.
+      - run: cargo test --all-targets --locked
+
+  build:
+    name: Build ${{ matrix.arch }}
+    # Native runner per architecture. Cross-building to
+    # aarch64-unknown-linux-musl would need a cross linker *and* a cross build
+    # of protobuf-src, and aya-build derives the BPF target arch from the
+    # outer target, so a native runner keeps both honest.
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-toolchain
+
+      - name: Add target
+        run: rustup target add ${{ matrix.arch }}-unknown-linux-musl
+
+      - name: Build
+        run: cargo build --release --locked --target ${{ matrix.arch }}-unknown-linux-musl
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: furui-${{ matrix.arch }}
+          path: target/${{ matrix.arch }}-unknown-linux-musl/release/furui
+          if-no-files-found: error

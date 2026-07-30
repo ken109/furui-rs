@@ -20,10 +20,10 @@ aya-log = { version = "0.3.0", default-features = false }
 aya-log-ebpf = { version = "0.2.0", default-features = false }
 
 anyhow = { version = "1", default-features = false }
-# `std` feature is currently required to build `clap`.
-#
-# See https://github.com/clap-rs/clap/blob/61f5ee5/clap_builder/src/lib.rs#L15.
-clap = { version = "4.6", default-features = false, features = ["std"] }
+# Default features on purpose: turning them off also drops `help`, `usage` and
+# `error-context`, which left `furui --help` reporting "unexpected argument
+# found" and errors with no usage line.
+clap = { version = "4.6" }
 libc = { version = "0.2", default-features = false }
 log = { version = "0.4", default-features = false }
 tokio = { version = "1", default-features = false }

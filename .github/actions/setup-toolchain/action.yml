@@ -1,0 +1,74 @@
+name: Set up the furui build toolchain
+description: >-
+  Installs LLVM, the stable and nightly Rust toolchains, and the eBPF build
+  tools, then generates furui-ebpf/src/vmlinux.rs from the runner's BTF.
+
+inputs:
+  llvm-version:
+    description: LLVM major version to build bpf-linker against.
+    required: false
+    default: "19"
+  codegen:
+    description: Whether to generate furui-ebpf/src/vmlinux.rs.
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Install LLVM ${{ inputs.llvm-version }}
+      shell: bash
+      run: |
+        set -euxo pipefail
+        wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key \
+          | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc >/dev/null
+        codename=$(lsb_release -cs)
+        echo "deb http://apt.llvm.org/${codename}/ llvm-toolchain-${codename}-${{ inputs.llvm-version }} main" \
+          | sudo tee /etc/apt/sources.list.d/llvm.list
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          "llvm-${{ inputs.llvm-version }}-dev" \
+          "libpolly-${{ inputs.llvm-version }}-dev" \
+          "clang-${{ inputs.llvm-version }}" \
+          cmake musl-tools
+        echo "/usr/lib/llvm-${{ inputs.llvm-version }}/bin" >> "$GITHUB_PATH"
+
+    - name: Install Rust toolchains
+      shell: bash
+      run: |
+        set -euxo pipefail
+        # furui-ebpf pins nightly via rust-toolchain.toml and needs rust-src for
+        # `-Z build-std=core`; rustfmt.toml sets `unstable_features`, so `fmt`
+        # needs nightly too.
+        rustup toolchain install nightly --profile minimal --component rust-src rustfmt clippy
+        rustup toolchain install stable --profile minimal --component rustfmt clippy
+        rustup default stable
+
+    - uses: Swatinem/rust-cache@v2
+
+    - name: Cache eBPF tooling
+      id: tools-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/bpf-linker
+          ~/.cargo/bin/bindgen
+          ~/.cargo/bin/aya-tool
+        key: ebpf-tools-${{ runner.os }}-${{ runner.arch }}-llvm${{ inputs.llvm-version }}-v1
+
+    - name: Install eBPF tooling
+      if: steps.tools-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        set -euxo pipefail
+        # NOTE: `--no-default-features` drops bpf-linker's llvm-sys dependency
+        # outright and no longer builds. Use the default features with the
+        # system LLVM installed above.
+        cargo install bpf-linker
+        cargo install bindgen-cli
+        cargo install aya-tool --git https://github.com/aya-rs/aya.git
+
+    - name: Generate vmlinux bindings
+      if: inputs.codegen == 'true'
+      shell: bash
+      run: cargo xtask codegen
