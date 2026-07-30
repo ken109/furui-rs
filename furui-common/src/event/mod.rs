@@ -1,12 +1,10 @@
 pub use bind::*;
 pub use connect::*;
-pub use egress::*;
-pub use ingress::*;
+pub use traffic::*;
 
 mod bind;
 mod connect;
-mod egress;
-mod ingress;
+mod traffic;
 
 #[cfg(feature = "user")]
 mod common {
@@ -59,11 +57,14 @@ mod tests {
     /// records the sequence so that a change in the generated order -- which
     /// used to vary between compilations, because the derive iterated a
     /// `HashMap` -- shows up as a test failure rather than silently.
-    fn socket_search_order(event: &mut IngressEvent) -> Vec<Vec<&'static str>> {
+    fn socket_search_order<F>(search: F) -> Vec<Vec<&'static str>>
+    where
+        F: FnOnce(&mut PolicyKey, &dyn Fn(&PolicyKey) -> bool) -> bool,
+    {
         let seen = RefCell::new(Vec::new());
         let mut key = PolicyKey::default();
 
-        event.search_key(&mut key, |key| {
+        search(&mut key, &|key| {
             let mut pinned = vec![];
             if key.remote_ip != 0 {
                 pinned.push("remote_ip");
@@ -87,6 +88,7 @@ mod tests {
     fn ingress_event() -> IngressEvent {
         IngressEvent {
             container_id: [0; CONTAINER_ID_LEN],
+            // Ingress: the remote end is the source.
             saddr: 0x0A000001,
             daddr: 0,
             sport: 443,
@@ -98,9 +100,25 @@ mod tests {
         }
     }
 
+    fn egress_event() -> EgressEvent {
+        EgressEvent {
+            container_id: [0; CONTAINER_ID_LEN],
+            // Egress: the remote end is the destination, so the same lookups
+            // should come out of the mirrored field values.
+            saddr: 0,
+            daddr: 0x0A000001,
+            sport: 80,
+            dport: 443,
+            family: EthProtocol::IP,
+            protocol: IpProtocol::TCP,
+            action: TcAction::Pass,
+            comm: [0; TASK_COMM_LEN],
+        }
+    }
+
     #[test]
     fn tcp_lookups_cover_every_combination_narrowest_first() {
-        let order = socket_search_order(&mut ingress_event());
+        let order = socket_search_order(|key, cb| ingress_event().search_key(key, cb));
 
         assert_eq!(
             order,
@@ -127,7 +145,10 @@ mod tests {
     /// `furui-ebpf/src/README.md` documents 15 socket rows and 7 ICMP rows.
     #[test]
     fn the_documented_row_counts_hold() {
-        assert_eq!(socket_search_order(&mut ingress_event()).len(), 15);
+        assert_eq!(
+            socket_search_order(|key, cb| ingress_event().search_key(key, cb)).len(),
+            15
+        );
 
         let seen = RefCell::new(0usize);
         let mut key = IcmpPolicyKey::default();
@@ -163,36 +184,14 @@ mod tests {
         assert_eq!(hits.into_inner(), 1);
     }
 
-    /// Each derive is generated independently; ingress and egress must still
-    /// probe the same number of rules.
+    /// The two directions are separate types with separately generated code,
+    /// but a rule means the same thing either way, so the lookups they produce
+    /// from mirrored inputs have to be identical -- not merely equal in count.
     #[test]
-    fn ingress_and_egress_probe_the_same_number_of_rules() {
-        fn count<F: FnOnce(&mut PolicyKey, &dyn Fn(&PolicyKey) -> bool) -> bool>(f: F) -> usize {
-            let seen = RefCell::new(0usize);
-            let mut key = PolicyKey::default();
-            f(&mut key, &|_| {
-                *seen.borrow_mut() += 1;
-                false
-            });
-            seen.into_inner()
-        }
-
-        let ingress = count(|key, cb| ingress_event().search_key(key, cb));
-        let egress = count(|key, cb| {
-            EgressEvent {
-                container_id: [0; CONTAINER_ID_LEN],
-                saddr: 0,
-                daddr: 0x0A000001,
-                sport: 80,
-                dport: 443,
-                family: EthProtocol::IP,
-                protocol: IpProtocol::TCP,
-                action: TcAction::Pass,
-                comm: [0; TASK_COMM_LEN],
-            }
-            .search_key(key, cb)
-        });
-
-        assert_eq!(ingress, egress);
+    fn ingress_and_egress_probe_in_the_same_order() {
+        assert_eq!(
+            socket_search_order(|key, cb| ingress_event().search_key(key, cb)),
+            socket_search_order(|key, cb| egress_event().search_key(key, cb)),
+        );
     }
 }

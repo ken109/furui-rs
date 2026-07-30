@@ -9,11 +9,10 @@ use aya::{
 use bind::*;
 use close::*;
 use connect::*;
-use egress::*;
 use furui_common::IpProtocol;
-use ingress::*;
 use tokio::{io::unix::AsyncFd, sync::Mutex, task};
 use tracing::warn;
+use traffic::{egress, ingress};
 
 use crate::{bpf::Maps, domain::Process};
 
@@ -21,8 +20,7 @@ mod bind;
 mod close;
 mod connect;
 
-mod egress;
-mod ingress;
+mod traffic;
 
 pub struct PidProcesses {
     map: HashMap<u32, Vec<Process>>,
