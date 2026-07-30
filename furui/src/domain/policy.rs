@@ -3,7 +3,7 @@ use std::{net::IpAddr, sync::Arc};
 use furui_common::{IcmpVersion, IpProtocol, TASK_COMM_LEN};
 use tokio::sync::Mutex;
 
-use crate::{domain::container::Container, Containers};
+use crate::domain::{container::Container, Containers};
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Policies {

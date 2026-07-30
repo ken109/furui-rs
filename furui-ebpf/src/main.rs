@@ -1,36 +1,19 @@
+//! The kernel side of furui.
+//!
+//! [`probes`] holds the kprobes and tracepoints that track which process owns
+//! which socket; [`tc`] holds the classifiers that decide whether a packet is
+//! allowed. Both consult the maps in [`maps`], which userspace fills in.
+
 #![no_std]
 #![no_main]
-
-use aya_ebpf::{macros::map, maps::HashMap};
-use furui_common::{
-    ContainerID, ContainerIP, IcmpPolicyKey, IcmpPolicyValue, PolicyKey, PolicyValue, PortKey,
-    PortVal,
-};
 
 #[allow(warnings)]
 mod vmlinux;
 
 mod helpers;
-
-mod bind;
-mod close;
-mod connect;
-mod egress;
-mod ingress;
-
-#[map]
-pub(crate) static PROC_PORTS: HashMap<PortKey, PortVal> = HashMap::with_max_entries(1024, 0);
-
-#[map]
-pub(crate) static POLICY_LIST: HashMap<PolicyKey, PolicyValue> = HashMap::with_max_entries(1024, 0);
-
-#[map]
-pub(crate) static ICMP_POLICY_LIST: HashMap<IcmpPolicyKey, IcmpPolicyValue> =
-    HashMap::with_max_entries(1024, 0);
-
-#[map]
-pub(crate) static CONTAINER_ID_FROM_IPS: HashMap<ContainerIP, ContainerID> =
-    HashMap::with_max_entries(1024, 0);
+mod maps;
+mod probes;
+mod tc;
 
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
